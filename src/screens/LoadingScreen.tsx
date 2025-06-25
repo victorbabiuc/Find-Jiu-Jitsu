@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { beltColors } from '../utils/constants';
+import { useTheme } from '../context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -17,6 +18,7 @@ const beltTypes = ['white', 'blue', 'purple', 'brown', 'black'] as const;
 type BeltType = typeof beltTypes[number];
 
 const LoadingScreen: React.FC = () => {
+  const { theme } = useTheme();
   // Animation values for belt bars
   const animatedValues = useRef(
     Array(5).fill(0).map(() => new Animated.Value(0.3))
@@ -60,9 +62,27 @@ const LoadingScreen: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Dynamic theme styles
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    message: {
+      color: theme.text.primary,
+      fontSize: 22,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginBottom: 32,
+      maxWidth: width * 0.85,
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.message}>{cleverMessages[messageIndex]}</Text>
+    <View style={dynamicStyles.container}>
+      <Text style={dynamicStyles.message}>{cleverMessages[messageIndex]}</Text>
       <View style={styles.beltBarsContainer}>
         {beltTypes.map((beltType, index) => {
           const beltColor = beltColors[beltType];
@@ -91,20 +111,6 @@ const LoadingScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  message: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 32,
-    maxWidth: width * 0.85,
-  },
   beltBarsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

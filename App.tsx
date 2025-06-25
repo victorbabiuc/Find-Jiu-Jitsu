@@ -7,9 +7,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AppProvider } from './src/context/AppContext';
+import { LoadingProvider, useLoading } from './src/context/LoadingContext';
+import LoadingScreen from './src/screens/LoadingScreen';
 
 // Import navigation
 import AppNavigator from './src/navigation/AppNavigator';
+
+// Global loading overlay component
+const GlobalLoadingOverlay: React.FC = () => {
+  const { isLoading } = useLoading();
+  if (!isLoading) return null;
+  return <LoadingScreen />;
+};
 
 export default function App() {
   return (
@@ -18,8 +27,11 @@ export default function App() {
         <AuthProvider>
           <ThemeProvider>
             <AppProvider>
-              <AppNavigator />
-              <StatusBar style="auto" />
+              <LoadingProvider>
+                <AppNavigator />
+                <GlobalLoadingOverlay />
+                <StatusBar style="auto" />
+              </LoadingProvider>
             </AppProvider>
           </ThemeProvider>
         </AuthProvider>

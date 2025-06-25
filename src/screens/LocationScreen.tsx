@@ -12,20 +12,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
-import { useDashboardNavigation } from '../navigation/useNavigation';
+import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
+import { useLoading } from '../context';
 
 const LocationScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { userBelt, setSelectedLocation } = useApp();
-  const navigation = useDashboardNavigation();
+  const navigation = useFindNavigation();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const { showLoading, hideLoading } = useLoading();
   
   const beltColor = beltColors[userBelt];
-
-  // Debug logging
-  console.log('LocationScreen rendered');
-  console.log('User belt:', userBelt);
 
   const requestLocationPermission = async (): Promise<boolean> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -65,14 +63,12 @@ const LocationScreen: React.FC = () => {
   };
 
   const handleNearMe = async () => {
-    console.log('Near Me button pressed');
     setIsLoadingLocation(true);
-    
+    showLoading();
     try {
       const hasPermission = await requestLocationPermission();
       
       if (!hasPermission) {
-        console.log('Location permission denied');
         Alert.alert(
           'Location Permission Required',
           'To find open mats near you, we need access to your location. Please enable location permissions in your device settings.',
@@ -82,26 +78,26 @@ const LocationScreen: React.FC = () => {
           ]
         );
         setIsLoadingLocation(false);
+        hideLoading();
         return;
       }
 
       const location = await getCurrentLocation();
       
       if (!location) {
-        console.log('Failed to get current location');
         Alert.alert(
           'Location Error',
           'Unable to get your current location. Please try again or select a location manually.',
           [{ text: 'OK', style: 'default' }]
         );
         setIsLoadingLocation(false);
+        hideLoading();
         return;
       }
 
       const locationName = await reverseGeocode(location.coords.latitude, location.coords.longitude);
-      console.log('Location selected (Near Me):', locationName);
       setSelectedLocation(locationName);
-      console.log('Navigating to TimeSelection screen');
+      // Navigate immediately - loading will be hidden by navigation state listener
       navigation.navigate('TimeSelection');
       
     } catch (error) {
@@ -111,15 +107,16 @@ const LocationScreen: React.FC = () => {
         'Something went wrong while getting your location. Please try again or select a location manually.',
         [{ text: 'OK', style: 'default' }]
       );
+      hideLoading();
     } finally {
       setIsLoadingLocation(false);
     }
   };
 
   const handleLocationSelect = (location: string) => {
-    console.log('Location selected:', location);
     setSelectedLocation(location);
-    console.log('Navigating to TimeSelection screen');
+    showLoading();
+    // Navigate immediately - loading will be hidden by navigation state listener
     navigation.navigate('TimeSelection');
   };
 

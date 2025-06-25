@@ -11,7 +11,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
-import { useDashboardNavigation } from '../navigation/useNavigation';
+import { useRootNavigation } from '../navigation/useNavigation';
+import { useLoading } from '../context';
 import { beltColors } from '../utils/constants';
 
 const { width, height } = Dimensions.get('window');
@@ -19,11 +20,8 @@ const { width, height } = Dimensions.get('window');
 const LoginScreen = () => {
   const { theme, toggleTheme } = useTheme();
   const { userBelt } = useApp();
-  const navigation = useDashboardNavigation();
-  
-  // Debug logging
-  console.log('LoginScreen (Landing) rendered');
-  console.log('User belt:', userBelt);
+  const navigation = useRootNavigation();
+  const { showLoading } = useLoading();
   
   // Animation values for belt bars
   const [animatedValues] = useState(() => 
@@ -62,9 +60,8 @@ const LoginScreen = () => {
   }, [animatedValues]);
 
   const handleGetStarted = () => {
-    console.log('Get Started button pressed');
-    console.log('Navigating to Location screen');
-    navigation.navigate('Location');
+    showLoading();
+    navigation.navigate('Main', { screen: 'Home' });
   };
 
   return (

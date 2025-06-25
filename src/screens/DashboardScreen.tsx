@@ -6,14 +6,16 @@ import {
   ScrollView,
   StyleSheet,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
-import { useDashboardNavigation } from '../navigation/useNavigation';
+import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
+import { SafeAreaView as SafeAreaViewRN } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -54,25 +56,27 @@ const mockRecentlyViewed: OpenMat[] = [
 
 const DashboardScreen: React.FC = () => {
   const { user } = useAuth();
-  const { theme } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
   const { userBelt } = useApp();
-  const dashboardNavigation = useDashboardNavigation();
+  const navigation = useMainTabNavigation();
   
   const beltColor = beltColors[userBelt];
 
-  const handleFindOpenMats = () => {
-    // Navigate to LocationScreen in the Dashboard stack
-    dashboardNavigation.navigate('Location');
+  const handleFindMats = () => {
+    navigation.navigate('Find', { screen: 'Location' });
   };
 
-  const handleQuickDate = (days: number | string) => {
-    // Navigate to time selection with pre-selected date
-    dashboardNavigation.navigate('TimeSelection');
+  const handleQuickToday = () => {
+    navigation.navigate('Find', { screen: 'TimeSelection' });
+  };
+
+  const handleQuickTomorrow = () => {
+    navigation.navigate('Find', { screen: 'TimeSelection' });
   };
 
   const handleGymPress = (gym: OpenMat) => {
-    // Navigate to gym details or results
-    dashboardNavigation.navigate('Results', { location: gym.address });
+    // Navigate to Find tab first, then to results
+    navigation.navigate('Find', { screen: 'Results', params: { location: 'Tampa' } });
   };
 
   const formatTime = (openMats: any[]) => {
@@ -98,24 +102,40 @@ const DashboardScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
     >
       {/* Welcome Section */}
-      <LinearGradient
-        colors={[beltColor.primary, beltColor.secondary]}
-        style={styles.welcomeSection}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Text style={[styles.welcomeText, { color: beltColor.textOnColor }]}>
-          Welcome back,
-        </Text>
-        <Text style={[styles.userName, { color: beltColor.textOnColor }]}>
-          {user?.name || 'Fighter'}
-        </Text>
-        <View style={styles.beltIndicator}>
-          <Text style={[styles.beltText, { color: beltColor.textOnColor }]}>
-            {userBelt.charAt(0).toUpperCase() + userBelt.slice(1)} Belt
-          </Text>
-        </View>
-      </LinearGradient>
+      <SafeAreaViewRN edges={['top']}>
+        <LinearGradient
+          colors={[beltColor.primary, beltColor.secondary]}
+          style={styles.welcomeSection}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={[styles.welcomeText, { color: beltColor.textOnColor }]}> 
+                Welcome back,
+              </Text>
+              <Text style={[styles.userName, { color: beltColor.textOnColor }]}> 
+                {user?.name || 'Fighter'}
+              </Text>
+              <View style={styles.beltIndicator}>
+                <Text style={[styles.beltText, { color: beltColor.textOnColor }]}> 
+                  {userBelt.charAt(0).toUpperCase() + userBelt.slice(1)} Belt
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={toggleTheme}
+              style={styles.themeToggleButton}
+              activeOpacity={0.7}
+              accessibilityLabel="Toggle theme"
+            >
+              <Text style={{ fontSize: 22, color: beltColor.textOnColor }}>
+                {themeMode === 'dark' ? '☀️' : '🌙'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </SafeAreaViewRN>
 
       {/* Quick Actions */}
       <View style={styles.section}>
@@ -125,7 +145,7 @@ const DashboardScreen: React.FC = () => {
         
         <TouchableOpacity
           style={[styles.primaryButton, { backgroundColor: beltColor.primary }]}
-          onPress={handleFindOpenMats}
+          onPress={handleFindMats}
         >
           <LinearGradient
             colors={[beltColor.primary, beltColor.secondary]}
@@ -143,7 +163,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.quickDateContainer}>
           <TouchableOpacity
             style={[styles.dateButton, { backgroundColor: theme.surface }]}
-            onPress={() => handleQuickDate(0)}
+            onPress={handleQuickToday}
           >
             <Text style={[styles.dateButtonText, { color: theme.text.primary }]}>
               Today
@@ -152,7 +172,7 @@ const DashboardScreen: React.FC = () => {
           
           <TouchableOpacity
             style={[styles.dateButton, { backgroundColor: theme.surface }]}
-            onPress={() => handleQuickDate(1)}
+            onPress={handleQuickTomorrow}
           >
             <Text style={[styles.dateButtonText, { color: theme.text.primary }]}>
               Tomorrow
@@ -360,6 +380,22 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  themeToggleButton: {
+    marginLeft: 16,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    borderRadius: 22,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 44,
+    minHeight: 44,
   },
 });
 

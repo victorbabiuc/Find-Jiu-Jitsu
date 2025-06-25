@@ -8,6 +8,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { OpenMat } from '../types';
 
 const { height } = Dimensions.get('window');
@@ -16,12 +17,16 @@ interface GymDetailsModalProps {
   gym: OpenMat | null;
   visible: boolean;
   onClose: () => void;
+  onHeartPress?: () => void;
+  isFavorited?: boolean;
 }
 
 const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
   gym,
   visible,
   onClose,
+  onHeartPress,
+  isFavorited = false,
 }) => {
   if (!gym) return null;
 
@@ -48,9 +53,20 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
           {/* Header */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' }}>
             <Text style={{ fontSize: 22, fontWeight: 'bold', flex: 1 }}>{gym.name}</Text>
-            <TouchableOpacity onPress={onClose} style={{ padding: 8, marginLeft: 8 }}>
-              <Text style={{ fontSize: 26 }}>✕</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {onHeartPress && (
+                <TouchableOpacity onPress={onHeartPress} style={{ padding: 8, marginRight: 8 }}>
+                  <Ionicons 
+                    name={isFavorited ? "heart" : "heart-outline"} 
+                    size={24} 
+                    color={isFavorited ? "#EF4444" : "#666"} 
+                  />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
+                <Text style={{ fontSize: 26 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Scrollable Content */}

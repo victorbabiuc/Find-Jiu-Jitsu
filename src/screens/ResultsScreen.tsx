@@ -10,26 +10,27 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
-import { useDashboardNavigation } from '../navigation/useNavigation';
+import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
 import { apiService } from '../services';
-import { DashboardStackRouteProp } from '../navigation/types';
+import { FindStackRouteProp } from '../navigation/types';
 import LoadingScreen from './LoadingScreen';
 
 const { width } = Dimensions.get('window');
 
 interface ResultsScreenProps {
-  route: DashboardStackRouteProp<'Results'>;
+  route: FindStackRouteProp<'Results'>;
 }
 
 const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const { theme } = useTheme();
-  const { selectedLocation, userBelt } = useApp();
-  const navigation = useDashboardNavigation();
+  const { selectedLocation, userBelt, favorites, toggleFavorite } = useApp();
+  const navigation = useFindNavigation();
   const beltColor = beltColors[userBelt];
   
   // Get location from route params
@@ -45,34 +46,34 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Fetch data from API
   useEffect(() => {
-    const fetchOpenMats = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const data = await apiService.getOpenMats(location);
         setOpenMats(data);
-        console.log('API data loaded:', data.length, 'gyms found');
-        console.log('Total gyms:', data.length);
       } catch (error) {
-        console.error('Error fetching open mats:', error);
+        console.error('Error fetching gyms:', error);
         setOpenMats([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOpenMats();
+    fetchData();
   }, [location]);
 
   const handleGymPress = (gym: OpenMat) => {
-    console.log('Gym pressed:', gym.name);
     setSelectedGym(gym);
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
-    console.log('Modal closed');
     setModalVisible(false);
     setSelectedGym(null);
+  };
+
+  const handleHeartPress = (gym: OpenMat) => {
+    toggleFavorite(parseInt(gym.id));
   };
 
   const getPriceDisplay = (matFee: number) => {
@@ -157,20 +158,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <FlatList
           data={openMats}
           keyExtractor={(gym) => gym.id}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={true}
-          bounces={true}
-          onScroll={() => console.log('SCROLL EVENT')}
-          onTouchStart={() => console.log('TOUCH START')}
-          onTouchEnd={() => console.log('TOUCH END')}
-          onMomentumScrollBegin={() => console.log('MOMENTUM BEGIN')}
-          onMomentumScrollEnd={() => console.log('MOMENTUM END')}
-          scrollEventThrottle={16}
-          removeClippedSubviews={false}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          getItemLayout={undefined}
           renderItem={({ item: gym }) => (
             <TouchableOpacity
               style={[styles.card, { backgroundColor: theme.surface, borderLeftColor: beltColor.primary }]}
@@ -210,10 +197,24 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                   <View style={[styles.skillTag, { backgroundColor: beltColor.surface }]}> 
                     <Text style={[styles.skillTagText, { color: beltColor.primary }]}>{getMatTypeDisplay(gym.openMats)}</Text>
                   </View>
+                  <TouchableOpacity
+                    style={styles.heartButton}
+                    onPress={() => handleHeartPress(gym)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons 
+                      name={favorites.has(parseInt(gym.id)) ? "heart" : "heart-outline"} 
+                      size={20} 
+                      color={favorites.has(parseInt(gym.id)) ? "#EF4444" : theme.text.secondary} 
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
             </TouchableOpacity>
           )}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          onEndReachedThreshold={0.1}
         />
       )}
 
@@ -222,6 +223,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         gym={selectedGym}
         visible={modalVisible}
         onClose={handleCloseModal}
+        onHeartPress={selectedGym ? () => handleHeartPress(selectedGym) : undefined}
+        isFavorited={selectedGym ? favorites.has(parseInt(selectedGym.id)) : false}
       />
     </SafeAreaView>
   );
@@ -366,6 +369,10 @@ const styles = StyleSheet.create({
   skillTagText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  heartButton: {
+    padding: 4,
+    marginLeft: 8,
   },
   navigateButton: {
     marginLeft: 12,
