@@ -32,13 +32,17 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)'
+      }}>
         <View style={{
           backgroundColor: 'white',
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
+          borderRadius: 20,
+          width: '90%',
           maxHeight: height * 0.85,
-          width: '100%',
           overflow: 'hidden',
         }}>
           {/* Header */}
@@ -50,38 +54,35 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
           </View>
 
           {/* Scrollable Content */}
-          <View style={{ flex: 1, minHeight: 0 }}>
-            <ScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 }}
-              showsVerticalScrollIndicator={true}
-              bounces={Platform.OS === 'ios'}
-            >
-              {/* Location */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Location</Text>
-                <Text>{gym.address}</Text>
-                <Text>{gym.distance} miles away</Text>
-              </View>
+          <ScrollView
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 }}
+            showsVerticalScrollIndicator={true}
+            bounces={Platform.OS === 'ios'}
+          >
+            {/* Location */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Location</Text>
+              <Text>{gym.address}</Text>
+              <Text>{gym.distance} miles away</Text>
+            </View>
 
-              {/* Schedule */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Open Mat Schedule</Text>
-                {gym.openMats.map((session, index) => (
-                  <View key={index} style={{ marginBottom: 10 }}>
-                    <Text>{session.day} {session.time}</Text>
-                    <Text style={{ color: '#666' }}>{session.type === 'gi' ? 'Gi Only' : session.type === 'nogi' ? 'No-Gi Only' : 'Gi & No-Gi'}</Text>
-                  </View>
-                ))}
-              </View>
+            {/* Schedule */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Open Mat Schedule</Text>
+              {gym.openMats.map((session, index) => (
+                <View key={index} style={{ marginBottom: 10 }}>
+                  <Text>{session.day} {session.time}</Text>
+                  <Text style={{ color: '#666' }}>{session.type === 'gi' ? 'Gi Only' : session.type === 'nogi' ? 'No-Gi Only' : 'Gi & No-Gi'}</Text>
+                </View>
+              ))}
+            </View>
 
-              {/* Pricing */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Pricing</Text>
-                <Text>{gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}</Text>
-              </View>
-            </ScrollView>
-          </View>
+            {/* Pricing */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Pricing</Text>
+              <Text>{gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}</Text>
+            </View>
+          </ScrollView>
 
           {/* Footer */}
           <View style={{ paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8, backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#F3F4F6' }}>

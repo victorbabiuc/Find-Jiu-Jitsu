@@ -18,6 +18,7 @@ import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
 import { apiService } from '../services';
 import { DashboardStackRouteProp } from '../navigation/types';
+import LoadingScreen from './LoadingScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -115,28 +116,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Show loading state
   if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background, flex: 1 }]}> 
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={[styles.backIcon, { color: theme.text.primary }]}>←</Text>
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Open Mats Near You</Text>
-            <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
-              Loading...
-            </Text>
-          </View>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text.secondary }]}>Finding open mats...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background, flex: 1 }]}>  
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Beta Info Banner */}
       <View style={styles.betaBanner}>
         <Text style={styles.betaBannerText}>🚧 Beta Version - Data may be incomplete</Text>
@@ -162,67 +146,76 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       </View>
 
       {/* Content */}
-      <View style={{ flex: 1 }}>
-        {openMats.length === 0 ? (
-          // Empty state
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: theme.text.primary }]}>No open mats found in {location}</Text>
-            <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>Check back soon or add a gym in your city!</Text>
-          </View>
-        ) : (
-          // Gym List
-          <FlatList
-            data={openMats}
-            keyExtractor={(gym) => gym.id}
-            style={{ flex: 1 }}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={true}
-            renderItem={({ item: gym }) => (
-              <TouchableOpacity
-                style={[styles.card, { backgroundColor: theme.surface, borderLeftColor: beltColor.primary }]}
-                activeOpacity={0.85}
-                onPress={() => handleGymPress(gym)}
+      {openMats.length === 0 ? (
+        // Empty state
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyText, { color: theme.text.primary }]}>No open mats found in {location}</Text>
+          <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>Check back soon or add a gym in your city!</Text>
+        </View>
+      ) : (
+        // Gym List
+        <FlatList
+          data={openMats}
+          keyExtractor={(gym) => gym.id}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
+          onScroll={() => console.log('SCROLL EVENT')}
+          onTouchStart={() => console.log('TOUCH START')}
+          onTouchEnd={() => console.log('TOUCH END')}
+          onMomentumScrollBegin={() => console.log('MOMENTUM BEGIN')}
+          onMomentumScrollEnd={() => console.log('MOMENTUM END')}
+          scrollEventThrottle={16}
+          removeClippedSubviews={false}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          getItemLayout={undefined}
+          renderItem={({ item: gym }) => (
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: theme.surface, borderLeftColor: beltColor.primary }]}
+              activeOpacity={0.85}
+              onPress={() => handleGymPress(gym)}
+            >
+              {/* Logo/Initials */}
+              <LinearGradient
+                colors={[beltColor.primary, beltColor.secondary]}
+                style={styles.logoCircle}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                {/* Logo/Initials */}
-                <LinearGradient
-                  colors={[beltColor.primary, beltColor.secondary]}
-                  style={styles.logoCircle}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
-                    {gym.name ? gym.name : getInitials(gym.name)}
-                  </Text>
-                </LinearGradient>
-                {/* Card Content */}
-                <View style={styles.cardContent}>
-                  <View style={styles.cardHeaderRow}>
-                    <Text style={[styles.gymName, { color: theme.text.primary }]}>{gym.name}</Text>
-                    <View style={styles.ratingRow}>
-                      <Text style={styles.star}>📍</Text>
-                      <Text style={[styles.ratingText, { color: theme.text.secondary }]}>{gym.distance} mi</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.timeText, { color: theme.text.secondary }]}>{formatOpenMats(gym.openMats)}</Text>
-                  <View style={styles.infoRow}>
-                    <Text style={[styles.infoText, { color: theme.text.secondary }]}>📍 {gym.address}</Text>
-                    {getPriceDisplay(gym.matFee)}
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={[styles.infoText, { color: theme.text.secondary }]}>🥋 {gym.openMats.length} sessions</Text>
-                    <Text style={[styles.infoText, { color: theme.text.secondary }]}>💰 {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}</Text>
-                  </View>
-                  <View style={styles.skillTagsRow}>
-                    <View style={[styles.skillTag, { backgroundColor: beltColor.surface }]}> 
-                      <Text style={[styles.skillTagText, { color: beltColor.primary }]}>{getMatTypeDisplay(gym.openMats)}</Text>
-                    </View>
+                <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
+                  {getInitials(gym.name)}
+                </Text>
+              </LinearGradient>
+              {/* Card Content */}
+              <View style={styles.cardContent}>
+                <View style={styles.cardHeaderRow}>
+                  <Text style={[styles.gymName, { color: theme.text.primary }]} numberOfLines={1}>{gym.name}</Text>
+                  <View style={styles.ratingRow}>
+                    <Text style={styles.star}>📍</Text>
+                    <Text style={[styles.ratingText, { color: theme.text.secondary }]}>{gym.distance} mi</Text>
                   </View>
                 </View>
-              </TouchableOpacity>
-            )}
-          />
-        )}
-      </View>
+                <Text style={[styles.timeText, { color: theme.text.secondary }]} numberOfLines={1}>{formatOpenMats(gym.openMats)}</Text>
+                <View style={styles.infoRow}>
+                  <Text style={[styles.infoText, { color: theme.text.secondary }]} numberOfLines={1}>📍 {gym.address}</Text>
+                  {getPriceDisplay(gym.matFee)}
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={[styles.infoText, { color: theme.text.secondary }]}>🥋 {gym.openMats.length} sessions</Text>
+                  <Text style={[styles.infoText, { color: theme.text.secondary }]}>💰 {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}</Text>
+                </View>
+                <View style={styles.skillTagsRow}>
+                  <View style={[styles.skillTag, { backgroundColor: beltColor.surface }]}> 
+                    <Text style={[styles.skillTagText, { color: beltColor.primary }]}>{getMatTypeDisplay(gym.openMats)}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
 
       {/* Gym Details Modal */}
       <GymDetailsModal

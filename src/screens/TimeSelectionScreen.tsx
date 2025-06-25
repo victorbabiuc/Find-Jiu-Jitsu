@@ -6,12 +6,34 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  Modal,
+  Platform,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useDashboardNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+function getNextWeekendDates() {
+  const today = new Date();
+  const day = today.getDay();
+  // 6 = Saturday, 0 = Sunday
+  const nextSaturday = new Date(today);
+  nextSaturday.setDate(today.getDate() + ((6 - day + 7) % 7));
+  const nextSunday = new Date(nextSaturday);
+  nextSunday.setDate(nextSaturday.getDate() + 1);
+  return [nextSaturday, nextSunday];
+}
+
+const dateOptions = [
+  { label: 'Today', value: 'today' },
+  { label: 'Tomorrow', value: 'tomorrow' },
+  { label: 'This Weekend', value: 'weekend' },
+  { label: 'Select Dates', value: 'custom' },
+];
 
 const TimeSelectionScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -19,32 +41,167 @@ const TimeSelectionScreen: React.FC = () => {
   const navigation = useDashboardNavigation();
   const beltColor = beltColors[userBelt];
   
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedOption, setSelectedOption] = useState<string>('today');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [multiSelectDates, setMultiSelectDates] = useState<Date[]>([]);
+  const [tempSelectedDates, setTempSelectedDates] = useState<Date[]>([]);
+  const [customDatePickerDate, setCustomDatePickerDate] = useState(new Date());
+  const [showSummary, setShowSummary] = useState(false);
 
   // Debug logging
   console.log('TimeSelectionScreen rendered');
   console.log('Selected location:', selectedLocation);
-  console.log('Selected date:', selectedDate);
-  console.log('Selected time:', selectedTime);
 
-  const dateOptions = [
-    { label: 'Today', value: 'today' },
-    { label: 'Tomorrow', value: 'tomorrow' },
-    { label: 'This Week', value: 'this_week' },
-    { label: 'This Weekend', value: 'this_weekend' }
-  ];
+  // Helper to get today/tomorrow
+  const getDateForOption = (option: string) => {
+    const today = new Date();
+    if (option === 'today') return [today];
+    if (option === 'tomorrow') {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      return [tomorrow];
+    }
+    if (option === 'weekend') {
+      return getNextWeekendDates();
+    }
+    if (option === 'custom') {
+      return multiSelectDates;
+    }
+    return [];
+  };
 
-  const timeOptions = [
-    { label: 'Morning', value: 'morning', time: '6am - 12pm' },
-    { label: 'Afternoon', value: 'afternoon', time: '12pm - 5pm' },
-    { label: 'Evening', value: 'evening', time: '5pm - 10pm' },
-    { label: 'Any Time', value: 'any', time: 'All day' }
-  ];
+  // Handle option select
+  const handleOptionSelect = (value: string) => {
+    setSelectedOption(value);
+    if (value === 'custom') {
+      setTempSelectedDates(multiSelectDates.length ? multiSelectDates : []);
+      setShowDatePicker(true);
+    } else if (value === 'weekend') {
+      setMultiSelectDates(getNextWeekendDates());
+      setShowSummary(true);
+    } else {
+      setMultiSelectDates(getDateForOption(value));
+      setShowSummary(true);
+    }
+  };
+
+  // Handle multi-date selection
+  const handleDateChange = (event: any, date?: Date) => {
+    if (date) {
+      // Toggle date in tempSelectedDates
+      const exists = tempSelectedDates.some(d => d.toDateString() === date.toDateString());
+      let newDates;
+      if (exists) {
+        newDates = tempSelectedDates.filter(d => d.toDateString() !== date.toDateString());
+      } else {
+        newDates = [...tempSelectedDates, date];
+      }
+      setTempSelectedDates(newDates);
+    }
+  };
+
+  // Confirm multi-date selection
+  const handleDone = () => {
+    setMultiSelectDates(tempSelectedDates);
+    setSelectedOption('custom');
+    setShowDatePicker(false);
+    setShowSummary(true);
+  };
+
+  // Format selected dates for summary
+  const getSelectedDatesSummary = () => {
+    if (selectedOption === 'weekend') return '2 days selected';
+    if (selectedOption === 'custom') return `${multiSelectDates.length} day${multiSelectDates.length !== 1 ? 's' : ''} selected`;
+    if (selectedOption === 'today' || selectedOption === 'tomorrow') return '1 day selected';
+    return '';
+  };
+
+  // Render grid buttons
+  const renderOptionButton = (option: typeof dateOptions[0]) => {
+    const isSelected = selectedOption === option.value;
+    return (
+      <TouchableOpacity
+        key={option.value}
+        style={[
+          styles.optionButton,
+          !isSelected && styles.optionButtonUnselected,
+          isSelected && { borderColor: beltColor.primary, borderWidth: 2, backgroundColor: '#fff' },
+        ]}
+        onPress={() => handleOptionSelect(option.value)}
+        activeOpacity={0.85}
+      >
+        <Text style={[
+          styles.optionText,
+          isSelected ? { color: beltColor.primary } : { color: '#fff' },
+        ]}>
+          {option.label}
+        </Text>
+        {option.value === 'custom' && multiSelectDates.length > 0 && (
+          <Text style={styles.selectedCount}>{multiSelectDates.length} selected</Text>
+        )}
+        {option.value === 'weekend' && isSelected && (
+          <Text style={styles.selectedCount}>2 selected</Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  // Render multi-date picker modal (simple: show next 14 days as buttons)
+  const renderMultiDatePicker = () => {
+    const days = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+    return (
+      <Modal
+        transparent
+        visible={showDatePicker}
+        animationType="fade"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.datePickerContainer}>
+            <Text style={styles.modalTitle}>Select Dates</Text>
+            <FlatList
+              data={days}
+              keyExtractor={d => d.toDateString()}
+              numColumns={2}
+              renderItem={({ item: d }) => {
+                const selected = tempSelectedDates.some(sel => sel.toDateString() === d.toDateString());
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.dateButton,
+                      selected && { backgroundColor: beltColor.primary },
+                    ]}
+                    onPress={() => handleDateChange(null, d)}
+                  >
+                    <Text style={[styles.dateButtonText, selected && { color: 'white', fontWeight: '700' }]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}
+                    </Text>
+                    {selected && <Text style={styles.checkmark}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              }}
+              contentContainerStyle={{ gap: 12, paddingHorizontal: 4, paddingBottom: 8 }}
+              columnWrapperStyle={{ gap: 12, justifyContent: 'space-between' }}
+            />
+            <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const handleSearch = () => {
     console.log('Find Open Mats button pressed');
-    console.log('Date/time selected:', { date: selectedDate, time: selectedTime });
+    console.log('Date/time selected:', { date: multiSelectDates, time: 'any' });
     console.log('Selected location before navigation:', selectedLocation);
     
     // Extract just the city name (before the comma if it exists)
@@ -59,16 +216,6 @@ const TimeSelectionScreen: React.FC = () => {
   const handleBack = () => {
     console.log('Back button pressed');
     navigation.goBack();
-  };
-
-  const handleDateSelect = (date: string) => {
-    console.log('Date selected:', date);
-    setSelectedDate(date);
-  };
-
-  const handleTimeSelect = (time: string) => {
-    console.log('Time selected:', time);
-    setSelectedTime(time);
   };
 
   return (
@@ -120,70 +267,7 @@ const TimeSelectionScreen: React.FC = () => {
             Select Date
           </Text>
           <View style={styles.optionsContainer}>
-            {dateOptions.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.optionButton,
-                  { backgroundColor: theme.surface },
-                  selectedDate === option.value && {
-                    borderColor: beltColor.primary,
-                    borderWidth: 2,
-                  }
-                ]}
-                onPress={() => handleDateSelect(option.value)}
-              >
-                <Text style={[
-                  styles.optionText,
-                  { color: theme.text.primary },
-                  selectedDate === option.value && { color: beltColor.primary, fontWeight: '600' }
-                ]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Time Selection */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-            Select Time of Day
-          </Text>
-          <View style={styles.optionsContainer}>
-            {timeOptions.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.optionButton,
-                  { backgroundColor: theme.surface },
-                  selectedTime === option.value && {
-                    borderColor: beltColor.primary,
-                    borderWidth: 2,
-                  }
-                ]}
-                onPress={() => handleTimeSelect(option.value)}
-              >
-                <View style={styles.timeOptionContent}>
-                  <View style={styles.timeOptionRow}>
-                    <Text style={[
-                      styles.optionText,
-                      { color: theme.text.primary },
-                      selectedTime === option.value && { color: beltColor.primary, fontWeight: '600' }
-                    ]}>
-                      {option.label}
-                    </Text>
-                    <Text style={[
-                      styles.timeText,
-                      { color: theme.text.secondary },
-                      selectedTime === option.value && { color: beltColor.secondary }
-                    ]}>
-                      {option.time}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {dateOptions.map(renderOptionButton)}
           </View>
         </View>
 
@@ -217,6 +301,14 @@ const TimeSelectionScreen: React.FC = () => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      {showSummary && (
+        <View style={styles.summaryContainer}>
+          <Text style={styles.summaryText}>{getSelectedDatesSummary()}</Text>
+        </View>
+      )}
+
+      {renderMultiDatePicker()}
     </SafeAreaView>
   );
 };
@@ -279,27 +371,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   optionButton: {
+    flexBasis: '48%',
     borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginBottom: 8,
+    marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: '#444',
+  },
+  optionButtonUnselected: {
+    backgroundColor: '#333',
   },
   optionText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  timeOptionContent: {
-    width: '100%',
-  },
-  timeOptionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  timeText: {
-    fontSize: 14,
-    fontWeight: '500',
+  selectedCount: {
+    color: '#888',
+    fontSize: 13,
+    marginTop: 4,
   },
   locationInfo: {
     flexDirection: 'row',
@@ -338,6 +429,71 @@ const styles = StyleSheet.create({
   searchButtonText: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  datePickerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  dateButton: {
+    width: '48%',
+    flex: 0,
+    backgroundColor: '#eee',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginVertical: 4,
+    minWidth: 120,
+    minHeight: 48,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dateButtonText: {
+    color: '#222',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  checkmark: {
+    color: '#2196F3',
+    fontSize: 18,
+    marginLeft: 4,
+    fontWeight: '700',
+  },
+  doneButton: {
+    marginTop: 16,
+    backgroundColor: '#222',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+  },
+  doneButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  summaryContainer: {
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  summaryText: {
+    color: '#222',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 

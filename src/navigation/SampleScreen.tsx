@@ -64,7 +64,7 @@ export const DashboardHomeScreen = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.button, { backgroundColor: theme.surface }]}
-        onPress={() => navigation.navigate('Results')}
+        onPress={() => navigation.navigate('Results', { location: 'Current Location' })}
       >
         <Text style={[styles.buttonText, { color: theme.text.primary }]}>
           View Results

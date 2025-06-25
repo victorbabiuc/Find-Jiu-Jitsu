@@ -72,7 +72,7 @@ const DashboardScreen: React.FC = () => {
 
   const handleGymPress = (gym: OpenMat) => {
     // Navigate to gym details or results
-    dashboardNavigation.navigate('Results');
+    dashboardNavigation.navigate('Results', { location: gym.address });
   };
 
   const formatTime = (openMats: any[]) => {
