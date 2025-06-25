@@ -1,0 +1,80 @@
+export interface User {
+    id?: string;
+    email: string;
+    name: string;
+    belt: BeltType;
+    homeAcademy?: string;
+    profile: UserProfile;
+  }
+  
+  export interface UserProfile {
+    age?: string;
+    location?: string;
+    yearsTraining?: string;
+    trainingStyle: 'Gi' | 'No-Gi' | 'Both';
+    competitionLevel: 'None' | 'Local' | 'Regional' | 'National';
+    favoriteTechniques?: string;
+    trainingGoals?: string;
+    instagram?: string;
+    availability: 'Morning' | 'Afternoon' | 'Evening' | 'Flexible';
+    budget?: string;
+    profilePhoto?: string;
+  }
+  
+  export type BeltType = 'white' | 'blue' | 'purple' | 'brown' | 'black';
+  
+  export interface OpenMat {
+    id: string;
+    name: string;
+    address: string;
+    distance: number;
+    openMats: OpenMatSession[];
+    matFee: number;
+  }
+  
+  export interface OpenMatSession {
+    day: string;
+    time: string;
+    type: 'gi' | 'nogi' | 'both';
+  }
+  
+  export interface Price {
+    amount: number;
+    status: 'confirmed' | 'estimated' | 'unknown';
+  }
+  
+  export type ThemeMode = 'light' | 'dark';
+  
+  export interface Theme {
+    name: ThemeMode;
+    background: string;
+    surface: string;
+    surfaceHover: string;
+    border: string;
+    text: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+    };
+    card: {
+      background: string;
+      hover: string;
+    };
+  }
+  
+  export interface Filters {
+    radius: string;
+    price: string;
+    timeOfDay: string;
+    giType: string;
+  }
+  
+  export type ViewType = 
+    | 'login' 
+    | 'registration' 
+    | 'dashboard' 
+    | 'locationFirst' 
+    | 'timeSelection' 
+    | 'results' 
+    | 'saved' 
+    | 'profile';
