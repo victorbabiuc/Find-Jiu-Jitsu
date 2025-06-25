@@ -3,23 +3,33 @@
 A React Native app that helps Brazilian Jiu-Jitsu practitioners find open mat sessions at gyms in their city.
 
 ## 📱 Screenshots
-[Add screenshots of: Landing screen, Location selection, Time selection, Results list, Gym details modal]
+[Coming soon - LoginScreen, LocationScreen, TimeSelection, Results, LoadingAnimation]
 
 ## 🌟 Features
-- **Find Open Mats by City** - Currently supports Tampa and Austin
-- **Day & Time Selection** - See what's available when you want to train
-- **Detailed Gym Information** - Address, schedule, gi/no-gi, pricing
-- **Get Directions** - One-tap navigation to any gym
-- **Belt-Themed UI** - Beautiful design inspired by BJJ belt colors
-- **Dark/Light Mode** - Easy on the eyes for any time of day
+
+### ✅ Implemented
+- **Find Open Mats by City** - Tampa and Austin with real data
+- **Multi-Date Selection** - Pick today, tomorrow, weekend, or custom dates
+- **Belt-Themed UI** - Animated belt progression (white→blue→purple→brown→black)
+- **Dark/Light Mode** - Seamless theme switching
+- **Location Services** - "Near Me" with GPS integration
+- **Animated Loading** - Belt-colored loading bars with clever messages
+- **Gym Details Modal** - Full information with one-tap directions
+
+### 🚧 In Progress
+- **More Cities** - Adding NYC, LA, Miami, Chicago, San Diego
+- **Search & Filters** - Find gyms by name, price, gi/no-gi
+- **User Accounts** - Save favorites and preferences
+- **Real Backend** - Moving from mock data to live API
 
 ## 🛠️ Tech Stack
 
-- **React Native** - Cross-platform mobile framework
-- **Expo** - Development platform
-- **TypeScript** - Type safety
-- **React Navigation** - Navigation library
-- **React Context** - State management
+- **React Native + Expo** - Cross-platform mobile development
+- **TypeScript** - Type-safe code
+- **React Navigation v6** - Stack & tab navigation
+- **React Context API** - State management
+- **Expo Location** - GPS services
+- **AsyncStorage** - Local data persistence
 
 ## 📂 Project Structure
 ```
@@ -33,20 +43,61 @@ src/
 └── utils/            # Helper functions
 ```
 
-## 🚀 Getting Started
+## 🚀 Current Status
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- iOS Simulator (Mac) or Android Emulator
+### Working Features
+- Complete navigation flow
+- Beautiful animations
+- Location selection with GPS
+- Multi-date picker
+- Results display with gym cards
+- Theme persistence
 
-### Installation
-1. Clone the repository
-   ```bash
-   git clone https://github.com/yourusername/OpenMatFinder.git
-   cd OpenMatFinder
-   ``` 
+### Known Issues
+- Scrolling fixed on all platforms
+- Some mock data for non-Austin cities
+- Profile/favorites not yet implemented
+
+## 🎯 Roadmap to App Store
+
+### Phase 1 (Current)
+- [x] Core navigation
+- [x] Basic UI/UX
+- [x] Location services
+- [x] Date selection
+- [ ] User authentication
+
+### Phase 2 (Next)
+- [ ] 5+ cities with real data
+- [ ] Search functionality
+- [ ] User profiles
+- [ ] Favorites system
+
+### Phase 3 (Polish)
+- [ ] App icon & launch screen
+- [ ] Error handling
+- [ ] Performance optimization
+- [ ] App Store assets
+
+## 📲 Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/OpenMatFinder.git
+cd OpenMatFinder
+
+# Install dependencies
+npm install
+
+# Start development
+npx expo start
+
+# Run on iOS
+i (in terminal after expo start)
+
+# Run on Android  
+a (in terminal after expo start)
+```
 
 # App Store Submission Checklist
 
