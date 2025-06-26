@@ -122,10 +122,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      {/* Beta Info Banner */}
-      <View style={styles.betaBanner}>
-        <Text style={styles.betaBannerText}>🚧 Beta Version - Data may be incomplete</Text>
-      </View>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -137,13 +133,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             {openMats.length} results • {location}
           </Text>
         </View>
-        {/* Report Issue Button */}
-        <TouchableOpacity
-          style={styles.reportIssueButton}
-          onPress={() => Linking.openURL('mailto:support@openmatfinder.com?subject=Open%20Mat%20Finder%20Beta%20Feedback')}
-        >
-          <Text style={styles.reportIssueText}>Report Issue</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -413,39 +402,6 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: 14,
     fontWeight: '500',
-  },
-  betaBanner: {
-    backgroundColor: '#F59E0B',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignSelf: 'center',
-    marginTop: 36,
-    marginBottom: 4,
-    minHeight: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 0.93,
-  },
-  betaBannerText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 13,
-    letterSpacing: 0.5,
-  },
-  reportIssueButton: {
-    marginLeft: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    backgroundColor: 'rgba(245,158,11,0.12)',
-    alignSelf: 'center',
-  },
-  reportIssueText: {
-    color: '#F59E0B',
-    fontWeight: '700',
-    fontSize: 13,
-    letterSpacing: 0.5,
   },
 });
 

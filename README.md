@@ -1,303 +1,171 @@
+# 📝 **Streamlined README with GitHub Integration**
+
+**Cursor Prompt:**
+```
+Replace the entire README.md file with this updated, streamlined version that focuses on our key features and removes redundancy:
+
 # 🥋 Open Mat Finder
 
-A professional React Native mobile application designed to help Brazilian Jiu-Jitsu practitioners find open mat training sessions in their area. Features belt-themed UI, real-time gym listings, and an intuitive user experience.
+A React Native mobile app helping Brazilian Jiu-Jitsu practitioners find open mat training sessions with **dynamic data updates from GitHub**.
 
 ## 🚀 Project Status
 
-**✅ 100% Functional & Ready for App Store Submission**
+**✅ 100% Functional - Ready for App Store Submission**
+- Complete React Native app with GitHub CSV data integration
+- Professional belt-themed UI with loading animations
+- **Dynamic data updates** - no app releases needed for gym data changes
+- Austin (24 gyms) + Tampa (14 gyms) with real-time GitHub sync
 
-- Complete React Native app with all core functionality working
-- Professional UI with belt-themed animations and theming
-- Enhanced loading screens with belt progression animations
-- No bugs or errors in production build
-- Ready for App Store visual assets creation
+## ⭐ Key Features
 
-## ✨ Features
+### 🌐 **GitHub Data Integration** (New!)
+- **Live gym data** loaded from GitHub CSV files
+- **Smart caching** (24-hour) with offline fallback
+- **Easy data updates** via GitHub web interface
+- **Standardized format** for scalable city expansion
+- **No app releases** needed for data changes
 
-### 🎯 Core Functionality
-- **Gym Discovery**: Find BJJ gyms with open mat sessions
-- **Location-Based Search**: Search by city/location
-- **Date & Time Selection**: Calendar interface for specific training dates
-- **Quick Actions**: One-tap access to today, tomorrow, and weekend sessions
-- **Saved Gyms**: Bookmark and manage favorite training locations
+### 🎯 **Core Functionality**
+- **Multi-city support**: Austin, Tampa (more cities easily added)
+- **Location-based search**: Find gyms by city
+- **Session details**: Days, times, Gi/No-Gi types, pricing
+- **Favorites system**: Save and manage preferred gyms
+- **Belt progression theming**: White → Blue → Purple → Brown → Black
 
-### 🎨 User Experience
-- **Belt Color Theming**: Dynamic UI based on user's BJJ belt level
-- **Dark/Light Mode**: Complete theme system with smooth transitions
-- **Loading Animations**: Belt progression animations during data loading
+### 📱 **User Experience**
 - **Professional UI/UX**: Modern, intuitive mobile interface
-- **Responsive Design**: Optimized for all iOS and Android devices
-
-### 🔐 Authentication & Data
-- **User Authentication**: Secure login/logout with persistence
-- **Belt Level System**: White → Blue → Purple → Brown → Black progression
-- **Data Persistence**: AsyncStorage for user preferences and saved gyms
-- **Mock Data Integration**: Comprehensive gym database for testing
-
-### 📱 Navigation & Structure
-- **Bottom Tab Navigation**: Find, Location, Saved, Profile tabs
-- **Stack Navigation**: Seamless screen transitions
-- **Loading States**: Professional loading indicators throughout app
-- **Error Handling**: Graceful error states and fallbacks
+- **Dark/Light mode**: Complete theme system
+- **Loading animations**: Belt progression during data loading
+- **Bottom tab navigation**: Find, Location, Saved, Profile
 
 ## 🛠 Tech Stack
 
-- **Framework**: React Native with Expo
-- **Language**: TypeScript
-- **Navigation**: React Navigation v6 (Stack + Bottom Tabs)
-- **State Management**: Context API (AuthContext, ThemeContext, AppContext)
-- **Storage**: AsyncStorage for data persistence
-- **UI Enhancements**: expo-linear-gradient, react-native-gesture-handler
-- **Development**: ESLint, Prettier, TypeScript strict mode
+- **React Native + Expo** with TypeScript
+- **GitHub CSV Integration** for dynamic data
+- **Context API** for state management
+- **React Navigation v6** (Stack + Bottom Tabs)
+- **AsyncStorage** for caching and persistence
+
+## 📊 Data Architecture
+
+### **Dynamic GitHub Data Sources:**
+```
+data/austin-gyms.csv    → 24 gyms with full details
+data/tampa-gyms.csv     → 14 gyms with standardized format
+```
+
+### **CSV Format (Standardized):**
+```
+id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
+austin-10th-planet-austin,"10th Planet Austin","4509 Freidrich Ln #210, Austin, TX 78744",0,25,Saturday,"10am-1pm",nogi
+```
+
+### **Easy Data Updates:**
+1. Navigate to GitHub repository
+2. Edit CSV files via web interface
+3. Commit changes → Data syncs automatically
+4. Users get updates within 24 hours (caching)
+
+## 🚀 Quick Start
+
+```bash
+# Clone and install
+git clone <repository-url>
+cd OpenMatFinder
+npm install
+
+# Start development
+npx expo start
+
+# Run on device
+# Press 'i' for iOS Simulator
+# Press 'a' for Android Emulator
+```
 
 ## 📁 Project Structure
 
 ```
 OpenMatFinder/
+├── data/                  # 🆕 GitHub CSV data files
+│   ├── austin-gyms.csv    # Austin gym data (24 gyms)
+│   └── tampa-gyms.csv     # Tampa gym data (14 gyms)
 ├── src/
 │   ├── screens/           # All screen components
-│   │   ├── LoginScreen.tsx
-│   │   ├── DashboardScreen.tsx
-│   │   ├── LocationScreen.tsx
-│   │   ├── TimeSelectionScreen.tsx
-│   │   ├── ResultsScreen.tsx
-│   │   ├── SavedScreen.tsx
-│   │   ├── LoadingScreen.tsx
-│   │   └── AboutScreen.tsx
-│   ├── context/           # Context providers
-│   │   ├── AuthContext.tsx
-│   │   ├── ThemeContext.tsx
-│   │   ├── AppContext.tsx
-│   │   └── LoadingContext.tsx
-│   ├── navigation/        # Navigation configuration
-│   │   ├── AppNavigator.tsx
-│   │   ├── useNavigation.ts
-│   │   └── types.ts
-│   ├── services/          # API and storage services
+│   ├── services/          # API & GitHub data service
 │   │   ├── api.service.ts
-│   │   ├── storage.service.ts
-│   │   └── validation.service.ts
+│   │   ├── github-data.service.ts  # 🆕 GitHub integration
+│   │   └── storage.service.ts
+│   ├── contexts/          # Auth, Theme, App contexts
+│   ├── navigation/        # Navigation configuration
 │   ├── types/             # TypeScript interfaces
-│   │   └── index.ts
-│   ├── utils/             # Constants and utilities
-│   │   ├── constants.ts
-│   │   └── beltColors.ts
-│   └── components/        # Reusable components
-│       ├── cards/
-│       ├── common/
-│       └── navigation/
-├── assets/                # Images and icons
-├── ios/                   # iOS specific files
-├── android/               # Android specific files
-└── package.json
+│   └── utils/             # Constants and belt colors
 ```
 
-## 🚀 Installation & Setup
+## 🔄 Data Management
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Expo CLI
-- iOS Simulator (for iOS development)
-- Android Studio (for Android development)
+### **Adding New Cities:**
+1. Create `data/city-name-gyms.csv` following the standard format
+2. Update GitHub data service URLs
+3. Deploy - no app changes needed!
 
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd OpenMatFinder
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npx expo start
-   ```
-
-4. **Run on device/simulator**
-   - Press `i` for iOS Simulator
-   - Press `a` for Android Emulator
-   - Scan QR code with Expo Go app on physical device
-
-### Development Commands
-
-```bash
-# Start development server
-npx expo start
-
-# Start with cleared cache
-npx expo start --clear
-
-# Build for production
-npx expo build:ios
-npx expo build:android
-
-# Eject from Expo (if needed)
-npx expo eject
-```
+### **Updating Existing Data:**
+- **Austin**: Edit addresses, pricing, sessions in `austin-gyms.csv`
+- **Tampa**: Enhance placeholder data with real addresses/prices
+- **Any changes**: Commit to GitHub → automatic app updates
 
 ## 🎨 Belt Color System
 
-The app features a dynamic belt color theming system that adapts the UI based on the user's BJJ belt level:
+Dynamic UI theming based on user's BJJ belt level:
+- **White**: Clean, beginner-friendly interface
+- **Blue**: Professional blue accents
+- **Purple**: Sophisticated purple theming  
+- **Brown**: Rich brown color scheme
+- **Black**: Premium black and gold accents
 
-- **White Belt**: Clean, beginner-friendly interface
-- **Blue Belt**: Professional blue accent colors
-- **Purple Belt**: Sophisticated purple theming
-- **Brown Belt**: Rich brown color scheme
-- **Black Belt**: Premium black and gold accents
+## 📱 App Flow
 
-Each belt level includes:
-- Custom primary and secondary colors
-- Themed button styles
-- Matching loading animations
-- Consistent visual hierarchy
-
-## 🔄 Recent Enhancements
-
-### Loading Screen Improvements
-- **Belt Progression Animations**: Visual belt advancement during loading
-- **Professional Transitions**: Smooth loading states throughout app
-- **Enhanced User Feedback**: Clear indication of app status
-- **Performance Optimization**: Efficient loading state management
-
-### UI/UX Polish
-- **Modern Design Language**: Clean, professional interface
-- **Responsive Layout**: Optimized for all screen sizes
-- **Accessibility**: Proper contrast ratios and touch targets
-- **Performance**: Optimized rendering and animations
-
-## 📱 Screens Overview
-
-### LoginScreen
-- Gradient buttons with belt color theming
-- Secure authentication flow
-- Persistent login state
-
-### DashboardScreen
-- Gym listings with detailed information
-- Quick action buttons for common tasks
-- Saved gyms management
-
-### LocationScreen
-- City/location selection interface
-- Search functionality
-- Location-based gym filtering
-
-### TimeSelectionScreen
-- Calendar interface for date selection
-- Quick action buttons (Today, Tomorrow, Weekend)
-- Multi-date selection capability
-
-### ResultsScreen
-- Gym search results display
-- Filtering and sorting options
-- Save/bookmark functionality
-
-### SavedScreen
-- Bookmarked gyms management
-- Quick access to favorite locations
-- Gym details modal
-
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env` file in the root directory:
-
-```env
-EXPO_PUBLIC_API_URL=your_api_url_here
-EXPO_PUBLIC_APP_NAME=Open Mat Finder
-```
-
-### Theme Configuration
-Customize themes in `src/utils/constants.ts`:
-
-```typescript
-export const themes = {
-  dark: {
-    background: '#000000',
-    surface: '#111111',
-    text: { primary: '#ffffff', secondary: '#a3a3a3' }
-  },
-  light: {
-    background: '#ffffff',
-    surface: '#f5f5f5',
-    text: { primary: '#000000', secondary: '#666666' }
-  }
-}
-```
+1. **Login** → Belt selection & authentication
+2. **Dashboard** → Quick actions and gym overview
+3. **Location** → Select Austin, Tampa, or custom location
+4. **Results** → Browse gyms with real-time GitHub data
+5. **Details** → Session times, pricing, directions
+6. **Favorites** → Save preferred gyms
 
 ## 🧪 Testing
 
-### Manual Testing Checklist
-- [ ] Authentication flow (login/logout)
-- [ ] Belt color theming changes
-- [ ] Dark/light mode toggle
-- [ ] Navigation between all screens
-- [ ] Calendar date selection
-- [ ] Quick action buttons
-- [ ] Gym saving/bookmarking
-- [ ] Loading states and animations
-- [ ] Error handling scenarios
+**Essential Tests:**
+- [ ] Austin data loads (24 gyms from GitHub)
+- [ ] Tampa data loads (14 gyms from GitHub)  
+- [ ] Offline mode uses cached data
+- [ ] Belt theming works across all levels
+- [ ] Favorites persist between sessions
 
-### Performance Testing
-- [ ] App launch time
-- [ ] Screen transition smoothness
-- [ ] Memory usage optimization
-- [ ] Battery consumption
+## 🚀 Deployment
 
-## 📦 Build & Deployment
+### **App Store Ready:**
+- Complete React Native build
+- Professional UI/UX
+- Error handling and offline support
+- Next: App icon, splash screen, screenshots
 
-### iOS App Store
-```bash
-# Build iOS app
-npx expo build:ios
+### **Data Updates:**
+- No app store releases needed for gym data
+- Edit CSV files in GitHub for instant updates
+- Scalable to hundreds of cities
 
-# Submit to App Store
-npx expo upload:ios
-```
+## 🎯 What Makes This Special
 
-### Google Play Store
-```bash
-# Build Android app
-npx expo build:android
+**🔥 Dynamic Data Updates**: Unlike other apps, gym data updates instantly without app releases
 
-# Generate APK/AAB
-npx expo build:android --type apk
-```
+**🏗️ Scalable Architecture**: Add new cities by simply adding CSV files
 
-## 🤝 Contributing
+**🎨 BJJ-Focused Design**: Built specifically for the BJJ community with belt progression theming
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🎯 Next Phase
-
-**Ready for App Store Submission**
-- [ ] App icon design and implementation
-- [ ] Splash screen creation
-- [ ] App Store screenshots
-- [ ] App description and metadata
-- [ ] Privacy policy and terms of service
-- [ ] Beta testing with TestFlight/Internal Testing
-
-## 📞 Support
-
-For support, email support@openmatfinder.com or create an issue in this repository.
+**📱 Professional Polish**: App store ready with loading animations and error handling
 
 ---
 
-**Built with ❤️ for the BJJ community** 
+**Built with ❤️ for the BJJ community**
+
+Remove all the redundant sections about installation details, long feature lists, environment variables, manual testing checklists, and contribution guidelines. Focus on what matters: the GitHub integration, the data architecture, and the key differentiators.
+``

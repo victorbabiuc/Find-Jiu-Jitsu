@@ -66,10 +66,6 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* BETA badge */}
-      <View style={styles.betaBadgeContainer}>
-        <View style={styles.betaBadge}><Text style={styles.betaBadgeText}>BETA</Text></View>
-      </View>
       <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.header}>
@@ -84,8 +80,6 @@ const LoginScreen = () => {
           <Text style={[styles.title, { color: theme.text.primary }]}>
             OPEN MAT FINDER
           </Text>
-          {/* Beta city info */}
-          <Text style={{ color: '#F59E0B', fontWeight: '600', marginTop: 4, marginBottom: 4, fontSize: 14 }}>Currently serving Tampa & Austin</Text>
           <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
             Your JiuJitsu Training Companion
           </Text>
@@ -252,32 +246,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 8,
     borderRadius: 4,
-  },
-  betaBadgeContainer: {
-    position: 'absolute',
-    top: 48,
-    right: 24,
-    zIndex: 10,
-  },
-  betaBadge: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 44,
-    minHeight: 22,
-    shadowColor: '#F59E0B',
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  betaBadgeText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 12,
-    letterSpacing: 1,
   },
   moreCitiesText: {
     position: 'absolute',

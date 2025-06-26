@@ -3,23 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from 
 
 const AboutScreen: React.FC = () => {
   const handleReportIssue = () => {
-    Linking.openURL('mailto:support@openmatfinder.com?subject=Open%20Mat%20Finder%20Beta%20Feedback');
+    Linking.openURL('mailto:support@openmatfinder.com?subject=Open%20Mat%20Finder%20Feedback');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.betaBadge}><Text style={styles.betaBadgeText}>BETA</Text></View>
         <Text style={styles.title}>About Open Mat Finder</Text>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Beta Notice</Text>
-          <Text style={styles.sectionText}>This is a beta version of Open Mat Finder.</Text>
-          <Text style={styles.sectionText}>We're actively adding more cities and features.</Text>
-          <Text style={styles.sectionText}>Help us improve by reporting any issues.</Text>
-          <Text style={styles.sectionText}>Current version: <Text style={styles.version}>v0.1.0-beta</Text></Text>
+          <Text style={styles.sectionTitle}>Your BJJ Training Companion</Text>
+          <Text style={styles.sectionText}>Find open mat sessions in your area with real-time data from our GitHub integration.</Text>
+          <Text style={styles.sectionText}>Currently serving Austin and Tampa with more cities coming soon.</Text>
+          <Text style={styles.sectionText}>Help us improve by reporting any issues or suggesting new features.</Text>
+          <Text style={styles.sectionText}>Current version: <Text style={styles.version}>v1.0.0</Text></Text>
         </View>
         <TouchableOpacity style={styles.reportButton} onPress={handleReportIssue}>
-          <Text style={styles.reportButtonText}>Report Issue</Text>
+          <Text style={styles.reportButtonText}>Contact Support</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -37,20 +36,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  betaBadge: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  betaBadgeText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 13,
-    letterSpacing: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: '700',
@@ -63,7 +48,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   sectionTitle: {
-    color: '#F59E0B',
+    color: '#2563EB',
     fontWeight: '700',
     fontSize: 18,
     marginBottom: 10,
@@ -76,11 +61,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   version: {
-    color: '#F59E0B',
+    color: '#2563EB',
     fontWeight: '700',
   },
   reportButton: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: '#2563EB',
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
