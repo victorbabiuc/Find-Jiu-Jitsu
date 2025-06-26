@@ -148,13 +148,15 @@ class GitHubDataService {
 
       // Add session to existing gym
       const gym = gymMap.get(row.id)!;
-      if (row.sessionDay && row.sessionTime) {
+      if (row.sessionDay && row.sessionTime && row.sessionDay.trim() !== '') {
         const session: OpenMatSession = {
-          day: row.sessionDay,
-          time: row.sessionTime,
+          day: row.sessionDay.trim(),
+          time: row.sessionTime.trim(),
           type: this.validateSessionType(row.sessionType)
         };
         gym.openMats.push(session);
+      } else {
+        console.log(`⚠️ Skipping session for ${row.name} - missing day or time: day="${row.sessionDay}", time="${row.sessionTime}"`);
       }
     });
 

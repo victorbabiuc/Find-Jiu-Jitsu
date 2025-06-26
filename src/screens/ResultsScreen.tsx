@@ -33,8 +33,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const navigation = useFindNavigation();
   const beltColor = beltColors[userBelt];
   
-  // Get location from route params
+  // Get location and date filtering from route params
   const location = route.params?.location || 'Tampa';
+  const dateSelection = route.params?.dateSelection;
+  const dates = route.params?.dates;
   
   // State for API data
   const [openMats, setOpenMats] = useState<OpenMat[]>([]);
@@ -44,12 +46,22 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Fetch data from API
+  // Fetch data from API with date filtering
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await apiService.getOpenMats(location);
+        
+        // Prepare filters object with date selection
+        const filters: any = {};
+        if (dateSelection) {
+          filters.dateSelection = dateSelection;
+        }
+        if (dates) {
+          filters.dates = dates;
+        }
+        
+        const data = await apiService.getOpenMats(location, filters);
         setOpenMats(data);
       } catch (error) {
         console.error('Error fetching gyms:', error);
@@ -60,7 +72,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     };
 
     fetchData();
-  }, [location]);
+  }, [location, dateSelection, dates]);
 
   const handleGymPress = (gym: OpenMat) => {
     setSelectedGym(gym);
@@ -115,6 +127,21 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     return 'Mixed';
   };
 
+  const getDateSelectionDisplay = (dateSelection: string): string => {
+    switch (dateSelection) {
+      case 'today':
+        return 'Today';
+      case 'tomorrow':
+        return 'Tomorrow';
+      case 'weekend':
+        return 'This Weekend';
+      case 'custom':
+        return 'Selected Dates';
+      default:
+        return dateSelection;
+    }
+  };
+
   // Show loading state
   if (loading) {
     return <LoadingScreen />;
@@ -131,6 +158,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Open Mats Near You</Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
             {openMats.length} results • {location}
+            {dateSelection && ` • ${getDateSelectionDisplay(dateSelection)}`}
           </Text>
         </View>
       </View>
@@ -139,8 +167,16 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       {openMats.length === 0 ? (
         // Empty state
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: theme.text.primary }]}>No open mats found in {location}</Text>
-          <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>Check back soon or add a gym in your city!</Text>
+          <Text style={[styles.emptyText, { color: theme.text.primary }]}>
+            No open mats found in {location}
+            {dateSelection && ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`}
+          </Text>
+          <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
+            {dateSelection 
+              ? 'Try selecting a different date or check other days of the week.'
+              : 'Check back soon or add a gym in your city!'
+            }
+          </Text>
         </View>
       ) : (
         // Gym List

@@ -244,7 +244,7 @@ class ApiService {
     };
   }
 
-  async getOpenMats(location: string, filters?: Partial<Filters>): Promise<OpenMat[]> {
+  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): Promise<OpenMat[]> {
     try {
       // Determine city from location string
       const city = location.toLowerCase().includes('austin') ? 'austin' : 
@@ -253,10 +253,16 @@ class ApiService {
       console.log(`🌐 Attempting to fetch ${city} data from GitHub...`);
       
       // Try GitHub service first
-      const githubData = await githubDataService.getGymData(city);
+      let githubData = await githubDataService.getGymData(city);
       
       console.log(`✅ Successfully loaded ${githubData.length} gyms from GitHub for ${city}`);
       console.log('📍 GitHub data source active');
+      
+      // Apply date filtering if specified
+      if (filters?.dateSelection || filters?.dates) {
+        githubData = this.filterGymsByDate(githubData, filters);
+        console.log(`📅 Applied date filtering: ${githubData.length} gyms match criteria`);
+      }
       
       return githubData;
       
@@ -265,12 +271,142 @@ class ApiService {
       console.log('📍 Using mock data source');
       
       // Fallback to mock data
-      if (location.toLowerCase().includes('austin')) {
-        return mockAustinGyms;
+      let mockData = location.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;
+      
+      // Apply date filtering to mock data as well
+      if (filters?.dateSelection || filters?.dates) {
+        mockData = this.filterGymsByDate(mockData, filters);
+        console.log(`📅 Applied date filtering to mock data: ${mockData.length} gyms match criteria`);
       }
       
-      return mockTampaGyms;
+      return mockData;
     }
+  }
+
+  /**
+   * Filter gyms based on date selection criteria
+   * @param gyms - Array of gyms to filter
+   * @param filters - Filter criteria including dateSelection and dates
+   * @returns Filtered array of gyms
+   */
+  private filterGymsByDate(gyms: OpenMat[], filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): OpenMat[] {
+    if (!filters.dateSelection && !filters.dates) {
+      console.log('📅 No date filtering applied');
+      return gyms;
+    }
+
+    const targetDays = this.getTargetDays(filters);
+    console.log(`🔍 Filtering ${gyms.length} gyms for days: ${targetDays.join(', ')}`);
+    
+    const filteredGyms = gyms.filter(gym => {
+      // Skip gyms with no sessions
+      if (!gym.openMats || gym.openMats.length === 0) {
+        console.log(`❌ ${gym.name}: No sessions available`);
+        return false;
+      }
+      
+      // Check if any of the gym's sessions match the target days
+      const hasMatchingSession = gym.openMats.some(session => {
+        // Skip sessions with empty or invalid day
+        if (!session.day || session.day.trim() === '') {
+          console.log(`⚠️ ${gym.name}: Session with empty day - ${session.time}`);
+          return false;
+        }
+        
+        const matches = targetDays.some(targetDay => 
+          this.daysMatch(session.day, targetDay)
+        );
+        
+        if (matches) {
+          console.log(`✅ ${gym.name}: Matches ${session.day} ${session.time}`);
+        }
+        
+        return matches;
+      });
+      
+      if (!hasMatchingSession) {
+        console.log(`❌ ${gym.name}: No sessions match target days`);
+      }
+      
+      return hasMatchingSession;
+    }).map(gym => ({
+      ...gym,
+      // Filter sessions to only show matching ones
+      openMats: gym.openMats.filter(session => {
+        // Skip sessions with empty or invalid day
+        if (!session.day || session.day.trim() === '') {
+          return false;
+        }
+        
+        return targetDays.some(targetDay => this.daysMatch(session.day, targetDay));
+      })
+    }));
+
+    console.log(`📊 Filtering complete: ${filteredGyms.length}/${gyms.length} gyms match criteria`);
+    return filteredGyms;
+  }
+
+  /**
+   * Get target days based on date selection criteria
+   * @param filters - Filter criteria
+   * @returns Array of day names to match against
+   */
+  private getTargetDays(filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): string[] {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    let targetDays: string[] = [];
+
+    switch (filters.dateSelection) {
+      case 'today':
+        targetDays = [this.getDayName(today)];
+        console.log(`📅 Today is ${this.getDayName(today)}`);
+        break;
+      case 'tomorrow':
+        targetDays = [this.getDayName(tomorrow)];
+        console.log(`📅 Tomorrow is ${this.getDayName(tomorrow)}`);
+        break;
+      case 'weekend':
+        targetDays = ['Saturday', 'Sunday'];
+        console.log(`📅 Weekend includes: ${targetDays.join(', ')}`);
+        break;
+      case 'custom':
+        if (filters.dates && filters.dates.length > 0) {
+          targetDays = filters.dates.map(date => this.getDayName(date));
+          console.log(`📅 Custom dates: ${targetDays.join(', ')}`);
+        } else {
+          targetDays = [this.getDayName(today)]; // Fallback to today
+          console.log(`📅 Custom dates fallback to today: ${this.getDayName(today)}`);
+        }
+        break;
+      default:
+        targetDays = [this.getDayName(today)]; // Default to today
+        console.log(`📅 Default to today: ${this.getDayName(today)}`);
+    }
+
+    console.log(`🎯 Target days for filtering: ${targetDays.join(', ')}`);
+    return targetDays;
+  }
+
+  /**
+   * Convert Date object to day name
+   * @param date - Date object
+   * @returns Day name (Monday, Tuesday, etc.)
+   */
+  private getDayName(date: Date): string {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[date.getDay()];
+  }
+
+  /**
+   * Check if two day names match (case-insensitive)
+   * @param day1 - First day name
+   * @param day2 - Second day name
+   * @returns True if days match
+   */
+  private daysMatch(day1: string, day2: string): boolean {
+    return day1.toLowerCase().trim() === day2.toLowerCase().trim();
   }
 
   async updateProfile(userId: string, profile: Partial<User>): Promise<User> {

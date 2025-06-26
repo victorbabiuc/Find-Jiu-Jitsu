@@ -19,7 +19,11 @@ export type MainTabParamList = {
 export type FindStackParamList = {
   Location: undefined;
   TimeSelection: undefined;
-  Results: { location: string };
+  Results: { 
+    location: string;
+    dateSelection?: string;
+    dates?: Date[];
+  };
 };
 
 // Screen Names (matching ViewType)
