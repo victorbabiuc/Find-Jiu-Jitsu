@@ -1,0 +1,16 @@
+id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
+tampa-stjj,"STJJ","Tampa, FL",0,0,Friday,"5:00 PM",nogi
+tampa-stjj,"STJJ","Tampa, FL",0,0,Sunday,"9:00 AM",gi
+tampa-rmnu,"RMNU","Tampa, FL",0,0,Friday,"6:00 PM",both*
+tampa-gracie-humaita,"Gracie Humaita","Tampa, FL",0,0,Friday,"6:30 PM - 7:30 PM",both*
+tampa-kaizen,"Kaizen","Tampa, FL",0,0,Sunday,"11:00 AM - 1:00 PM",both*
+tampa-ybor-city-jj,"Ybor City JJ","Tampa, FL",0,0,Sunday,"12:00 PM - 2:00 PM",both*
+tampa-gracie-brandon,"Gracie Brandon","Tampa, FL",0,0,Sunday,"1:30 PM",both*
+tampa-gracie-westchase,"Gracie Westchase","Tampa, FL",0,0,Saturday,"10:00 AM",both*
+tampa-tactics-jj,"Tactics JJ","Tampa, FL",0,0,Saturday,"10:30 AM",both*
+tampa-northriver,"NorthRiver","Tampa, FL",0,0,Saturday,"11:00 AM",both*
+tampa-tmt,"TMT","Tampa, FL",0,0,Saturday,"11:30 AM",both*
+tampa-gracie-trinity,"Gracie Trinity","Tampa, FL",0,0,Saturday,"11:00 AM",both*
+tampa-gracie-clermont,"Gracie Clermont","Tampa, FL",0,0,Saturday,"12:00 PM",both*
+tampa-st-pete-bjj,"St Pete BJJ","Tampa, FL",0,0,Sunday,"5:00 PM",both*
+tampa-inside-control-st-pete,"Inside Control St Pete","Tampa, FL",0,0,Sunday,"11:00 AM",both* 
