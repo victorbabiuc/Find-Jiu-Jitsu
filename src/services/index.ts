@@ -3,4 +3,5 @@
 
 export { storageService } from './storage.service';
 export { apiService } from './api.service';
-export { validationRules } from './validation.service'; 
+export { validationRules } from './validation.service';
+export { githubDataService } from './github-data.service'; 

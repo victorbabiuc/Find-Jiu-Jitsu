@@ -1,0 +1,22 @@
+id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
+1,STJJ,Tampa FL,5.2,0,Sunday,9:00 AM,gi
+1,STJJ,Tampa FL,5.2,0,Thursday,5:00 PM,nogi
+2,RMNU,Tampa FL,7.1,0,Wednesday,6:00 PM,both
+3,Gracie Humaita,Tampa FL,4.8,0,Tuesday,6:30 PM,both
+4,Kaizen,Tampa FL,9.3,0,Saturday,11:00 AM,both
+5,Ybor City JJ,Ybor City Tampa FL,6.5,0,Saturday,12:00 PM,both
+6,Gracie Brandon,Brandon FL,12.4,0,Saturday,1:30 PM,both
+7,Gracie Westchase,Westchase Tampa FL,15.2,0,Saturday,10:00 AM,both
+8,Tactics JJ,Tampa FL,8.7,0,Saturday,10:30 AM,both
+9,NorthRiver,North Tampa FL,11.3,0,Saturday,11:00 AM,both
+10,TMT,Tampa FL,7.9,0,Saturday,11:30 AM,both
+11,Gracie Trinity,Trinity FL,18.6,0,Saturday,11:00 AM,both
+12,Gracie Clermont,Clermont FL,35.2,0,Saturday,12:00 PM,both
+13,St Pete BJJ,St. Petersburg FL,22.4,0,Saturday,5:00 PM,both
+14,Inside Control St Pete,St. Petersburg FL,23.1,0,Sunday,11:00 AM,both
+austin-1,10th Planet Austin,4509 Freidrich Ln #210 Austin TX 78744,5.2,25,Wednesday,10:00 AM,nogi
+austin-1,10th Planet Austin,4509 Freidrich Ln #210 Austin TX 78744,5.2,25,Saturday,12:00 PM,nogi
+austin-2,10th Planet Round Rock,3810 Gattis School Rd Suite 109 & 110 Round Rock TX 78664,12.5,0,Sunday,12:00 PM,nogi
+austin-3,Aces,2200 E 7th St #B Austin TX 78702,3.8,0,Friday,7:00 PM,both
+austin-4,Atos,11701 Bee Caves Rd Suite 110 Austin TX 78738,15.3,0,Saturday,11:30 AM,both
+austin-5,Austin Submission Fighting,11940 Menchaca Rd #104 Austin TX 78748,11.7,0,Saturday,10:00 AM,both 
