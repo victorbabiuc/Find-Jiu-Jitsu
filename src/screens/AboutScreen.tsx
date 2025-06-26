@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from 
 
 const AboutScreen: React.FC = () => {
   const handleReportIssue = () => {
-    Linking.openURL('mailto:support@openmatfinder.com?subject=Open%20Mat%20Finder%20Feedback');
+    Linking.openURL('mailto:glootieapp@gmail.com?subject=Open%20Mat%20Finder%20Feedback');
   };
 
   return (

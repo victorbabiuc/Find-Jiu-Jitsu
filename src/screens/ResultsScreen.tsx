@@ -8,6 +8,7 @@ import {
   Dimensions,
   Linking,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,7 +86,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   };
 
   const handleHeartPress = (gym: OpenMat) => {
-    toggleFavorite(parseInt(gym.id));
+    toggleFavorite(gym.id);
   };
 
   const getPriceDisplay = (matFee: number) => {
@@ -142,6 +143,78 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     }
   };
 
+  const showFallbackAlert = (subject: string) => {
+    Alert.alert(
+      'Email Not Available',
+      `Please email glootieapp@gmail.com\n\nSubject: ${subject}\n\nCopy the template and send it manually.`,
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleSuggestGym = () => {
+    const subject = `New Gym Suggestion - ${location}`;
+    const body = `Hi Open Mat Finder team,
+
+I'd like to suggest a new gym for your app:
+
+📍 Gym Name: 
+📍 Address: 
+📞 Phone: 
+🕐 Open Mat Days/Times: 
+💰 Pricing: 
+🌐 Website: 
+🥋 Gi/No-Gi/Both: 
+📝 Additional Notes: 
+
+Thanks for helping grow the BJJ community!
+
+---
+Sent from Open Mat Finder app`;
+
+    // Use encodeURIComponent for proper URL encoding of emojis and special characters
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body);
+    
+    const emailUrl = `mailto:glootieapp@gmail.com?subject=${encodedSubject}&body=${encodedBody}`;
+    
+    // Check if URL is too long (some email clients have limits)
+    if (emailUrl.length > 2000) {
+      console.warn('⚠️ Email URL is very long, trying simplified version');
+      // Fallback to simpler format without emojis if URL is too long
+      const simpleBody = `Hi Open Mat Finder team,
+
+I'd like to suggest a new gym for your app:
+
+Gym Name: 
+Address: 
+Phone: 
+Open Mat Days/Times: 
+Pricing: 
+Website: 
+Gi/No-Gi/Both: 
+Additional Notes: 
+
+Thanks for helping grow the BJJ community!
+
+---
+Sent from Open Mat Finder app`;
+      
+      const simpleEncodedBody = encodeURIComponent(simpleBody);
+      const simpleEmailUrl = `mailto:glootieapp@gmail.com?subject=${encodedSubject}&body=${simpleEncodedBody}`;
+      
+      Linking.openURL(simpleEmailUrl).catch(err => {
+        console.error('❌ Error opening simplified email:', err);
+        showFallbackAlert(subject);
+      });
+    } else {
+      Linking.openURL(emailUrl).catch(err => {
+        console.error('❌ Error opening email:', err);
+        console.error('Error details:', err.message);
+        showFallbackAlert(subject);
+      });
+    }
+  };
+
   // Show loading state
   if (loading) {
     return <LoadingScreen />;
@@ -161,6 +234,16 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             {dateSelection && ` • ${getDateSelectionDisplay(dateSelection)}`}
           </Text>
         </View>
+        <TouchableOpacity 
+          style={[styles.suggestButton, { backgroundColor: beltColor.surface }]} 
+          onPress={handleSuggestGym}
+          activeOpacity={0.7}
+          accessibilityLabel="Suggest a new gym"
+          accessibilityHint="Opens email app to suggest a new gym for the app"
+        >
+          <Ionicons name="add-circle-outline" size={16} color={beltColor.primary} />
+          <Text style={[styles.suggestText, { color: beltColor.primary }]}>Suggest</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -228,9 +311,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                     activeOpacity={0.7}
                   >
                     <Ionicons 
-                      name={favorites.has(parseInt(gym.id)) ? "heart" : "heart-outline"} 
+                      name={favorites.has(gym.id) ? "heart" : "heart-outline"} 
                       size={20} 
-                      color={favorites.has(parseInt(gym.id)) ? "#EF4444" : theme.text.secondary} 
+                      color={favorites.has(gym.id) ? "#EF4444" : theme.text.secondary} 
                     />
                   </TouchableOpacity>
                 </View>
@@ -249,7 +332,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         visible={modalVisible}
         onClose={handleCloseModal}
         onHeartPress={selectedGym ? () => handleHeartPress(selectedGym) : undefined}
-        isFavorited={selectedGym ? favorites.has(parseInt(selectedGym.id)) : false}
+        isFavorited={selectedGym ? favorites.has(selectedGym.id) : false}
       />
     </SafeAreaView>
   );
@@ -438,6 +521,19 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  suggestButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginLeft: 8,
+    gap: 4,
+  },
+  suggestText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });
 

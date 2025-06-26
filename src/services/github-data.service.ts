@@ -42,13 +42,11 @@ class GitHubDataService {
       if (!forceRefresh) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
-          console.log(`Using cached data for ${location}`);
           return cachedData;
         }
       }
 
       // Fetch fresh data from GitHub
-      console.log(`Fetching fresh data for ${location}`);
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
       const parsedData = this.parseCSVToOpenMats(csvData);
       
@@ -62,7 +60,6 @@ class GitHubDataService {
       // Fallback to cached data if available
       const cachedData = await this.getCachedData(location.toLowerCase());
       if (cachedData) {
-        console.log(`Falling back to cached data for ${location}`);
         return cachedData;
       }
       
@@ -155,8 +152,6 @@ class GitHubDataService {
           type: this.validateSessionType(row.sessionType)
         };
         gym.openMats.push(session);
-      } else {
-        console.log(`⚠️ Skipping session for ${row.name} - missing day or time: day="${row.sessionDay}", time="${row.sessionTime}"`);
       }
     });
 
@@ -219,30 +214,30 @@ class GitHubDataService {
   /**
    * Get cached data for a location
    * @param location - The location to get cached data for
-   * @returns Promise<OpenMat[] | null> - Cached data or null if expired/not found
+   * @returns Promise<OpenMat[] | null> - Cached data or null if not found/expired
    */
   private async getCachedData(location: string): Promise<OpenMat[] | null> {
     try {
-      const cacheKey = `${this.CACHE_PREFIX}${location}`;
-      const cachedString = await AsyncStorage.getItem(cacheKey);
+      const cacheKey = this.CACHE_PREFIX + location;
+      const cachedData = await AsyncStorage.getItem(cacheKey);
       
-      if (!cachedString) {
+      if (!cachedData) {
         return null;
       }
 
-      const cached: CachedData = JSON.parse(cachedString);
+      const parsed: CachedData = JSON.parse(cachedData);
       const now = Date.now();
-      
-      // Check if cache is still valid
-      if (now - cached.timestamp > this.CACHE_DURATION) {
-        console.log(`Cache expired for ${location}, removing`);
+      const age = now - parsed.timestamp;
+
+      // Check if cache is expired
+      if (age > this.CACHE_DURATION) {
         await AsyncStorage.removeItem(cacheKey);
         return null;
       }
 
-      return cached.data;
+      return parsed.data;
     } catch (error) {
-      console.error(`Error reading cached data for ${location}:`, error);
+      console.error('Error reading cached data:', error);
       return null;
     }
   }
@@ -262,28 +257,24 @@ class GitHubDataService {
       };
       
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cachedData));
-      console.log(`Cached data for ${location}`);
     } catch (error) {
       console.error(`Error caching data for ${location}:`, error);
     }
   }
 
   /**
-   * Clear cache for a specific location
-   * @param location - The location to clear cache for
+   * Clear cache for a specific location or all locations
+   * @param location - Optional location to clear cache for. If not provided, clears all cache.
    */
   async clearCache(location?: string): Promise<void> {
     try {
       if (location) {
-        const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
+        const cacheKey = this.CACHE_PREFIX + location.toLowerCase();
         await AsyncStorage.removeItem(cacheKey);
-        console.log(`Cleared cache for ${location}`);
       } else {
-        // Clear all gym data cache
         const keys = await AsyncStorage.getAllKeys();
         const cacheKeys = keys.filter(key => key.startsWith(this.CACHE_PREFIX));
         await AsyncStorage.multiRemove(cacheKeys);
-        console.log('Cleared all gym data cache');
       }
     } catch (error) {
       console.error('Error clearing cache:', error);
@@ -291,9 +282,9 @@ class GitHubDataService {
   }
 
   /**
-   * Refresh data for a location (force fetch new data)
+   * Force refresh data for a location
    * @param location - The location to refresh data for
-   * @returns Promise<OpenMat[]> - Fresh gym data
+   * @returns Promise<OpenMat[]> - Fresh data
    */
   async refreshData(location: string): Promise<OpenMat[]> {
     return this.getGymData(location, true);

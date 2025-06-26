@@ -250,18 +250,12 @@ class ApiService {
       const city = location.toLowerCase().includes('austin') ? 'austin' : 
                    location.toLowerCase().includes('tampa') ? 'tampa' : 'austin';
       
-      console.log(`🌐 Attempting to fetch ${city} data from GitHub...`);
-      
       // Try GitHub service first
       let githubData = await githubDataService.getGymData(city);
-      
-      console.log(`✅ Successfully loaded ${githubData.length} gyms from GitHub for ${city}`);
-      console.log('📍 GitHub data source active');
       
       // Apply date filtering if specified
       if (filters?.dateSelection || filters?.dates) {
         githubData = this.filterGymsByDate(githubData, filters);
-        console.log(`📅 Applied date filtering: ${githubData.length} gyms match criteria`);
       }
       
       return githubData;
@@ -276,7 +270,6 @@ class ApiService {
       // Apply date filtering to mock data as well
       if (filters?.dateSelection || filters?.dates) {
         mockData = this.filterGymsByDate(mockData, filters);
-        console.log(`📅 Applied date filtering to mock data: ${mockData.length} gyms match criteria`);
       }
       
       return mockData;
@@ -291,17 +284,14 @@ class ApiService {
    */
   private filterGymsByDate(gyms: OpenMat[], filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): OpenMat[] {
     if (!filters.dateSelection && !filters.dates) {
-      console.log('📅 No date filtering applied');
       return gyms;
     }
 
     const targetDays = this.getTargetDays(filters);
-    console.log(`🔍 Filtering ${gyms.length} gyms for days: ${targetDays.join(', ')}`);
     
     const filteredGyms = gyms.filter(gym => {
       // Skip gyms with no sessions
       if (!gym.openMats || gym.openMats.length === 0) {
-        console.log(`❌ ${gym.name}: No sessions available`);
         return false;
       }
       
@@ -309,7 +299,6 @@ class ApiService {
       const hasMatchingSession = gym.openMats.some(session => {
         // Skip sessions with empty or invalid day
         if (!session.day || session.day.trim() === '') {
-          console.log(`⚠️ ${gym.name}: Session with empty day - ${session.time}`);
           return false;
         }
         
@@ -317,16 +306,8 @@ class ApiService {
           this.daysMatch(session.day, targetDay)
         );
         
-        if (matches) {
-          console.log(`✅ ${gym.name}: Matches ${session.day} ${session.time}`);
-        }
-        
         return matches;
       });
-      
-      if (!hasMatchingSession) {
-        console.log(`❌ ${gym.name}: No sessions match target days`);
-      }
       
       return hasMatchingSession;
     }).map(gym => ({
@@ -342,7 +323,6 @@ class ApiService {
       })
     }));
 
-    console.log(`📊 Filtering complete: ${filteredGyms.length}/${gyms.length} gyms match criteria`);
     return filteredGyms;
   }
 
@@ -361,31 +341,24 @@ class ApiService {
     switch (filters.dateSelection) {
       case 'today':
         targetDays = [this.getDayName(today)];
-        console.log(`📅 Today is ${this.getDayName(today)}`);
         break;
       case 'tomorrow':
         targetDays = [this.getDayName(tomorrow)];
-        console.log(`📅 Tomorrow is ${this.getDayName(tomorrow)}`);
         break;
       case 'weekend':
         targetDays = ['Saturday', 'Sunday'];
-        console.log(`📅 Weekend includes: ${targetDays.join(', ')}`);
         break;
       case 'custom':
         if (filters.dates && filters.dates.length > 0) {
           targetDays = filters.dates.map(date => this.getDayName(date));
-          console.log(`📅 Custom dates: ${targetDays.join(', ')}`);
         } else {
           targetDays = [this.getDayName(today)]; // Fallback to today
-          console.log(`📅 Custom dates fallback to today: ${this.getDayName(today)}`);
         }
         break;
       default:
         targetDays = [this.getDayName(today)]; // Default to today
-        console.log(`📅 Default to today: ${this.getDayName(today)}`);
     }
 
-    console.log(`🎯 Target days for filtering: ${targetDays.join(', ')}`);
     return targetDays;
   }
 

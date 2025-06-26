@@ -9,8 +9,8 @@ interface AppContextType {
   setUserBelt: (belt: BeltType) => void;
   selectedLocation: string;
   setSelectedLocation: (location: string) => void;
-  favorites: Set<number>;
-  toggleFavorite: (id: number) => void;
+  favorites: Set<string>;
+  toggleFavorite: (id: string) => void;
   filters: Filters;
   updateFilters: (filters: Partial<Filters>) => void;
   showSideMenu: boolean;
@@ -24,7 +24,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [userBelt, setUserBelt] = useState<BeltType>('blue');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showSideMenu, setShowSideMenu] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     radius: '',
@@ -38,7 +38,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const loadAppData = async () => {
       try {
         const savedBelt = await storageService.getItem<BeltType>('userBelt');
-        const savedFavorites = await storageService.getItem<number[]>('favorites');
+        const savedFavorites = await storageService.getItem<string[]>('favorites');
         const savedLocation = await storageService.getItem<string>('selectedLocation');
 
         if (savedBelt) setUserBelt(savedBelt);
@@ -68,7 +68,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     saveLocation();
   }, [selectedLocation]);
 
-  const toggleFavorite = async (id: number) => {
+  const toggleFavorite = async (id: string) => {
     const newFavorites = new Set(favorites);
     if (newFavorites.has(id)) {
       newFavorites.delete(id);

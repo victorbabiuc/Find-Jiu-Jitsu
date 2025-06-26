@@ -41,7 +41,7 @@ const SavedScreen: React.FC = () => {
         setLoading(true);
         // Get all gyms from API and filter by favorites
         const allGyms = await apiService.getOpenMats('Tampa'); // We'll need to handle multiple locations
-        const saved = allGyms.filter(gym => favorites.has(parseInt(gym.id)));
+        const saved = allGyms.filter(gym => favorites.has(gym.id));
         setSavedGyms(saved);
       } catch (error) {
         console.error('Error fetching saved gyms:', error);
@@ -65,7 +65,7 @@ const SavedScreen: React.FC = () => {
   };
 
   const handleHeartPress = (gym: OpenMat) => {
-    toggleFavorite(parseInt(gym.id));
+    toggleFavorite(gym.id);
   };
 
   const getPriceDisplay = (matFee: number) => {
@@ -212,7 +212,7 @@ const SavedScreen: React.FC = () => {
           visible={modalVisible}
           onClose={handleCloseModal}
           onHeartPress={() => handleHeartPress(selectedGym)}
-          isFavorited={favorites.has(parseInt(selectedGym.id))}
+          isFavorited={favorites.has(selectedGym.id)}
         />
       )}
     </SafeAreaView>
