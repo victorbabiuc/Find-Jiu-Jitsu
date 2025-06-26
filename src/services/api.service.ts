@@ -1,4 +1,5 @@
 import { OpenMat, User, Filters } from '../types';
+import { githubDataService } from './github-data.service';
 
 // Mock data for Tampa gyms
 const mockTampaGyms: OpenMat[] = [
@@ -244,15 +245,32 @@ class ApiService {
   }
 
   async getOpenMats(location: string, filters?: Partial<Filters>): Promise<OpenMat[]> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For now, return mock data based on location
-    if (location.toLowerCase().includes('austin')) {
-      return mockAustinGyms;
+    try {
+      // Determine city from location string
+      const city = location.toLowerCase().includes('austin') ? 'austin' : 
+                   location.toLowerCase().includes('tampa') ? 'tampa' : 'austin';
+      
+      console.log(`🌐 Attempting to fetch ${city} data from GitHub...`);
+      
+      // Try GitHub service first
+      const githubData = await githubDataService.getGymData(city);
+      
+      console.log(`✅ Successfully loaded ${githubData.length} gyms from GitHub for ${city}`);
+      console.log('📍 GitHub data source active');
+      
+      return githubData;
+      
+    } catch (error) {
+      console.log('❌ GitHub service failed, falling back to mock data:', (error as Error).message);
+      console.log('📍 Using mock data source');
+      
+      // Fallback to mock data
+      if (location.toLowerCase().includes('austin')) {
+        return mockAustinGyms;
+      }
+      
+      return mockTampaGyms;
     }
-    
-    return mockTampaGyms;
   }
 
   async updateProfile(userId: string, profile: Partial<User>): Promise<User> {
