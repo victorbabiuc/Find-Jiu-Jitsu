@@ -9,7 +9,6 @@ node_modules/
 .env
 # iOS build artifacts
 ios/Pods/
-ios/Podfile.lock
 # Android build artifacts
 android/.gradle/
 android/app/build/
