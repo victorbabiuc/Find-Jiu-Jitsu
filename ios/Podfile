@@ -43,11 +43,12 @@ target 'OpenMatFinder' do
   )
 
   post_install do |installer|
+    # Standard React Native post-install requirements
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
+      :ccache_enabled => false
     )
 
     # This is necessary for Xcode 14, because it signs resource bundles by default
