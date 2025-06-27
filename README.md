@@ -8,6 +8,57 @@ Replace the entire README.md file with this updated, streamlined version that fo
 
 A React Native mobile app helping Brazilian Jiu-Jitsu practitioners find open mat training sessions with **dynamic data updates from GitHub**.
 
+## 📁 Project Structure & Location
+
+### **Current Project Path:**
+`/Users/vik/Documents/Startup/VibeCoding/OpenMatFinder/`
+
+### **Important Path Notes:**
+- **No spaces in path** - Required for React Native/Expo build scripts
+- **Previous location had spaces** which caused build failures
+- **All relative paths preserved** during folder rename
+
+### **Directory Structure:**
+```
+VibeCoding/
+└── OpenMatFinder/
+├── data/                  # GitHub CSV data files
+│   ├── austin-gyms.csv    # Austin gym data (24 gyms)
+│   └── tampa-gyms.csv     # Tampa gym data (14 gyms)
+├── src/
+│   ├── screens/           # All screen components
+│   ├── services/          # API & GitHub data service
+│   ├── contexts/          # Auth, Theme, App contexts
+│   ├── navigation/        # Navigation configuration
+│   ├── types/             # TypeScript interfaces
+│   └── utils/             # Constants and belt colors
+├── ios/                   # Native iOS project
+├── assets/                # App icons and images
+├── eas.json              # EAS Build configuration
+└── app.json              # Expo configuration
+```
+
+### **Development Commands:**
+```bash
+# Navigate to project
+cd "/Users/vik/Documents/Startup/VibeCoding/OpenMatFinder"
+
+# Start development server
+npx expo start
+
+# iOS development
+npx expo run:ios
+
+# Build for App Store
+npx eas-cli build -p ios --profile production
+```
+
+### **Build Requirements:**
+- ✅ Path must not contain spaces (fixed in current location)
+- ✅ Node.js and npm installed
+- ✅ Xcode for iOS development
+- ✅ Apple Developer Account for App Store submission
+
 ## 🚀 Project Status
 
 **✅ 100% Functional - Ready for App Store Submission**
@@ -168,4 +219,3 @@ Dynamic UI theming based on user's BJJ belt level:
 **Built with ❤️ for the BJJ community**
 
 Remove all the redundant sections about installation details, long feature lists, environment variables, manual testing checklists, and contribution guidelines. Focus on what matters: the GitHub integration, the data architecture, and the key differentiators.
-``
