@@ -8,28 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		1EAD241EF0BC6C7FE7304A02 /* libPods-OpenMatFinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 99BC0F9B3CD76429CF845C89 /* libPods-OpenMatFinder.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		B32544D6AD337D0E8FC80C56 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABCEC07BE3B6387E1CE3EA1 /* ExpoModulesProvider.swift */; };
+		73FC5D778FDA0E95EDB72DCA /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB99588EEBCEAD8CDF0F6E0 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		CF1A87A18C56A54A4FFADE4F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F563FA6EFED3F226EF4499B1 /* PrivacyInfo.xcprivacy */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		F4F394C6C5F09AD516646773 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D0D425E58CDF5428BCE28454 /* PrivacyInfo.xcprivacy */; };
+		FC3B2532E9C769610ED43668 /* libPods-OpenMatFinder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB645106CB0CFAAA3EE8C36E /* libPods-OpenMatFinder.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0ABCEC07BE3B6387E1CE3EA1 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-OpenMatFinder/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* OpenMatFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenMatFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = OpenMatFinder/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = OpenMatFinder/Info.plist; sourceTree = "<group>"; };
-		34D24699E89C9335E25E8B16 /* Pods-OpenMatFinder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenMatFinder.release.xcconfig"; path = "Target Support Files/Pods-OpenMatFinder/Pods-OpenMatFinder.release.xcconfig"; sourceTree = "<group>"; };
-		84815F452200F3028D0ADE86 /* Pods-OpenMatFinder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenMatFinder.debug.xcconfig"; path = "Target Support Files/Pods-OpenMatFinder/Pods-OpenMatFinder.debug.xcconfig"; sourceTree = "<group>"; };
-		99BC0F9B3CD76429CF845C89 /* libPods-OpenMatFinder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OpenMatFinder.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2482A29D341BE5B96AC52434 /* Pods-OpenMatFinder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenMatFinder.release.xcconfig"; path = "Target Support Files/Pods-OpenMatFinder/Pods-OpenMatFinder.release.xcconfig"; sourceTree = "<group>"; };
+		9834C5F89A33E90B79353718 /* Pods-OpenMatFinder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenMatFinder.debug.xcconfig"; path = "Target Support Files/Pods-OpenMatFinder/Pods-OpenMatFinder.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = OpenMatFinder/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		D0D425E58CDF5428BCE28454 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = OpenMatFinder/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = OpenMatFinder/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* OpenMatFinder-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "OpenMatFinder-Bridging-Header.h"; path = "OpenMatFinder/OpenMatFinder-Bridging-Header.h"; sourceTree = "<group>"; };
-		F563FA6EFED3F226EF4499B1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = OpenMatFinder/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		FB645106CB0CFAAA3EE8C36E /* libPods-OpenMatFinder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OpenMatFinder.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCB99588EEBCEAD8CDF0F6E0 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-OpenMatFinder/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EAD241EF0BC6C7FE7304A02 /* libPods-OpenMatFinder.a in Frameworks */,
+				FC3B2532E9C769610ED43668 /* libPods-OpenMatFinder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,7 +53,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				F563FA6EFED3F226EF4499B1 /* PrivacyInfo.xcprivacy */,
+				D0D425E58CDF5428BCE28454 /* PrivacyInfo.xcprivacy */,
 			);
 			name = OpenMatFinder;
 			sourceTree = "<group>";
@@ -62,25 +62,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				99BC0F9B3CD76429CF845C89 /* libPods-OpenMatFinder.a */,
+				FB645106CB0CFAAA3EE8C36E /* libPods-OpenMatFinder.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4A2B0E19AF3AD563464B5BAC /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				7995348310EF15B1CB3CCBCE /* OpenMatFinder */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		7995348310EF15B1CB3CCBCE /* OpenMatFinder */ = {
-			isa = PBXGroup;
-			children = (
-				0ABCEC07BE3B6387E1CE3EA1 /* ExpoModulesProvider.swift */,
-			);
-			name = OpenMatFinder;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -97,8 +81,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				F9D1925FCE098D32B094BB11 /* Pods */,
-				4A2B0E19AF3AD563464B5BAC /* ExpoModulesProviders */,
+				B1C97A7235C59DA15F43428E /* Pods */,
+				A2602DF23B1D61B415EBAA56 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -113,6 +97,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A2602DF23B1D61B415EBAA56 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				F86E0523371EEE42163755F2 /* OpenMatFinder */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		B1C97A7235C59DA15F43428E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9834C5F89A33E90B79353718 /* Pods-OpenMatFinder.debug.xcconfig */,
+				2482A29D341BE5B96AC52434 /* Pods-OpenMatFinder.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,14 +123,12 @@
 			path = OpenMatFinder/Supporting;
 			sourceTree = "<group>";
 		};
-		F9D1925FCE098D32B094BB11 /* Pods */ = {
+		F86E0523371EEE42163755F2 /* OpenMatFinder */ = {
 			isa = PBXGroup;
 			children = (
-				84815F452200F3028D0ADE86 /* Pods-OpenMatFinder.debug.xcconfig */,
-				34D24699E89C9335E25E8B16 /* Pods-OpenMatFinder.release.xcconfig */,
+				FCB99588EEBCEAD8CDF0F6E0 /* ExpoModulesProvider.swift */,
 			);
-			name = Pods;
-			path = Pods;
+			name = OpenMatFinder;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,13 +139,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "OpenMatFinder" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				A561835E51B16A0C019B5F62 /* [Expo] Configure project */,
+				CFC52C0B917B81686EA3E09D /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				3E5F423667C828F2DB7A87DD /* [CP] Embed Pods Frameworks */,
+				5745814D53DBD6614654416B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -163,7 +162,8 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1130;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				CF1A87A18C56A54A4FFADE4F /* PrivacyInfo.xcprivacy in Resources */,
+				F4F394C6C5F09AD516646773 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,7 +240,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		3E5F423667C828F2DB7A87DD /* [CP] Embed Pods Frameworks */ = {
+		5745814D53DBD6614654416B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -292,7 +292,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OpenMatFinder/Pods-OpenMatFinder-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A561835E51B16A0C019B5F62 /* [Expo] Configure project */ = {
+		CFC52C0B917B81686EA3E09D /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -319,7 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				B32544D6AD337D0E8FC80C56 /* ExpoModulesProvider.swift in Sources */,
+				73FC5D778FDA0E95EDB72DCA /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,7 +328,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 84815F452200F3028D0ADE86 /* Pods-OpenMatFinder.debug.xcconfig */;
+			baseConfigurationReference = 9834C5F89A33E90B79353718 /* Pods-OpenMatFinder.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -364,7 +364,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 34D24699E89C9335E25E8B16 /* Pods-OpenMatFinder.release.xcconfig */;
+			baseConfigurationReference = 2482A29D341BE5B96AC52434 /* Pods-OpenMatFinder.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -415,6 +415,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -422,8 +423,10 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = N7K748277K;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -481,6 +484,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -488,8 +492,10 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				DEVELOPMENT_TEAM = N7K748277K;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -511,6 +517,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
