@@ -1,12 +1,22 @@
+## 🎉 App Store Status
+- **Submitted for Review**: June 27, 2025
+- **Status**: Waiting for Review
+- **Version**: 1.0.0 (Build 9)
+- **App Name**: Jiu Jitsu Open Mat Finder
+- **Bundle ID**: com.anonymous.OpenMatFinder
+
+## ✅ Recent Achievements
+- Successfully fixed EAS build issues with hardcoded paths
+- Created custom Ruby script (ios/fix-expo-paths.rb) to handle path replacements
+- Submitted first version to App Store
+- Currently supporting Austin and Tampa locations
+
 # 📝 **Streamlined README with GitHub Integration**
-
-**Cursor Prompt:**
-```
-Replace the entire README.md file with this updated, streamlined version that focuses on our key features and removes redundancy:
-
 # 🥋 Open Mat Finder
 
 A React Native mobile app helping Brazilian Jiu-Jitsu practitioners find open mat training sessions with **dynamic data updates from GitHub**.
+
+> **Note:** The app is now pending App Store review as of June 27, 2025. The EAS build issues caused by hardcoded paths have been resolved using a custom Ruby script (`ios/fix-expo-paths.rb`). Please refer to this script for future path-related build issues. Outdated information about build failures has been removed.
 
 ## 📁 Project Structure & Location
 
