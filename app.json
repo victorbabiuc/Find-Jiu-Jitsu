@@ -15,14 +15,16 @@
     "ios": {
       "icon": "./assets/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.OpenMatFinder"
+      "bundleIdentifier": "com.victorbabiuc.openmatfinder",
+      "buildNumber": "10"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.victorbabiuc.openmatfinder"
     },
     "web": {
       "favicon": "./assets/favicon.png"
