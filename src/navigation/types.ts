@@ -22,7 +22,7 @@ export type FindStackParamList = {
   Results: { 
     location: string;
     dateSelection?: string;
-    dates?: Date[];
+    dates?: string[];
   };
 };
 

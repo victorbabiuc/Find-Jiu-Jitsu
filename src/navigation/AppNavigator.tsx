@@ -32,7 +32,7 @@ const FindStack = createStackNavigator<FindStackParamList>();
 // Find Stack Navigator (Location → TimeSelection → Results)
 const FindStackNavigator = () => {
   const { theme } = useTheme();
-  const { hideLoading } = useLoading();
+  const { showTransitionalLoading, hideLoading } = useLoading();
   
   return (
     <FindStack.Navigator
@@ -48,7 +48,19 @@ const FindStackNavigator = () => {
         },
       }}
       screenListeners={{
-        focus: () => {
+        beforeRemove: (e) => {
+          // Show transitional loading when navigating away from a screen
+          if (e.target.includes('Location')) {
+            showTransitionalLoading("Finding your next roll...", 1500);
+          } else if (e.target.includes('TimeSelection')) {
+            showTransitionalLoading("Discovering open mat sessions...", 2000);
+          }
+        },
+        focus: (e) => {
+          // Show transitional loading when focusing on Results screen (needs data)
+          if (e.target.includes('Results')) {
+            showTransitionalLoading("Discovering open mat sessions...", 2000);
+          }
           // Hide loading when any screen in the Find stack is focused
           hideLoading();
         },
@@ -81,7 +93,7 @@ const MainTabNavigator = () => {
   const { userBelt } = useApp();
   const { theme } = useTheme();
   const beltColor = beltColors[userBelt];
-  const { showLoading, hideLoading } = useLoading();
+  const { showTransitionalLoading, hideLoading } = useLoading();
 
   return (
     <MainTabs.Navigator
@@ -119,8 +131,15 @@ const MainTabNavigator = () => {
       })}
       screenListeners={{
         tabPress: (e) => {
-          // Show loading immediately
-          showLoading();
+          // Show transitional loading for tab changes
+          const routeName = e.target.split('-')[0];
+          if (routeName.includes('Home')) {
+            showTransitionalLoading("Loading your dashboard...", 1000);
+          } else if (routeName.includes('Find')) {
+            showTransitionalLoading("Preparing to find gyms...", 1000);
+          } else if (routeName.includes('Favorites')) {
+            showTransitionalLoading("Loading your favorites...", 1000);
+          }
         },
         focus: () => {
           // Hide loading when tab is focused (navigation complete)

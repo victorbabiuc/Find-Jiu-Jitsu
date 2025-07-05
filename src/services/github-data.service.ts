@@ -35,6 +35,8 @@ class GitHubDataService {
    * @returns Promise<OpenMat[]> - Array of gym data
    */
   async getGymData(location: string, forceRefresh: boolean = false): Promise<OpenMat[]> {
+    console.log('�� GitHubDataService: Fetching data for', location);
+    
     try {
       const normalizedLocation = location.toLowerCase();
       
@@ -42,6 +44,7 @@ class GitHubDataService {
       if (!forceRefresh) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
+          console.log('✅ GitHubDataService: Using cached data -', cachedData.length, 'gyms');
           return cachedData;
         }
       }
@@ -49,22 +52,24 @@ class GitHubDataService {
       // Fetch fresh data from GitHub
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
       const parsedData = this.parseCSVToOpenMats(csvData);
+      console.log('✅ GitHubDataService: Fresh data loaded -', parsedData.length, 'gyms');
       
       // Cache the new data
       await this.cacheData(normalizedLocation, parsedData);
       
       return parsedData;
     } catch (error) {
-      console.error(`Error fetching gym data for ${location}:`, error);
+      console.error(`❌ GitHubDataService: Error fetching data for ${location}:`, error);
       
       // Fallback to cached data if available
       const cachedData = await this.getCachedData(location.toLowerCase());
       if (cachedData) {
+        console.log('✅ GitHubDataService: Using fallback cached data -', cachedData.length, 'gyms');
         return cachedData;
       }
       
       // Return empty array if no cached data available
-      console.warn(`No cached data available for ${location}, returning empty array`);
+      console.warn(`⚠️ GitHubDataService: No data available for ${location}`);
       return [];
     }
   }

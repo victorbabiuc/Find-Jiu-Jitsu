@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
+import { useLoading } from '../context/LoadingContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
@@ -23,6 +24,7 @@ const { width } = Dimensions.get('window');
 const SavedScreen: React.FC = () => {
   const { theme } = useTheme();
   const { favorites, toggleFavorite, userBelt } = useApp();
+  const { showTransitionalLoading } = useLoading();
   const navigation = useMainTabNavigation();
   const beltColor = beltColors[userBelt];
   
@@ -37,6 +39,9 @@ const SavedScreen: React.FC = () => {
   // Fetch saved gyms data
   useEffect(() => {
     const fetchSavedGyms = async () => {
+      // Show transitional loading for data fetching
+      showTransitionalLoading("Loading your favorites...", 1500);
+      
       try {
         setLoading(true);
         // Get all gyms from API and filter by favorites
@@ -52,7 +57,7 @@ const SavedScreen: React.FC = () => {
     };
 
     fetchSavedGyms();
-  }, [favorites]);
+  }, [favorites, showTransitionalLoading]);
 
   const handleGymPress = (gym: OpenMat) => {
     setSelectedGym(gym);
@@ -102,15 +107,9 @@ const SavedScreen: React.FC = () => {
     navigation.navigate('Find', { screen: 'Location' });
   };
 
-  // Show loading state
+  // Show loading state - removed in favor of transitional loading
   if (loading) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text.primary }]}>Loading saved gyms...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return null; // Let transitional loading handle this
   }
 
   return (

@@ -30,6 +30,9 @@ export interface User {
     distance: number;
     openMats: OpenMatSession[];
     matFee: number;
+    dropInFee?: number; // Optional field for drop-in class fees
+    website?: string; // Optional website URL
+    instructor?: string; // Optional instructor name
   }
   
   export interface OpenMatSession {

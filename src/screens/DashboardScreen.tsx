@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
@@ -16,51 +17,23 @@ import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
 import { SafeAreaView as SafeAreaViewRN } from 'react-native-safe-area-context';
+import { apiService } from '../services';
 
 const { width } = Dimensions.get('window');
 
-// Mock data for recently viewed gyms
-const mockRecentlyViewed: OpenMat[] = [
-  {
-    id: '1',
-    name: 'STJJ',
-    address: 'Tampa, FL',
-    distance: 5.2,
-    openMats: [
-      { day: 'Sunday', time: '9:00 AM', type: 'gi' },
-      { day: 'Thursday', time: '5:00 PM', type: 'nogi' }
-    ],
-    matFee: 0
-  },
-  {
-    id: '2',
-    name: 'RMNU',
-    address: 'Tampa, FL',
-    distance: 7.1,
-    openMats: [
-      { day: 'Wednesday', time: '6:00 PM', type: 'both' }
-    ],
-    matFee: 0
-  },
-  {
-    id: '3',
-    name: 'Gracie Humaita',
-    address: 'Tampa, FL',
-    distance: 4.8,
-    openMats: [
-      { day: 'Tuesday', time: '6:30 PM', type: 'both' }
-    ],
-    matFee: 0
-  }
-];
+// TODO: v2.0 - Replace with user's home gym info
 
 const DashboardScreen: React.FC = () => {
   const { user } = useAuth();
   const { theme, themeMode, toggleTheme } = useTheme();
-  const { userBelt } = useApp();
+  const { userBelt, selectedLocation, favorites, toggleFavorite } = useApp();
   const navigation = useMainTabNavigation();
   
   const beltColor = beltColors[userBelt];
+  
+  // State for next open mat
+  const [nextOpenMat, setNextOpenMat] = useState<OpenMat | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const handleFindMats = () => {
     navigation.navigate('Find', { screen: 'Location' });
@@ -74,26 +47,214 @@ const DashboardScreen: React.FC = () => {
     navigation.navigate('Find', { screen: 'TimeSelection' });
   };
 
+  // Helper functions for next open mat logic
+  const getCurrentDay = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[new Date().getDay()];
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const parseTime = (timeStr: string) => {
+    const time = timeStr.toUpperCase();
+    const match = time.match(/(\d+):?(\d*)\s*(AM|PM)/);
+    if (!match) return 0;
+    
+    let hours = parseInt(match[1]);
+    const minutes = match[2] ? parseInt(match[2]) : 0;
+    const period = match[3];
+    
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    
+    return hours * 60 + minutes;
+  };
+
+  const isTimeInFuture = (day: string, time: string) => {
+    const currentDay = getCurrentDay();
+    const currentTime = parseTime(getCurrentTime());
+    const sessionTime = parseTime(time);
+    
+    const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDayIndex = dayOrder.indexOf(currentDay);
+    const sessionDayIndex = dayOrder.indexOf(day);
+    
+    // If session is today, check if time is in future
+    if (currentDayIndex === sessionDayIndex) {
+      return sessionTime > currentTime;
+    }
+    
+    // If session is in future days, it's valid
+    return sessionDayIndex > currentDayIndex;
+  };
+
+  const findNextOpenMat = (gyms: OpenMat[]) => {
+    const validSessions: Array<{ gym: OpenMat; session: any; dayIndex: number; timeMinutes: number }> = [];
+    
+    const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    gyms.forEach(gym => {
+      gym.openMats.forEach(session => {
+        if (isTimeInFuture(session.day, session.time)) {
+          const dayIndex = dayOrder.indexOf(session.day);
+          const timeMinutes = parseTime(session.time);
+          validSessions.push({ gym, session, dayIndex, timeMinutes });
+        }
+      });
+    });
+    
+    // Sort by day first, then by time
+    validSessions.sort((a, b) => {
+      if (a.dayIndex !== b.dayIndex) {
+        return a.dayIndex - b.dayIndex;
+      }
+      return a.timeMinutes - b.timeMinutes;
+    });
+    
+    if (validSessions.length > 0) {
+      const nextSession = validSessions[0];
+      // Create a gym object with only the next session
+      return {
+        ...nextSession.gym,
+        openMats: [nextSession.session]
+      };
+    }
+    
+    return null;
+  };
+
+  // Fetch and find next open mat
+  useEffect(() => {
+    const fetchNextOpenMat = async () => {
+      try {
+        setLoading(true);
+        const location = selectedLocation || 'Tampa';
+        const allGyms = await apiService.getOpenMats(location);
+        const next = findNextOpenMat(allGyms);
+        setNextOpenMat(next);
+      } catch (error) {
+        console.error('Error fetching next open mat:', error);
+        setNextOpenMat(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNextOpenMat();
+  }, [selectedLocation]);
+
   const handleGymPress = (gym: OpenMat) => {
     // Navigate to Find tab first, then to results
-    navigation.navigate('Find', { screen: 'Results', params: { location: 'Tampa' } });
+    const location = selectedLocation || 'Tampa';
+    navigation.navigate('Find', { screen: 'Results', params: { location } });
   };
 
-  const formatTime = (openMats: any[]) => {
-    return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
+  // Helper functions for gym card display
+  const formatTimeRange = (sessionTime: string) => {
+    // Check if the time already contains a range (has a dash/hyphen)
+    if (sessionTime.includes('-') || sessionTime.includes('–')) {
+      // It's already a time range, format it properly
+      const parts = sessionTime.split(/[-–]/).map(part => part.trim());
+      if (parts.length >= 2) {
+        const startTime = formatSingleTime(parts[0]);
+        const endTime = formatSingleTime(parts[1]);
+        return `${startTime} - ${endTime}`;
+      }
+    }
+    
+    // It's a single time, add 1 hour
+    const formattedStart = formatSingleTime(sessionTime);
+    const endTime = addOneHour(sessionTime);
+    return `${formattedStart} - ${endTime}`;
   };
 
-  const formatPrice = (matFee: number) => {
-    return matFee === 0 ? 'Free' : `$${matFee}`;
+  const formatSingleTime = (time: string) => {
+    // Handle various time formats and standardize them
+    const cleanTime = time.trim().toLowerCase();
+    
+    // Handle formats like "11am", "6pm", "5:00 PM", etc.
+    let hour, minute = '00', period;
+    
+    // Match patterns like "11am", "6pm"
+    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
+    if (simpleMatch) {
+      hour = parseInt(simpleMatch[1]);
+      period = simpleMatch[2].toUpperCase();
+    } else {
+      // Match patterns like "5:00 PM", "11:30 AM"
+      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
+      if (detailedMatch) {
+        hour = parseInt(detailedMatch[1]);
+        minute = detailedMatch[2];
+        period = detailedMatch[3].toUpperCase();
+      } else {
+        // Fallback - return as is
+        return time;
+      }
+    }
+    
+    // Format consistently
+    return `${hour}:${minute} ${period}`;
   };
 
-  const getMatTypeDisplay = (openMats: any[]) => {
-    const types = openMats.map(mat => mat.type);
-    if (types.includes('both')) return 'Gi & No-Gi';
-    if (types.includes('gi') && types.includes('nogi')) return 'Gi & No-Gi';
-    if (types.includes('gi')) return 'Gi Only';
-    if (types.includes('nogi')) return 'No-Gi Only';
-    return 'Mixed';
+  const addOneHour = (time: string) => {
+    // Parse the time and add 1 hour
+    const cleanTime = time.trim().toLowerCase();
+    
+    let hour, minute = '00', period;
+    
+    // Match patterns like "11am", "6pm"
+    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
+    if (simpleMatch) {
+      hour = parseInt(simpleMatch[1]);
+      period = simpleMatch[2].toUpperCase();
+    } else {
+      // Match patterns like "5:00 PM", "11:30 AM"
+      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
+      if (detailedMatch) {
+        hour = parseInt(detailedMatch[1]);
+        minute = detailedMatch[2];
+        period = detailedMatch[3].toUpperCase();
+      } else {
+        // Fallback - return as is
+        return time;
+      }
+    }
+    
+    // Add 1 hour
+    hour += 1;
+    
+    // Handle 12-hour format
+    if (hour === 13) hour = 1;
+    if (hour === 12) {
+      return `12:${minute} ${period === 'AM' ? 'PM' : 'AM'}`;
+    }
+    
+    return `${hour}:${minute} ${period}`;
+  };
+
+  const getSessionTypeWithIcon = (type: string) => {
+    switch (type) {
+      case 'gi':
+        return 'Gi 🥋';
+      case 'nogi':
+        return 'No-Gi 👕';
+      case 'both':
+        return 'Gi & No-Gi 🥋👕';
+      default:
+        return 'Open Mat 🥋👕';
+    }
+  };
+
+  const handleHeartPress = (gym: OpenMat) => {
+    toggleFavorite(gym.id);
   };
 
   return (
@@ -181,63 +342,123 @@ const DashboardScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Recently Viewed Gyms */}
+      {/* Next Open Mat */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-          Recently Viewed
+          Next Open Mat
         </Text>
         
-        {mockRecentlyViewed.map((gym) => (
-          <TouchableOpacity
-            key={gym.id}
-            style={[styles.gymCard, { backgroundColor: theme.surface }]}
-            onPress={() => handleGymPress(gym)}
-          >
-            <View style={styles.gymHeader}>
-              <Text style={[styles.gymName, { color: theme.text.primary }]}>
-                {gym.name}
-              </Text>
-              <View style={styles.gymRating}>
-                <Text style={[styles.ratingText, { color: theme.text.secondary }]}>
-                  📍 {gym.distance} mi
+        {loading ? (
+          <View style={[styles.loadingCard, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.loadingText, { color: theme.text.secondary }]}>
+              Finding your next session...
+            </Text>
+          </View>
+        ) : nextOpenMat ? (
+          <View style={[styles.card, { backgroundColor: theme.surface }]}>
+            {/* Header: Gym Name + Heart Button */}
+            <View style={styles.cardHeader}>
+              <Text style={styles.gymName}>{nextOpenMat.name}</Text>
+              <TouchableOpacity 
+                style={styles.heartButton}
+                onPress={() => handleHeartPress(nextOpenMat)}
+              >
+                <Text style={styles.heartIcon}>
+                  {favorites.has(nextOpenMat.id) ? '♥' : '♡'}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
-            
-            <View style={styles.gymDetails}>
-              <View style={styles.gymInfo}>
-                <Text style={[styles.gymInfoText, { color: theme.text.secondary }]}>
-                  🕐 {formatTime(gym.openMats)}
-                </Text>
-                <Text style={[styles.gymInfoText, { color: theme.text.secondary }]}>
-                  📍 {gym.address}
-                </Text>
-                <Text style={[styles.gymInfoText, { color: theme.text.secondary }]}>
-                  💰 {formatPrice(gym.matFee)}
-                </Text>
-              </View>
-              
-              <View style={styles.gymStats}>
-                <Text style={[styles.attendeesText, { color: theme.text.secondary }]}>
-                  🥋 {gym.openMats.length} sessions
-                </Text>
-                <Text style={[styles.skillText, { color: theme.text.tertiary }]}>
-                  {getMatTypeDisplay(gym.openMats)}
-                </Text>
-              </View>
-            </View>
-            
-            <View style={styles.gymTags}>
-              {gym.openMats.map((session, index) => (
-                <View key={index} style={[styles.tag, { backgroundColor: beltColor.surface }]}>
-                  <Text style={[styles.tagText, { color: beltColor.primary }]}>
-                    {session.type === 'both' ? 'Gi & No-Gi' : session.type === 'gi' ? 'Gi' : 'No-Gi'}
+
+            {/* Session Type Subtitle */}
+            <Text style={styles.sessionSubtitle}>Open Mat Session</Text>
+
+            {/* Sessions Section */}
+            <View style={styles.sessionsSection}>
+              {nextOpenMat.openMats.map((session, index) => (
+                <View key={index} style={styles.sessionBlock}>
+                  <Text style={styles.dayHeader}>
+                    {session.day.toUpperCase()}
+                  </Text>
+                  <Text style={styles.timeRange}>
+                    {formatTimeRange(session.time)} • {getSessionTypeWithIcon(session.type)}
                   </Text>
                 </View>
               ))}
             </View>
-          </TouchableOpacity>
-        ))}
+
+            {/* Info Section */}
+            <View style={styles.infoSection}>
+              {/* Fees Section */}
+              <View style={styles.feesSection}>
+                <View style={styles.feesHeader}>
+                  <Text style={styles.infoIcon}>💵</Text>
+                  <Text style={styles.infoText}>Fees</Text>
+                </View>
+                <View style={styles.feeItem}>
+                  <Text style={styles.feeLabel}>Open mat - </Text>
+                  <Text style={styles.feeValue}>
+                    {nextOpenMat.matFee === 0 ? 'Free' : nextOpenMat.matFee ? `$${nextOpenMat.matFee}` : '?/unknown'}
+                  </Text>
+                </View>
+                <View style={styles.feeItem}>
+                  <Text style={styles.feeLabel}>Class Drop in - </Text>
+                  <Text style={styles.feeValue}>
+                    {nextOpenMat.dropInFee === 0 ? 'Free' : nextOpenMat.dropInFee ? `$${nextOpenMat.dropInFee}` : '?/unknown'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoIcon}>📍</Text>
+                <Text style={styles.infoText}>{nextOpenMat.distance} miles • {selectedLocation || 'Tampa'}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoIcon}>⚠️</Text>
+                <Text style={styles.infoText}>Waiver required on arrival</Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => {
+                  Alert.alert('Call Gym', 'Call functionality coming soon!');
+                }}
+              >
+                <Text style={styles.buttonText}>📞 Call</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.middleButton]}
+                onPress={() => handleHeartPress(nextOpenMat)}
+              >
+                <Text style={styles.buttonText}>
+                  {favorites.has(nextOpenMat.id) ? '💾 Saved' : '💾 Save'}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => {
+                  Alert.alert('Get Directions', 'Directions functionality coming soon!');
+                }}
+              >
+                <Text style={styles.buttonText}>🧭 Go</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.emptyCard, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.emptyText, { color: theme.text.secondary }]}>
+              No upcoming open mats found
+            </Text>
+            <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
+              Check back later or search for sessions
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Bottom Spacing */}
@@ -313,70 +534,156 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  gymCard: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  // New gym card styles (matching ResultsScreen)
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: '#F0F0F0',
+    marginBottom: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  gymHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  gymName: {
-    fontSize: 16,
-    fontWeight: '600',
-    flex: 1,
-    marginRight: 8,
-  },
-  gymRating: {
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  gymDetails: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  gymInfo: {
+  gymName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111518',
     flex: 1,
   },
-  gymInfoText: {
+  heartButton: {
+    padding: 8,
+  },
+  heartIcon: {
+    fontSize: 24,
+    color: '#FF6B6B',
+  },
+  sessionSubtitle: {
     fontSize: 14,
+    color: '#60798A',
+    fontStyle: 'italic',
+    marginBottom: 16,
+  },
+  sessionsSection: {
+    marginBottom: 20,
+  },
+  sessionBlock: {
+    marginBottom: 16,
+  },
+  dayHeader: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111518',
     marginBottom: 4,
   },
-  gymStats: {
-    alignItems: 'flex-end',
-  },
-  attendeesText: {
+  timeRange: {
     fontSize: 14,
     fontWeight: '500',
-    marginBottom: 4,
+    color: '#111518',
+    marginBottom: 2,
   },
-  skillText: {
-    fontSize: 12,
-    fontWeight: '500',
+  infoSection: {
+    marginBottom: 20,
   },
-  gymTags: {
+  feesSection: {
+    marginBottom: 16,
+  },
+  feesHeader: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  tag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+  feeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 30,
+    marginBottom: 4,
   },
-  tagText: {
-    fontSize: 12,
+  feeLabel: {
+    fontSize: 13,
+    color: '#60798A',
     fontWeight: '500',
+  },
+  feeValue: {
+    fontSize: 13,
+    color: '#111518',
+    fontWeight: '600',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoIcon: {
+    fontSize: 18,
+    marginRight: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111518',
+    flex: 1,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#F0F3F5',
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  middleButton: {
+    marginHorizontal: 6,
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111518',
+  },
+  loadingCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  emptyCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'center',
   },
   bottomSpacing: {
     height: 20,
