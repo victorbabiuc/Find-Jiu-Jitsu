@@ -29,6 +29,15 @@ Find Jiu Jitsu helps practitioners discover open mat training sessions at local 
 - **Dual Pricing** - View both open mat and drop-in fees
 - **Light Mode Only** - Simplified theme system for better consistency
 
+## 📋 Recent Updates (July 6, 2025)
+
+- ✅ **Successfully submitted v1.2.0 to App Store** - Build completed and submitted for review
+- ✅ **Fixed iOS build versioning issues** - Resolved version conflicts between app.json and native iOS files
+- ✅ **App name changed to "Find Jiu Jitsu"** - Complete rebranding throughout the application
+- ✅ **Dark mode removed** - Simplified to light mode only for better consistency
+- ✅ **Updated splash screen** - Fixed belt animation positioning and asset references
+- ✅ **Repository renamed** - GitHub repository updated from "OpenMatFinder" to "Find-Jiu-Jitsu"
+
 ## 🛠️ Tech Stack
 
 - **Framework**: React Native with Expo
@@ -66,7 +75,7 @@ OpenMatFinder/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/OpenMatFinder.git
+git clone https://github.com/victorbabiuc/Find-Jiu-Jitsu.git
 
 # Navigate to project
 cd OpenMatFinder
@@ -145,6 +154,9 @@ The app is distributed through the iOS App Store as a free app.
 - **Bundle ID**: com.anonymous.OpenMatFinder
 - **Category**: Sports
 - **Price**: Free
+- **Latest Build**: 1.2.0 (Build 13) - July 6, 2025
+- **Submission Date**: July 6, 2025
+- **Status**: Submitted for review
 
 ## 🤝 Contributing
 
@@ -168,6 +180,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Current Version**: 1.2.0 (Build 12)  
-**App Store Status**: Ready for submission  
+**Current Version**: 1.2.0 (Build 13)  
+**App Store Status**: Submitted for review (July 6, 2025)  
 **Contact**: glootieapp@gmail.com
