@@ -2,7 +2,7 @@
 
 Your Jiu Jitsu Training Companion - Find open mat sessions at gyms near you!
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-iOS-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -19,7 +19,7 @@ Find Jiu Jitsu helps practitioners discover open mat training sessions at local 
 - **Belt Progression** - Personalize the app with your current belt rank
 - **One-Tap Actions** - Call gyms, get directions, or save with a single tap
 
-## 🎯 Version 1.1.0 Highlights
+## 🎯 Version 1.2.0 Highlights
 
 - **New App Name** - Rebranded from "Open Mat Finder" to "Find Jiu Jitsu"
 - **Premium Gym Cards** - Beautiful redesigned cards with session details
@@ -168,6 +168,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Current Version**: 1.1.0 (Build 11)  
+**Current Version**: 1.2.0 (Build 12)  
 **App Store Status**: Ready for submission  
 **Contact**: glootieapp@gmail.com
