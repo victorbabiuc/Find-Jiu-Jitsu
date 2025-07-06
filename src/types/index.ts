@@ -46,10 +46,7 @@ export interface User {
     status: 'confirmed' | 'estimated' | 'unknown';
   }
   
-  export type ThemeMode = 'light' | 'dark';
-  
   export interface Theme {
-    name: ThemeMode;
     background: string;
     surface: string;
     surfaceHover: string;

@@ -9,7 +9,7 @@ const AboutScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>About Open Mat Finder</Text>
+        <Text style={styles.title}>About Find Jiu Jitsu</Text>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your BJJ Training Companion</Text>
           <Text style={styles.sectionText}>Find open mat sessions in your area with real-time data from our GitHub integration.</Text>

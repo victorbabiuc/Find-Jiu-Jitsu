@@ -6,7 +6,6 @@ import {
   StyleSheet,
   SafeAreaView,
   Dimensions,
-  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
@@ -18,46 +17,34 @@ import { beltColors } from '../utils/constants';
 const { width, height } = Dimensions.get('window');
 
 const LoginScreen = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { userBelt } = useApp();
   const navigation = useRootNavigation();
   const { showLoading } = useLoading();
   
-  // Animation values for belt bars
-  const [animatedValues] = useState(() => 
-    Array(5).fill(0).map(() => new Animated.Value(0.3))
-  );
+  // Belt progression state
+  const [currentBeltIndex, setCurrentBeltIndex] = useState(0);
 
   const currentBeltColor = beltColors[userBelt];
   const beltTypes: Array<'white' | 'blue' | 'purple' | 'brown' | 'black'> = ['white', 'blue', 'purple', 'brown', 'black'];
 
-  // Belt bar pulse animation
+  // Belt progression animation with continuous looping
   useEffect(() => {
-    const pulseAnimation = () => {
-      const animations = animatedValues.map((value, index) => {
-        return Animated.sequence([
-          Animated.timing(value, {
-            toValue: 1,
-            duration: 300,
-            delay: index * 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(value, {
-            toValue: 0.3,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]);
-      });
-
-      Animated.parallel(animations).start(() => {
-        // Repeat animation after 3 seconds
-        setTimeout(pulseAnimation, 3000);
+    const beltProgression = () => {
+      setCurrentBeltIndex(prev => {
+        // When we reach the end (black belt), reset to white
+        if (prev >= beltTypes.length - 1) {
+          return 0;
+        }
+        return prev + 1;
       });
     };
 
-    pulseAnimation();
-  }, [animatedValues]);
+    // Start belt progression
+    const timer = setTimeout(beltProgression, 600);
+
+    return () => clearTimeout(timer);
+  }, [currentBeltIndex]);
 
   const handleGetStarted = () => {
     showLoading();
@@ -78,10 +65,10 @@ const LoginScreen = () => {
           
           {/* Title */}
           <Text style={[styles.title, { color: theme.text.primary }]}>
-            OPEN MAT FINDER
+            FIND JIU JITSU
           </Text>
           <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
-            Your JiuJitsu Training Companion
+            Your Jiu Jitsu Training Companion
           </Text>
         </View>
 
@@ -104,38 +91,31 @@ const LoginScreen = () => {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-        </View>
 
-        {/* Footer Section */}
-        <View style={styles.footer}>
-          {/* Theme Toggle */}
-          <TouchableOpacity
-            style={[styles.themeToggle, { backgroundColor: theme.surface }]}
-            onPress={toggleTheme}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.themeToggleText, { color: theme.text.secondary }]}>
-              {theme.name === 'dark' ? '☀️' : '🌙'} {theme.name === 'dark' ? 'Light' : 'Dark'} Mode
-            </Text>
-          </TouchableOpacity>
-
-          {/* Belt Animation Bars */}
+          {/* Belt progression animation positioned below the button */}
           <View style={styles.beltBarsContainer}>
             {beltTypes.map((beltType, index) => {
               const beltColor = beltColors[beltType];
+              const isActive = index <= currentBeltIndex;
+              
+              // Special handling for white belt in light mode
+              const isWhiteBeltInLightMode = beltType === 'white';
+              
               return (
-                <Animated.View
+                <View
                   key={beltType}
                   style={[
                     styles.beltBar,
                     {
-                      backgroundColor: beltColor.primary,
-                      opacity: animatedValues[index],
+                      backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
+                      opacity: isActive ? 1 : 0.3,
+                      // Add border for white belt in light mode for better visibility
+                      ...(isWhiteBeltInLightMode && {
+                        borderWidth: 1.5,
+                        borderColor: '#9CA3AF',  // More visible gray
+                      }),
                       transform: [{
-                        scale: animatedValues[index].interpolate({
-                          inputRange: [0.3, 1],
-                          outputRange: [0.8, 1.2],
-                        })
+                        scale: isActive && index === currentBeltIndex ? 1.1 : 1
                       }]
                     }
                   ]}
@@ -145,6 +125,7 @@ const LoginScreen = () => {
           </View>
         </View>
       </View>
+
       {/* More cities coming soon */}
       <Text style={styles.moreCitiesText}>More cities coming soon!</Text>
     </SafeAreaView>
@@ -158,12 +139,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    paddingTop: height * 0.1,
-    paddingBottom: 40,
+    paddingTop: height * 0.05,
+    paddingBottom: 20,
   },
   beltLogo: {
     width: 80,
@@ -171,7 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -187,18 +168,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 22,
+    marginBottom: 40,
   },
   mainContent: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 40,
   },
   getStartedButton: {
     borderRadius: 12,
@@ -211,6 +192,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    marginBottom: 30,
   },
   gradient: {
     paddingVertical: 16,
@@ -223,29 +205,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   footer: {
-    paddingBottom: 40,
     alignItems: 'center',
-  },
-  themeToggle: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    marginBottom: 24,
-  },
-  themeToggleText: {
-    fontSize: 14,
-    fontWeight: '600',
+    marginBottom: 20,
   },
   beltBarsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
   beltBar: {
-    width: 24,
-    height: 8,
-    borderRadius: 4,
+    width: 40,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 6,
   },
   moreCitiesText: {
     position: 'absolute',

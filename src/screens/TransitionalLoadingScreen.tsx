@@ -23,9 +23,6 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const beltAnimations = useRef(
-    Array(5).fill(0).map(() => new Animated.Value(0))
-  ).current;
   const textAnim = useRef(new Animated.Value(0)).current;
 
   // Belt progression state
@@ -50,17 +47,10 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
     // Belt progression animation
     const beltProgression = () => {
       if (currentBeltIndex < beltTypes.length) {
-        // Animate current belt
-        Animated.timing(beltAnimations[currentBeltIndex], {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }).start(() => {
-          // Move to next belt after a short delay
-          setTimeout(() => {
-            setCurrentBeltIndex(prev => prev + 1);
-          }, 200);
-        });
+        // Move to next belt after a short delay
+        setTimeout(() => {
+          setCurrentBeltIndex(prev => prev + 1);
+        }, 600);
       }
     };
 
@@ -85,26 +75,18 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
       clearTimeout(timer);
       clearTimeout(completeTimer);
     };
-  }, [currentBeltIndex, duration, onComplete, fadeAnim, textAnim, beltAnimations]);
+  }, [currentBeltIndex, duration, onComplete, fadeAnim, textAnim]);
 
   // Continue belt progression
   useEffect(() => {
     if (currentBeltIndex < beltTypes.length) {
       const timer = setTimeout(() => {
-        Animated.timing(beltAnimations[currentBeltIndex], {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }).start(() => {
-          setTimeout(() => {
-            setCurrentBeltIndex(prev => prev + 1);
-          }, 200);
-        });
-      }, 300);
+        setCurrentBeltIndex(prev => prev + 1);
+      }, 600);
 
       return () => clearTimeout(timer);
     }
-  }, [currentBeltIndex, beltAnimations]);
+  }, [currentBeltIndex]);
 
   return (
     <Animated.View 
@@ -137,23 +119,20 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
           const isWhiteBeltInLightMode = beltType === 'white' && theme.name === 'light';
           
           return (
-            <Animated.View
+            <View
               key={beltType}
               style={[
                 styles.beltBar,
                 {
-                  backgroundColor: beltColor.primary,
-                  opacity: beltAnimations[index],
+                  backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
+                  opacity: isActive ? 1 : 0.3,
                   // Add border for white belt in light mode for better visibility
                   ...(isWhiteBeltInLightMode && {
                     borderWidth: 1.5,
                     borderColor: '#9CA3AF',  // More visible gray
                   }),
                   transform: [{
-                    scale: beltAnimations[index].interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.8, 1.2],
-                    })
+                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
                   }]
                 }
               ]}

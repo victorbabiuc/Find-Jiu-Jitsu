@@ -17,7 +17,7 @@ import { beltColors } from '../utils/constants';
 import { useLoading } from '../context';
 
 const LocationScreen: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { userBelt, setSelectedLocation } = useApp();
   const navigation = useFindNavigation();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -136,16 +136,7 @@ const LocationScreen: React.FC = () => {
           Where do you want to train?
         </Text>
         
-        {/* Theme Toggle */}
-        <TouchableOpacity
-          style={[styles.themeToggle, { backgroundColor: theme.surface }]}
-          onPress={toggleTheme}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.themeToggleText, { color: theme.text.secondary }]}>
-            {theme.name === 'dark' ? '☀️' : '🌙'}
-          </Text>
-        </TouchableOpacity>
+
       </View>
 
       {/* Main Content */}
@@ -247,14 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
   },
-  themeToggle: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  themeToggleText: {
-    fontSize: 18,
-  },
+
   content: {
     flex: 1,
     justifyContent: 'center',

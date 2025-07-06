@@ -19,40 +19,30 @@ type BeltType = typeof beltTypes[number];
 
 const LoadingScreen: React.FC = () => {
   const { theme } = useTheme();
-  // Animation values for belt bars
-  const animatedValues = useRef(
-    Array(5).fill(0).map(() => new Animated.Value(0.3))
-  ).current;
+  
+  // Belt progression state
+  const [currentBeltIndex, setCurrentBeltIndex] = useState(0);
 
   // Message index for rotation
   const [messageIndex, setMessageIndex] = useState(() => Math.floor(Math.random() * cleverMessages.length));
 
-  // Belt bar pulse animation
+  // Belt progression animation with continuous looping
   useEffect(() => {
-    let isMounted = true;
-    const pulseAnimation = () => {
-      const animations = animatedValues.map((value, index) => {
-        return Animated.sequence([
-          Animated.timing(value, {
-            toValue: 1,
-            duration: 300,
-            delay: index * 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(value, {
-            toValue: 0.3,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]);
-      });
-      Animated.parallel(animations).start(() => {
-        if (isMounted) setTimeout(pulseAnimation, 3000);
+    const beltProgression = () => {
+      setCurrentBeltIndex(prev => {
+        // When we reach the end (black belt), reset to white
+        if (prev >= beltTypes.length - 1) {
+          return 0;
+        }
+        return prev + 1;
       });
     };
-    pulseAnimation();
-    return () => { isMounted = false; };
-  }, [animatedValues]);
+
+    // Start belt progression
+    const timer = setTimeout(beltProgression, 600);
+
+    return () => clearTimeout(timer);
+  }, [currentBeltIndex]);
 
   // Rotate clever message every 2 seconds
   useEffect(() => {
@@ -83,22 +73,31 @@ const LoadingScreen: React.FC = () => {
   return (
     <View style={dynamicStyles.container}>
       <Text style={dynamicStyles.message}>{cleverMessages[messageIndex]}</Text>
+      
+      {/* Belt progression animation positioned at bottom */}
       <View style={styles.beltBarsContainer}>
         {beltTypes.map((beltType, index) => {
           const beltColor = beltColors[beltType];
+          const isActive = index <= currentBeltIndex;
+          
+          // Special handling for white belt in light mode
+          const isWhiteBeltInLightMode = beltType === 'white' && theme.name === 'light';
+          
           return (
-            <Animated.View
+            <View
               key={beltType}
               style={[
                 styles.beltBar,
                 {
-                  backgroundColor: beltColor.primary,
-                  opacity: animatedValues[index],
+                  backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
+                  opacity: isActive ? 1 : 0.3,
+                  // Add border for white belt in light mode for better visibility
+                  ...(isWhiteBeltInLightMode && {
+                    borderWidth: 1.5,
+                    borderColor: '#9CA3AF',  // More visible gray
+                  }),
                   transform: [{
-                    scale: animatedValues[index].interpolate({
-                      inputRange: [0.3, 1],
-                      outputRange: [0.8, 1.2],
-                    })
+                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
                   }]
                 }
               ]}
@@ -112,10 +111,11 @@ const LoadingScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   beltBarsContainer: {
+    position: 'absolute',
+    bottom: 80,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 0,
   },
   beltBar: {
     width: 48,

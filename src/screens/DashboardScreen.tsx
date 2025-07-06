@@ -25,7 +25,7 @@ const { width } = Dimensions.get('window');
 
 const DashboardScreen: React.FC = () => {
   const { user } = useAuth();
-  const { theme, themeMode, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { userBelt, selectedLocation, favorites, toggleFavorite } = useApp();
   const navigation = useMainTabNavigation();
   
@@ -77,53 +77,67 @@ const DashboardScreen: React.FC = () => {
     return hours * 60 + minutes;
   };
 
-  const isTimeInFuture = (day: string, time: string) => {
-    const currentDay = getCurrentDay();
-    const currentTime = parseTime(getCurrentTime());
-    const sessionTime = parseTime(time);
-    
-    const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const currentDayIndex = dayOrder.indexOf(currentDay);
-    const sessionDayIndex = dayOrder.indexOf(day);
-    
-    // If session is today, check if time is in future
-    if (currentDayIndex === sessionDayIndex) {
-      return sessionTime > currentTime;
-    }
-    
-    // If session is in future days, it's valid
-    return sessionDayIndex > currentDayIndex;
-  };
+
 
   const findNextOpenMat = (gyms: OpenMat[]) => {
-    const validSessions: Array<{ gym: OpenMat; session: any; dayIndex: number; timeMinutes: number }> = [];
-    
     const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDay = getCurrentDay();
+    const currentTime = parseTime(getCurrentTime());
+    const currentDayIndex = dayOrder.indexOf(currentDay);
+    
+    // Collect all sessions from all gyms
+    const allSessions: Array<{ gym: OpenMat; session: any; dayIndex: number; timeMinutes: number; weekOffset: number }> = [];
     
     gyms.forEach(gym => {
       gym.openMats.forEach(session => {
-        if (isTimeInFuture(session.day, session.time)) {
-          const dayIndex = dayOrder.indexOf(session.day);
-          const timeMinutes = parseTime(session.time);
-          validSessions.push({ gym, session, dayIndex, timeMinutes });
+        const sessionDayIndex = dayOrder.indexOf(session.day);
+        const sessionTime = parseTime(session.time);
+        
+        // Calculate week offset and adjusted day index
+        let weekOffset = 0;
+        let adjustedDayIndex = sessionDayIndex;
+        
+        // If session is today, check if time is in future
+        if (sessionDayIndex === currentDayIndex) {
+          if (sessionTime > currentTime) {
+            // Session is later today
+            allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 0 });
+          }
+        } else if (sessionDayIndex > currentDayIndex) {
+          // Session is later this week
+          allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 0 });
+        } else {
+          // Session is earlier in the week, so it's next week
+          allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 1 });
         }
       });
     });
     
-    // Sort by day first, then by time
-    validSessions.sort((a, b) => {
+    // Sort by week offset first, then by day, then by time
+    allSessions.sort((a, b) => {
+      if (a.weekOffset !== b.weekOffset) {
+        return a.weekOffset - b.weekOffset;
+      }
       if (a.dayIndex !== b.dayIndex) {
         return a.dayIndex - b.dayIndex;
       }
       return a.timeMinutes - b.timeMinutes;
     });
     
-    if (validSessions.length > 0) {
-      const nextSession = validSessions[0];
-      // Create a gym object with only the next session
+    // Always return the first session (there should always be at least one)
+    if (allSessions.length > 0) {
+      const nextSession = allSessions[0];
       return {
         ...nextSession.gym,
         openMats: [nextSession.session]
+      };
+    }
+    
+    // Fallback: if somehow no sessions found, return the first gym's first session
+    if (gyms.length > 0 && gyms[0].openMats.length > 0) {
+      return {
+        ...gyms[0],
+        openMats: [gyms[0].openMats[0]]
       };
     }
     
@@ -284,16 +298,7 @@ const DashboardScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={styles.themeToggleButton}
-              activeOpacity={0.7}
-              accessibilityLabel="Toggle theme"
-            >
-              <Text style={{ fontSize: 22, color: beltColor.textOnColor }}>
-                {themeMode === 'dark' ? '☀️' : '🌙'}
-              </Text>
-            </TouchableOpacity>
+
           </View>
         </LinearGradient>
       </SafeAreaViewRN>
@@ -450,12 +455,9 @@ const DashboardScreen: React.FC = () => {
             </View>
           </View>
         ) : (
-          <View style={[styles.emptyCard, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.emptyText, { color: theme.text.secondary }]}>
-              No upcoming open mats found
-            </Text>
-            <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
-              Check back later or search for sessions
+          <View style={[styles.loadingCard, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.loadingText, { color: theme.text.secondary }]}>
+              Loading next session...
             </Text>
           </View>
         )}
@@ -693,17 +695,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  themeToggleButton: {
-    marginLeft: 16,
-    backgroundColor: 'rgba(0,0,0,0.12)',
-    borderRadius: 22,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 44,
-    minHeight: 44,
-  },
+
 });
 
 export default DashboardScreen; 

@@ -1,8 +1,8 @@
-# Privacy Policy for JiuJitsu Open Mat Finder (OpenMatFinder)
+# Privacy Policy for Find Jiu Jitsu (OpenMatFinder)
 
 **Effective Date:** June 27, 2025
 
-Thank you for using JiuJitsu Open Mat Finder ("OpenMatFinder", "the app"). Your privacy is important to us. This policy explains what information we collect, how we use it, and your rights regarding your data.
+Thank you for using Find Jiu Jitsu ("OpenMatFinder", "the app"). Your privacy is important to us. This policy explains what information we collect, how we use it, and your rights regarding your data.
 
 ## Information Collection
 - **No Personal Information Collected:**
@@ -31,8 +31,7 @@ Thank you for using JiuJitsu Open Mat Finder ("OpenMatFinder", "the app"). Your 
 ## Contact Information
 If you have any questions or concerns about this privacy policy, please contact:
 
-Victor Babiuc  
-Email: victorbabiuc@gmail.com
+Email: glootieapp@gmail.com
 
 ---
 

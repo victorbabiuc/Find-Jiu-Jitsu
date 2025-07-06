@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "OpenMatFinder",
+    "name": "Find Jiu Jitsu",
     "slug": "OpenMatFinder",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
       "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.OpenMatFinder",
-      "buildNumber": "10"
+      "buildNumber": "11"
     },
     "android": {
       "adaptiveIcon": {
