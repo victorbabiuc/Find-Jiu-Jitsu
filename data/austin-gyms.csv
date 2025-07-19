@@ -1,28 +1,28 @@
-id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
-austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744",0,25,Saturday,"10am-1pm",nogi
-austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744",0,25,Sunday,"12-2pm",nogi
-austin-10th-planet-round-rock,"10th planet round rock","3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664",0,0,Sunday,"12-3pm",both
-austin-atos,"Atos","11701 Bee Caves Rd Suite 110, Austin, TX 78738",0,0,Saturday,"11:30am-12:30pm",both
-austin-austin-submission-fighting,"Austin Submission Fighting","11940 Menchaca Rd #104, Austin, TX 78748",0,0,Sunday,"10am-12pm",both
-austin-black-widow-mma,"Black widow MMA","2007 Kramer Ln #101, Austin, TX 78758",0,0,Thursday,"12pm-1pm",both
-austin-brazilian-top-team,"Brazilian Top Team","9313 Anderson Mill Rd, Austin, TX 78729",0,35,Saturday,"12-2pm",both
-austin-claunch,"Claunch","12112 Ranch Rd 620 N, Austin, TX 78750",0,0,Sunday,"11am-1pm",both
-austin-coopers,"Coopers","12129 N FM 620 Suite # 330, Austin, TX 78750",0,0,Tuesday,"6:30pm-7:30pm",both
-austin-coopers,"Coopers","12129 N FM 620 Suite # 330, Austin, TX 78750",0,0,Thursday,"6:30pm-7:30pm",both
-austin-free-world-jiu-jitsu,"Free world jiu jitsu","1202 Farm To Market 685, Pflugerville, TX 78660",0,0,Sunday,"11am-1pm",both
-austin-gracie-humaita,"Gracie Humaita","321 W Ben White Blvd Suite 108, Austin, TX 78704",0,0,,,both
-austin-integracao-jiu-jitsu,"Integração Jiu Jitsu","1600 W Stassney Ln c, Austin, TX 78745",0,0,,,both
-austin-stoic-jiujitsu,"stoic jiujitsu","4955 Bell Springs Rd #5, Dripping Springs, TX 78620",0,0,,,both
-austin-johns-gym,"John's Gym","11416 Ranch Rd 620 N, Austin, TX 78726",0,0,Monday,"7pm-8pm",both
-austin-johns-gym,"John's Gym","11416 Ranch Rd 620 N, Austin, TX 78726",0,0,Wednesday,"7pm-8pm",both
-austin-mario-esfiha,"Mario Esfiha","1921 Cedar Bend Dr APT 146, Austin, TX 78758",0,0,,,both
-austin-openmat-co-judo-jiujitsu,"OpenMat Co. Judo Jiujitsu","2100 Cypress Creek Road Suite 500, Cedar Park, TX 78613",0,0,,,both
-austin-paragon,"Paragon","6800 West Gate Blvd APT 116, Austin, TX 78745",0,0,,,both
-austin-renzo-gracie,"Renzo Gracie","4301 Guadalupe St A, Austin, TX 78751",0,0,,,both
-austin-relson-gracie,"Relson Gracie","8213 Brodie Ln Austin, TX",0,0,,,both
-austin-six-blades,"Six Blades","13642 N Hwy 183 #300, Austin, TX 78750",0,0,Monday,"6:30pm-7:30pm",both
-austin-triple-threat-marble-falls,"triple threat (marble falls)","2415 Commerce St, Marble Falls, TX 78654",0,0,,,both
-austin-true-jiu-jitsu,"true jiu jitsu","#1300B, 2111 Sam Bass Rd, Round Rock, TX 78681",0,0,,,both
-austin-vasquez-academy,"Vasquez Academy","12110 Menchaca Rd #401, Austin, TX 78748",0,0,Monday,"7:30pm-8:30pm",both
-austin-violet-crown-jiu-jitsu-no-gi-0,"Violet crown jiu jitsu (no gi, $0)","1609 Ohlen Rd ste. B, Austin, TX 78758",0,0,,,nogi
-austin-vow-bjj-no-gi-0,"VOW BJJ (no gi, $0)","5555 N Lamar Blvd C109, Austin, TX 78751",0,0,,,nogi 
+id,name,address,website,distance,matFee,sessionDay,sessionTime,sessionType
+austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744","https://10patx.com/",0,25,Saturday,"10am-1pm",nogi
+austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744","https://10patx.com/",0,25,Sunday,"12-2pm",nogi
+austin-10th-planet-round-rock,"10th planet round rock","3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664","https://10patx.com/",0,0,Sunday,"12-3pm",both
+austin-atos,"Atos","11701 Bee Caves Rd Suite 110, Austin, TX 78738","https://atosjiujitsu.com/",0,0,Saturday,"11:30am-12:30pm",both
+austin-austin-submission-fighting,"Austin Submission Fighting","11940 Menchaca Rd #104, Austin, TX 78748","",0,0,Sunday,"10am-12pm",both
+austin-black-widow-mma,"Black widow MMA","2007 Kramer Ln #101, Austin, TX 78758","",0,0,Thursday,"12pm-1pm",both
+austin-brazilian-top-team,"Brazilian Top Team","9313 Anderson Mill Rd, Austin, TX 78729","https://bttusa.com/",0,35,Saturday,"12-2pm",both
+austin-claunch,"Claunch","12112 Ranch Rd 620 N, Austin, TX 78750","",0,0,Sunday,"11am-1pm",both
+austin-coopers,"Coopers","12129 N FM 620 Suite # 330, Austin, TX 78750","https://coopersjiujitsu.com/",0,0,Tuesday,"6:30pm-7:30pm",both
+austin-coopers,"Coopers","12129 N FM 620 Suite # 330, Austin, TX 78750","https://coopersjiujitsu.com/",0,0,Thursday,"6:30pm-7:30pm",both
+austin-free-world-jiu-jitsu,"Free world jiu jitsu","1202 Farm To Market 685, Pflugerville, TX 78660","",0,0,Sunday,"11am-1pm",both
+austin-gracie-humaita,"Gracie Humaita","321 W Ben White Blvd Suite 108, Austin, TX 78704","https://graciehumaita.com/",0,0,,,both
+austin-integracao-jiu-jitsu,"Integração Jiu Jitsu","1600 W Stassney Ln c, Austin, TX 78745","",0,0,,,both
+austin-stoic-jiujitsu,"stoic jiujitsu","4955 Bell Springs Rd #5, Dripping Springs, TX 78620","",0,0,,,both
+austin-johns-gym,"John's Gym","11416 Ranch Rd 620 N, Austin, TX 78726","",0,0,Monday,"7pm-8pm",both
+austin-johns-gym,"John's Gym","11416 Ranch Rd 620 N, Austin, TX 78726","",0,0,Wednesday,"7pm-8pm",both
+austin-mario-esfiha,"Mario Esfiha","1921 Cedar Bend Dr APT 146, Austin, TX 78758","",0,0,,,both
+austin-openmat-co-judo-jiujitsu,"OpenMat Co. Judo Jiujitsu","2100 Cypress Creek Road Suite 500, Cedar Park, TX 78613","",0,0,,,both
+austin-paragon,"Paragon","6800 West Gate Blvd APT 116, Austin, TX 78745","https://paragonjiujitsu.com/",0,0,,,both
+austin-renzo-gracie,"Renzo Gracie","4301 Guadalupe St A, Austin, TX 78751","https://renzogracie.com/",0,0,,,both
+austin-relson-gracie,"Relson Gracie","8213 Brodie Ln Austin, TX","https://relsongracie.com/",0,0,,,both
+austin-six-blades,"Six Blades","13642 N Hwy 183 #300, Austin, TX 78750","",0,0,Monday,"6:30pm-7:30pm",both
+austin-triple-threat-marble-falls,"triple threat (marble falls)","2415 Commerce St, Marble Falls, TX 78654","",0,0,,,both
+austin-true-jiu-jitsu,"true jiu jitsu","#1300B, 2111 Sam Bass Rd, Round Rock, TX 78681","",0,0,,,both
+austin-vasquez-academy,"Vasquez Academy","12110 Menchaca Rd #401, Austin, TX 78748","",0,0,Monday,"7:30pm-8:30pm",both
+austin-violet-crown-jiu-jitsu-no-gi-0,"Violet crown jiu jitsu (no gi, $0)","1609 Ohlen Rd ste. B, Austin, TX 78758","",0,0,,,nogi
+austin-vow-bjj-no-gi-0,"VOW BJJ (no gi, $0)","5555 N Lamar Blvd C109, Austin, TX 78751","",0,0,,,nogi 
