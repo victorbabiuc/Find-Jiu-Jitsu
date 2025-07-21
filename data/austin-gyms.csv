@@ -1,4 +1,4 @@
-id,name,address,website,distance,matFee,sessionDay,sessionTime,sessionType
+id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType
 austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744","https://10patx.com/",0,25,Saturday,"10am-1pm",nogi
 austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744","https://10patx.com/",0,25,Sunday,"12-2pm",nogi
 austin-10th-planet-round-rock,"10th planet round rock","3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664","https://10patx.com/",0,0,Sunday,"12-3pm",both
@@ -26,3 +26,4 @@ austin-true-jiu-jitsu,"true jiu jitsu","#1300B, 2111 Sam Bass Rd, Round Rock, TX
 austin-vasquez-academy,"Vasquez Academy","12110 Menchaca Rd #401, Austin, TX 78748","",0,0,Monday,"7:30pm-8:30pm",both
 austin-violet-crown-jiu-jitsu-no-gi-0,"Violet crown jiu jitsu (no gi, $0)","1609 Ohlen Rd ste. B, Austin, TX 78758","",0,0,,,nogi
 austin-vow-bjj-no-gi-0,"VOW BJJ (no gi, $0)","5555 N Lamar Blvd C109, Austin, TX 78751","",0,0,,,nogi 
+austin-gracie-barra-south,"Gracie Barra South Austin","1701 W Ben White Blvd #165, Austin, TX 78704","https://gbsouthaustin.com/",0,20,30,Saturday,"12:00 PM - 1:30 PM",both 
