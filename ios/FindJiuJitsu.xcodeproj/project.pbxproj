@@ -20,7 +20,7 @@
 		13B07F961A680F5B00A75B9A /* FindJiuJitsu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FindJiuJitsu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FindJiuJitsu/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FindJiuJitsu/Info.plist; sourceTree = "<group>"; };
-		3B92266C309DD907C276ED07 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = FindJiuJitsu/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3B92266C309DD907C276ED07 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = FindJiuJitsu/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		89383451539F3AB76D3A715E /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-FindJiuJitsu/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = FindJiuJitsu/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B95F8A7A4A7627CCBFAE7B0E /* Pods-FindJiuJitsu.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FindJiuJitsu.release.xcconfig"; path = "Target Support Files/Pods-FindJiuJitsu/Pods-FindJiuJitsu.release.xcconfig"; sourceTree = "<group>"; };
@@ -128,7 +128,6 @@
 				EFC1184F305A143A905D4A9A /* Pods-FindJiuJitsu.debug.xcconfig */,
 				B95F8A7A4A7627CCBFAE7B0E /* Pods-FindJiuJitsu.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -247,26 +246,44 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-FindJiuJitsu/Pods-FindJiuJitsu-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuthCore_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GTMAppAuth/GTMAppAuth_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GTMSessionFetcher/GTMSessionFetcher_Core_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-launcher/EXDevLauncher.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-menu/EXDevMenu.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppAuthCore_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GTMAppAuth_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GTMSessionFetcher_Core_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleUtilities_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FBLPromises_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevLauncher.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevMenu.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -334,6 +351,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FindJiuJitsu/FindJiuJitsu.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N7K748277K;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -370,6 +388,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FindJiuJitsu/FindJiuJitsu.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N7K748277K;
 				INFOPLIST_FILE = FindJiuJitsu/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ViewType, Filters, BeltType } from '../types';
 import { storageService } from '../services/storage.service';
+import { syncFavorites, getFavorites } from '../services/favorites.service';
+import { useAuth } from './AuthContext';
 
 interface AppContextType {
   currentView: ViewType;
@@ -17,13 +19,17 @@ interface AppContextType {
   setShowSideMenu: (show: boolean) => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | null>(null);
 
-export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface AppContextProviderProps {
+  children: any;
+}
+
+export const AppProvider = ({ children }: AppContextProviderProps) => {
   // MVP: Set default view to dashboard and default belt to blue
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [userBelt, setUserBelt] = useState<BeltType>('blue');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('Tampa');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showSideMenu, setShowSideMenu] = useState(false);
   const [filters, setFilters] = useState<Filters>({
@@ -33,24 +39,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     giType: ''
   });
 
+  // Get authentication context
+  const { user, isAuthenticated } = useAuth();
+
   useEffect(() => {
     // Load saved data (MVP: keep for future re-integration)
     const loadAppData = async () => {
       try {
         const savedBelt = await storageService.getItem<BeltType>('userBelt');
-        const savedFavorites = await storageService.getItem<string[]>('favorites');
         const savedLocation = await storageService.getItem<string>('selectedLocation');
 
         if (savedBelt) setUserBelt(savedBelt);
-        if (savedFavorites) setFavorites(new Set(savedFavorites));
         if (savedLocation) setSelectedLocation(savedLocation);
+
+        // Load favorites based on authentication status
+        if (isAuthenticated && user?.uid) {
+          // Load from Firebase for authenticated users
+          const firebaseFavorites = await getFavorites(user.uid);
+          setFavorites(new Set(firebaseFavorites.map(String)));
+        } else {
+          // Load from local storage for unauthenticated users
+          const savedFavorites = await storageService.getItem<string[]>('favorites');
+          if (savedFavorites) setFavorites(new Set(savedFavorites));
+        }
       } catch (error) {
         console.error('Failed to load app data:', error);
       }
     };
 
     loadAppData();
-  }, []);
+  }, [isAuthenticated, user?.uid]);
 
   useEffect(() => {
     // Save belt changes
@@ -76,7 +94,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       newFavorites.add(id);
     }
     setFavorites(newFavorites);
+    
+    // Save to local storage for all users
     await storageService.setItem('favorites', Array.from(newFavorites));
+    
+    // Sync to Firebase for authenticated users
+    if (isAuthenticated && user?.uid) {
+      try {
+        await syncFavorites(user.uid, Array.from(newFavorites).map(Number));
+      } catch (error) {
+        console.error('Failed to sync favorites to Firebase:', error);
+      }
+    }
   };
 
   const updateFilters = (newFilters: Partial<Filters>) => {
@@ -97,7 +126,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       updateFilters,
       showSideMenu,
       setShowSideMenu
-    }}>
+    } as AppContextType}>
       {children}
     </AppContext.Provider>
   );

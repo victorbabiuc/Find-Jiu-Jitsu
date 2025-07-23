@@ -33,12 +33,13 @@ export interface User {
     dropInFee?: number; // Optional field for drop-in class fees
     website?: string; // Optional website URL
     instructor?: string; // Optional instructor name
+    goingUsers?: any[]; // Optional array of users attending
   }
   
   export interface OpenMatSession {
     day: string;
     time: string;
-    type: 'gi' | 'nogi' | 'both';
+    type: 'gi' | 'nogi' | 'both' | 'mma' | string; // Allow custom types like 'MMA Sparring'
   }
   
   export interface Price {

@@ -7,10 +7,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "FindJiuJitsu",
+    "main": "./index.ts",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
       "icon": "./assets/icon.png",
@@ -19,7 +21,11 @@
       "buildNumber": "14",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "urlSchemes": [
+        "FindJiuJitsu",
+        "com.googleusercontent.apps.713938761178-9c5rfvvqfsgb01hinme07tsfo5naj31o"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +39,8 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

@@ -2,66 +2,106 @@
 
 Your Jiu Jitsu Training Companion - Find open mat sessions at gyms near you!
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-iOS-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 📱 About
+## 📱 App Description
 
-Find Jiu Jitsu helps practitioners discover open mat training sessions at local gyms. Whether you're traveling or looking for extra training opportunities, quickly find gyms offering open mats in your area.
+Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners discover open mat training sessions at local gyms. Whether you're traveling or looking for extra training opportunities, quickly find gyms offering open mats in your area.
 
-### ✨ Features
+**Currently supports Tampa and Austin with 65+ open mat sessions across 40+ gyms.**
 
-- **Location-Based Search** - Find open mats in Tampa and Austin (more cities coming soon!)
-- **Smart Filtering** - Filter by Gi/No-Gi, price, distance, and time
-- **Session Details** - View times, prices, requirements, and contact info
-- **Save Favorites** - Keep track of your preferred training spots
-- **Belt Progression** - Personalize the app with your current belt rank
-- **One-Tap Actions** - Call gyms, get directions, or save with a single tap
+## ✨ Current Features (v1.3.2)
 
-## 🎯 Version 1.2.0 Highlights
+### 🎯 Core Functionality
+- **Browse open mat sessions by city** - Tampa and Austin with comprehensive gym coverage
+- **Smart filtering system** - Filter by Gi, No-Gi, or Free sessions with intelligent session-level filtering
+- **Calendar date selection** - Choose specific dates or use quick filters (Today, Tomorrow, Weekend)
+- **Enhanced sharing** - Share sessions with professional text formatting and app promotion
 
-- **New App Name** - Rebranded from "Open Mat Finder" to "Find Jiu Jitsu"
-- **Premium Gym Cards** - Beautiful redesigned cards with session details
-- **Next Open Mat** - See your next training opportunity on the dashboard
-- **Enhanced Filters** - Working Gi/No-Gi filters with smart logic
-- **Smooth Animations** - Belt progression loading between screens
-- **Dual Pricing** - View both open mat and drop-in fees
-- **Light Mode Only** - Simplified theme system for better consistency
+### 🏢 Gym Information
+- **Complete session details** - Times, days, and session types (Gi/No-Gi)
+- **Pricing information** - Open mat fees (free or paid) and drop-in rates
+- **Contact details** - Gym addresses, phone numbers, and websites
+- **Requirements** - Waiver requirements and other important notes
 
-## 📋 Recent Updates (July 6, 2025)
+### 💾 User Experience
+- **Save favorite gyms** - Keep track of preferred training spots with local storage
+- **One-tap actions** - Call gyms, get directions, visit websites, or save with a single tap
+- **Dark/Light theme support** - Consistent design system with unified color scheme
+- **Intuitive navigation** - Streamlined flow from city selection to results
+- **Empty state handling** - Helpful messages and action buttons when no results found
 
-- ✅ **Successfully submitted v1.2.0 to App Store** - Build completed and submitted for review
-- ✅ **Fixed iOS build versioning issues** - Resolved version conflicts between app.json and native iOS files
-- ✅ **App name changed to "Find Jiu Jitsu"** - Complete rebranding throughout the application
-- ✅ **Dark mode removed** - Simplified to light mode only for better consistency
-- ✅ **Updated splash screen** - Fixed belt animation positioning and asset references
-- ✅ **Repository renamed** - GitHub repository updated from "OpenMatFinder" to "Find-Jiu-Jitsu"
+### 🎨 Design Features
+- **Professional UI** - Modern, clean interface with consistent design language
+- **Responsive design** - Works perfectly on all iOS device sizes
+- **Circular splash screen** - Perfect circular app icon during loading
+- **Enhanced share functionality** - Professional text formatting with emojis and branding
 
-## 🛠️ Tech Stack
+## 🚀 How to Use
+
+1. **Select your city** - Choose between Tampa (14 gyms) or Austin (30 gyms)
+2. **Choose dates** - Use quick filters (Today, Tomorrow, Weekend) or select custom dates from the calendar
+3. **Filter results** - Apply Gi/No-Gi filters or show only free sessions
+4. **Explore gyms** - Tap gym cards to view detailed information
+5. **Save favorites** - Use the heart icon to save preferred gyms
+6. **Share sessions** - Share gym details with training partners
+7. **Take action** - Call gyms, get directions, or visit websites directly from the app
+
+### 💡 Pro Tips
+- **Tap white space** on the calendar screen to clear date selections
+- **Drag across dates** to select multiple days at once
+- **Use filters** to find specific session types or free training
+- **Save favorites** to quickly access your preferred gyms
+
+## 🛠️ Technical Stack
 
 - **Framework**: React Native with Expo
-- **Language**: TypeScript
-- **Navigation**: React Navigation v6
-- **State Management**: Context API
-- **Data Storage**: AsyncStorage + GitHub CSV files
-- **Styling**: React Native StyleSheet + LinearGradient
+- **Language**: TypeScript for full type safety
+- **Navigation**: React Navigation v6 with streamlined user flow
+- **State Management**: Context API + React Hooks
+- **Data Storage**: AsyncStorage for local favorites
+- **Data Source**: GitHub-hosted CSV files for easy updates
+- **Styling**: React Native StyleSheet with consistent design system
+- **Sharing**: Native text sharing with professional formatting
 
-## 📂 Project Structure
+## 📊 Data Sources
 
+- **Gym data** stored in CSV files on GitHub for easy updates
+- **Currently tracking 40+ gyms** across Tampa and Austin
+- **65+ open mat sessions** with verified times and information
+- **Regular updates** to ensure accuracy and add new gyms
+
+### CSV Format
+```csv
+GymName,SessionDay,SessionTime,GiType,OpenMatFee,DropInFee,Requirements,Address,Phone,Website,Coordinates
 ```
-OpenMatFinder/
-├── src/
-│   ├── screens/          # All app screens
-│   ├── components/       # Reusable components
-│   ├── context/          # Auth, Theme, App contexts
-│   ├── navigation/       # Navigation configuration
-│   ├── services/         # API and storage services
-│   ├── types/           # TypeScript definitions
-│   └── utils/           # Constants and helpers
-├── data/                # CSV gym data files
-└── assets/             # Images and icons
-```
+
+## 🎯 Future Features (v2.0+)
+
+### 🔐 User Authentication & Profiles
+- **Firebase authentication** - Google and Apple Sign-In integration
+- **User profiles** - Belt level tracking and training preferences
+- **Cloud sync** - Sync favorites across devices
+- **Personalized experience** - Custom recommendations based on preferences
+
+### 🗺️ Enhanced Discovery
+- **Map view** - Visual gym locations with directions
+- **Distance filtering** - Find gyms within specific radius
+- **Advanced search** - Filter by time of day, skill level, or distance
+- **More cities** - Expand beyond Tampa and Austin
+
+### 👥 Community Features
+- **"I'm going" feature** - See who's attending sessions
+- **Training logs** - Track your training sessions and progress
+- **Gym reviews** - User ratings and reviews
+- **Social features** - Connect with training partners
+
+### 🔔 Smart Notifications
+- **Push notifications** - Alerts for favorite gym sessions
+- **New gym alerts** - Notifications when new gyms are added
+- **Session reminders** - Get notified before your planned sessions
 
 ## 🚀 Getting Started
 
@@ -78,7 +118,7 @@ OpenMatFinder/
 git clone https://github.com/victorbabiuc/Find-Jiu-Jitsu.git
 
 # Navigate to project
-cd OpenMatFinder
+cd FindJiuJitsu
 
 # Install dependencies
 npm install
@@ -90,34 +130,6 @@ npx expo start
 i (in the terminal)
 ```
 
-## 📊 Data Management
-
-Gym data is stored in CSV files on GitHub for easy updates:
-- `data/tampa-gyms.csv` - Tampa area gyms
-- `data/austin-gyms.csv` - Austin area gyms
-
-### CSV Format
-
-```csv
-GymName,SessionDay,SessionTime,GiType,OpenMatFee,DropInFee,Requirements,Address,Phone,Website,Coordinates
-```
-
-## 🎨 Design System
-
-### Belt Colors
-- **White Belt**: `#F8F9FA`
-- **Blue Belt**: `#3B82F6`
-- **Purple Belt**: `#A855F7`
-- **Brown Belt**: `#D97706`
-- **Black Belt**: `#525252`
-
-### Icons
-- 🥋 Gi sessions
-- 👕 No-Gi sessions
-- 💵 Paid sessions
-- 📍 Location
-- ⚠️ Waiver required
-
 ## 🔧 Development
 
 ### Key Commands
@@ -126,6 +138,9 @@ GymName,SessionDay,SessionTime,GiType,OpenMatFee,DropInFee,Requirements,Address,
 # Run development server
 npx expo start
 
+# Run with cache clear
+npx expo start --clear
+
 # Build for production
 npx eas build -p ios --profile production
 
@@ -133,34 +148,46 @@ npx eas build -p ios --profile production
 npx eas submit -p ios
 ```
 
-### Environment Variables
-
-No environment variables required - all data is fetched from public GitHub CSVs.
-
 ## 📱 Deployment
 
 The app is distributed through the iOS App Store as a free app.
 
-### Build Process
-
-1. Update version in `app.json`
-2. Commit all changes
-3. Run EAS build
-4. Submit through EAS CLI
-
 ### App Store Information
 
-- **App Name**: Find Jiu Jitsu (formerly Open Mat Finder)
+- **App Name**: Find Jiu Jitsu
 - **Bundle ID**: com.anonymous.OpenMatFinder
 - **Category**: Sports
 - **Price**: Free
-- **Latest Build**: 1.2.0 (Build 13) - July 6, 2025
-- **Submission Date**: July 6, 2025
-- **Status**: Submitted for review
+- **Latest Version**: 1.3.2 (Build 17) - July 2025
+- **Status**: ✅ Live on App Store
 
 ## 🤝 Contributing
 
-We welcome contributions! Please:
+We welcome contributions! Here's how you can help:
+
+### Adding New Cities/Gyms
+
+1. **Fork the repository**
+2. **Add gym data** to the appropriate CSV file in `data/` directory
+3. **Follow the CSV format** specified above
+4. **Test your changes** locally
+5. **Submit a pull request** with detailed description
+
+### CSV Format Requirements
+
+- **GymName**: Full gym name
+- **SessionDay**: Day of the week (Monday, Tuesday, etc.)
+- **SessionTime**: Time format (e.g., "6:00 PM" or "18:00")
+- **GiType**: "gi", "nogi", or "both"
+- **OpenMatFee**: "Free" or dollar amount
+- **DropInFee**: Dollar amount for regular classes
+- **Requirements**: Any special requirements (waiver, etc.)
+- **Address**: Full street address
+- **Phone**: Contact phone number
+- **Website**: Gym website URL
+- **Coordinates**: Latitude,Longitude format
+
+### Development Workflow
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
@@ -180,6 +207,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Current Version**: 1.2.0 (Build 13)  
-**App Store Status**: Submitted for review (July 6, 2025)  
+**Current Version**: 1.3.2 (Build 17)  
+**App Store Status**: ✅ Live  
 **Contact**: glootieapp@gmail.com
+

@@ -88,7 +88,13 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
               {gym.openMats.map((session, index) => (
                 <View key={index} style={{ marginBottom: 10 }}>
                   <Text>{session.day} {session.time}</Text>
-                  <Text style={{ color: '#666' }}>{session.type === 'gi' ? 'Gi Only' : session.type === 'nogi' ? 'No-Gi Only' : 'Gi & No-Gi'}</Text>
+                  <Text style={{ color: '#666' }}>
+                    {session.type === 'gi' ? 'Gi Only' : 
+                     session.type === 'nogi' ? 'No-Gi Only' : 
+                     session.type.toLowerCase() === 'mma' || session.type.toLowerCase() === 'mma sparring' ? 'MMA Sparring' :
+                     session.type === 'both' ? 'Gi & No-Gi' : 
+                     session.type}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -96,7 +102,12 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
             {/* Pricing */}
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Pricing</Text>
-              <Text>{gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}</Text>
+              <Text style={{ marginBottom: 5 }}>
+                Open Mat: {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
+              </Text>
+              <Text>
+                Drop-in Class: {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : 'Contact gym'}
+              </Text>
             </View>
           </ScrollView>
 

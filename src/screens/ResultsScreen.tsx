@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import {
   SafeAreaView,
   Alert,
   Modal,
-  Clipboard,
   ScrollView,
   LayoutAnimation,
+  Share,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
@@ -23,8 +25,11 @@ import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
-import { apiService } from '../services';
+import { apiService, gymLogoService } from '../services';
+import { githubDataService } from '../services/github-data.service';
 import { FindStackRouteProp } from '../navigation/types';
+import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
+import stjjLogo from '../../assets/logos/STJJ.png';
 
 const { width } = Dimensions.get('window');
 
@@ -36,7 +41,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const { theme } = useTheme();
   const { selectedLocation, userBelt, favorites, toggleFavorite } = useApp();
   const { showTransitionalLoading } = useLoading();
-  const navigation = useFindNavigation();
+  const findNavigation = useFindNavigation();
   const beltColor = beltColors[userBelt];
   
   // Get location and date filtering from route params
@@ -60,25 +65,70 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const [loading, setLoading] = useState(true);
   
   // Filter state
-  const [activeFilters, setActiveFilters] = useState({
+  const [activeFilters, setActiveFilters] = useState<{
+    gi: boolean;
+    nogi: boolean;
+    price: 'free' | null;
+  }>({
     gi: false,
     nogi: false,
-    price: null, // null, 'free', or 'paid'
-    radius: null,
-    timeOfDay: null
+    price: null, // null or 'free'
   });
 
-  // Dropdown state
-  const [showPriceDropdown, setShowPriceDropdown] = useState(false);
-  const [selectedPrice, setSelectedPrice] = useState(null); // null, 'free', or 'paid'
+  // Debug: Log when component mounts/unmounts
+  useEffect(() => {
+    console.log('🔍 ResultsScreen: Component mounted');
+    return () => {
+      console.log('🔍 ResultsScreen: Component unmounting');
+    };
+  }, []);
+
+  // Debug: Monitor activeFilters changes
+  useEffect(() => {
+    console.log(`🔍 Filter Debug: activeFilters changed at ${new Date().toISOString()}:`, activeFilters);
+  }, [activeFilters]);
+
+  // Load gym logos when openMats data changes
+  useEffect(() => {
+    const loadGymLogos = async () => {
+      const logoUrls: Record<string, string> = {};
+      
+      for (const gym of openMats) {
+        // Skip gyms that already have hardcoded logos
+        if (gym.id.includes('10th-planet') || gym.id.includes('stjj')) {
+          continue;
+        }
+        
+        try {
+          const logoUrl = await gymLogoService.getGymLogo(gym.id, gym.name, gym.website);
+          if (logoUrl) {
+            logoUrls[gym.id] = logoUrl;
+          }
+        } catch (error) {
+          console.log(`Failed to load logo for ${gym.name}:`, error);
+        }
+      }
+      
+      setGymLogos(logoUrls);
+    };
+
+    if (openMats.length > 0) {
+      loadGymLogos();
+    }
+  }, [openMats]);
+
+  // Free filter state
+  const [showFreeOnly, setShowFreeOnly] = useState(false);
   
-  // Add state for dropdown positioning
-  const [priceDropdownPosition, setPriceDropdownPosition] = useState({ x: 0, y: 0 });
+
   
   // Modal state
   const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [suggestModalVisible, setSuggestModalVisible] = useState(false);
+  
+  // Gym logo state
+  const [gymLogos, setGymLogos] = useState<Record<string, string>>({});
+
   
 
 
@@ -117,15 +167,22 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // TEMPORARY: Load data once on mount to stop infinite loop
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔄 ResultsScreen: Loading data once on mount');
-      
-      // Show transitional loading for data fetching
+      console.log('🔄 ResultsScreen: Fetching data for', location, dateSelection);
       showTransitionalLoading("Discovering open mat sessions...", 2000);
-      
       try {
         setLoading(true);
         
-        // Prepare filters object with date selection
+        // Determine city from location string
+        const city = location.toLowerCase().includes('austin') ? 'austin' : 
+                     location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
+        
+        // Force refresh data from GitHub
+        await githubDataService.refreshData(city);
+        
+        // Debug: Check last update time
+        const lastUpdate = await githubDataService.getLastUpdateTime(city);
+        console.log('🔍 ResultsScreen: Last data update time:', lastUpdate ? new Date(lastUpdate).toISOString() : 'No cache');
+        
         const filters: any = {};
         if (dateSelection) {
           filters.dateSelection = dateSelection;
@@ -133,10 +190,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         if (dates) {
           filters.dates = dates;
         }
-        
-        const data = await apiService.getOpenMats(location, filters);
+        const data = await apiService.getOpenMats(location, filters, true);
         console.log('✅ ResultsScreen: Data loaded successfully -', data.length, 'gyms');
-        
         setOpenMats(data);
       } catch (error) {
         console.error('❌ ResultsScreen: Error fetching gyms:', error);
@@ -145,9 +200,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, []); // Empty dependency array to run only once
+  }, [location, dateSelection, paramsKey]);
 
   const handleGymPress = (gym: OpenMat) => {
     setSelectedGym(gym);
@@ -190,14 +244,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     );
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 3);
-  };
+
 
   const formatOpenMats = (openMats: any[]) => {
     return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
@@ -296,15 +343,19 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   };
 
   const getSessionTypeWithIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'gi':
         return 'Gi 🥋';
       case 'nogi':
         return 'No-Gi 👕';
       case 'both':
         return 'Gi & No-Gi 🥋👕';
+      case 'mma':
+      case 'mma sparring':
+        return 'MMA Sparring 🥊';
       default:
-        return 'Open Mat 🥋👕';
+        // For any other custom session types, preserve the original name
+        return `${type} 🥋👕`;
     }
   };
 
@@ -340,59 +391,46 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     );
   };
 
-  const handleSuggestGym = () => {
-    setSuggestModalVisible(true);
-  };
 
-  const handleCopyEmail = async () => {
-    try {
-      await Clipboard.setString('glootieapp@gmail.com');
-      Alert.alert('Email Copied', 'Email address copied to clipboard!');
-    } catch (error) {
-      console.error('Error copying email:', error);
-      Alert.alert('Error', 'Failed to copy email address');
-    }
-  };
 
-  const handleCloseSuggestModal = () => {
-    setSuggestModalVisible(false);
-  };
+
+
+
 
   const toggleFilter = (filterType: 'gi' | 'nogi') => {
-    setActiveFilters(prev => ({
-      ...prev,
-      [filterType]: !prev[filterType]
-    }));
+    console.log(`🔍 Filter Debug: ${filterType} button pressed at ${new Date().toISOString()}`);
+    console.log(`🔍 Filter Debug: Current activeFilters:`, activeFilters);
+    
+    setActiveFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [filterType]: !prev[filterType]
+      };
+      console.log(`🔍 Filter Debug: Setting new activeFilters:`, newFilters);
+      return newFilters;
+    });
   };
 
-  const handlePriceFilter = (priceType: 'free' | 'paid') => {
-    // Toggle behavior: if same option is selected, deselect it
-    const newValue = selectedPrice === priceType ? null : priceType;
-    setSelectedPrice(newValue);
-    setShowPriceDropdown(false);
+  const handleFreeFilter = () => {
+    const newValue = !showFreeOnly;
+    setShowFreeOnly(newValue);
     
     // Update active filters
     setActiveFilters(prev => ({
       ...prev,
-      price: newValue
+      price: newValue ? 'free' : null
     }));
   };
 
   const handleFilterTap = (filterName: string) => {
     console.log(`Filter tapped: ${filterName}`);
     
-    if (filterName === 'Price') {
-      console.log('Price clicked, toggling from:', showPriceDropdown);
-      setShowPriceDropdown(!showPriceDropdown);
-    } else {
-      // TODO: Implement dropdown filters for Radius, Time of Day
+    if (filterName === 'Free') {
+      handleFreeFilter();
     }
   };
 
-  const handlePriceButtonLayout = (event: any) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    setPriceDropdownPosition({ x, y: y + height });
-  };
+
 
 
 
@@ -400,36 +438,145 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const filteredGyms = useMemo(() => {
     let filtered = [...openMats];
     
+    console.log(`🔍 Filter Debug: Starting with ${filtered.length} gyms`);
+    console.log(`🔍 Filter Debug: activeFilters:`, activeFilters);
+    
     // Apply Gi/No-Gi filters with smart logic
     if (activeFilters.gi || activeFilters.nogi) {
+      console.log(`🔍 Filter Debug: Applying Gi/No-Gi filters`);
+      
       filtered = filtered.filter(gym => {
         // Check what session types this gym offers
         const sessionTypes = gym.openMats.map(mat => mat.type);
         const hasGi = sessionTypes.includes('gi');
         const hasNoGi = sessionTypes.includes('nogi');
-        const hasBoth = sessionTypes.includes('both') || sessionTypes.includes('mixed');
-        const hasUnknown = sessionTypes.some(type => !type || type === 'unknown' || type === '');
+        const hasBoth = sessionTypes.includes('both');
+        
+        console.log(`🔍 Filter Debug: ${gym.name} - sessionTypes:`, sessionTypes, `hasGi:`, hasGi, `hasNoGi:`, hasNoGi, `hasBoth:`, hasBoth);
         
         if (activeFilters.gi && activeFilters.nogi) {
-          // Show gyms that have EITHER Gi OR No-Gi OR both/mixed/unknown
-          return hasGi || hasNoGi || hasBoth || hasUnknown;
+          // Show gyms that have EITHER Gi OR No-Gi OR both
+          const matches = hasGi || hasNoGi || hasBoth;
+          console.log(`🔍 Filter Debug: ${gym.name} - both filters active, matches:`, matches);
+          return matches;
         } else if (activeFilters.gi) {
-          // Show gyms with Gi, both/mixed, or unknown types
-          return hasGi || hasBoth || hasUnknown;
+          // Show gyms with Gi or both types
+          const matches = hasGi || hasBoth;
+          console.log(`🔍 Filter Debug: ${gym.name} - Gi filter active, matches:`, matches);
+          return matches;
         } else if (activeFilters.nogi) {
-          // Show gyms with No-Gi, both/mixed, or unknown types
-          return hasNoGi || hasBoth || hasUnknown;
+          // Show gyms with No-Gi or both types
+          const matches = hasNoGi || hasBoth;
+          console.log(`🔍 Filter Debug: ${gym.name} - No-Gi filter active, matches:`, matches);
+          return matches;
         }
         return false;
+      }).map(gym => {
+        // Filter the sessions within each gym based on active filters
+        let filteredSessions = gym.openMats;
+        
+        if (activeFilters.gi && !activeFilters.nogi) {
+          // Only show Gi sessions
+          filteredSessions = gym.openMats.filter(session => session.type === 'gi' || session.type === 'both');
+        } else if (activeFilters.nogi && !activeFilters.gi) {
+          // Only show No-Gi sessions
+          filteredSessions = gym.openMats.filter(session => session.type === 'nogi' || session.type === 'both');
+        }
+        // If both filters are active, show all sessions (no filtering needed)
+        
+        return {
+          ...gym,
+          openMats: filteredSessions
+        };
       });
+      
+      console.log(`🔍 Filter Debug: After Gi/No-Gi filtering: ${filtered.length} gyms`);
     }
     
-    // Apply price filter
+    // Apply free filter
     if (activeFilters.price === 'free') {
       filtered = filtered.filter(gym => gym.matFee === 0);
-    } else if (activeFilters.price === 'paid') {
-      filtered = filtered.filter(gym => gym.matFee > 0);
     }
+    
+    // Sort gyms by their earliest session time within the selected date range
+    filtered.sort((a, b) => {
+      // Get the earliest session for each gym
+      const earliestSessionA = a.openMats[0]; // Sessions are already sorted by day
+      const earliestSessionB = b.openMats[0];
+      
+      if (!earliestSessionA && !earliestSessionB) return 0;
+      if (!earliestSessionA) return 1;
+      if (!earliestSessionB) return -1;
+      
+      // Define day order for sorting (Friday first, then Saturday, then Sunday)
+      const dayOrder = {
+        'Friday': 1,
+        'Saturday': 2,
+        'Sunday': 3,
+        'Monday': 4,
+        'Tuesday': 5,
+        'Wednesday': 6,
+        'Thursday': 7
+      };
+      
+      const dayA = dayOrder[earliestSessionA.day as keyof typeof dayOrder] || 999;
+      const dayB = dayOrder[earliestSessionB.day as keyof typeof dayOrder] || 999;
+      
+      // First sort by day
+      if (dayA !== dayB) {
+        return dayA - dayB;
+      }
+      
+      // If same day, sort by time (earlier time first)
+      const timeA = earliestSessionA.time;
+      const timeB = earliestSessionB.time;
+      
+      // Convert time to minutes for comparison
+      const getMinutesFromTime = (timeStr: string): number => {
+        const cleanTime = timeStr.trim().toLowerCase();
+        
+        // Handle time ranges like "6:30 PM - 7:30 PM" by taking the start time
+        const timeRangeMatch = cleanTime.match(/^(.+?)\s*-\s*(.+)$/);
+        if (timeRangeMatch) {
+          return getMinutesFromTime(timeRangeMatch[1]); // Use start time
+        }
+        
+        // Handle formats like "5:00 PM", "6pm", "12:30 AM"
+        const match = cleanTime.match(/^(\d+):?(\d*)\s*(am|pm)$/);
+        if (match) {
+          let hour = parseInt(match[1]);
+          const minute = match[2] ? parseInt(match[2]) : 0;
+          const period = match[3];
+          
+          if (period === 'pm' && hour !== 12) hour += 12;
+          if (period === 'am' && hour === 12) hour = 0;
+          
+          return hour * 60 + minute;
+        }
+        
+        // Handle 24-hour format like "18:00"
+        const militaryMatch = cleanTime.match(/^(\d+):(\d+)$/);
+        if (militaryMatch) {
+          const hour = parseInt(militaryMatch[1]);
+          const minute = parseInt(militaryMatch[2]);
+          return hour * 60 + minute;
+        }
+        
+        return 999; // Default for unparseable times
+      };
+      
+      const minutesA = getMinutesFromTime(timeA);
+      const minutesB = getMinutesFromTime(timeB);
+      
+      return minutesA - minutesB;
+    });
+    
+    // Debug: Log the sorted order of gyms
+    console.log('🔍 ResultsScreen: Gym sorting order:');
+    filtered.slice(0, 5).forEach((gym, index) => {
+      const earliestSession = gym.openMats[0];
+      console.log(`  ${index + 1}. ${gym.name} - ${earliestSession?.day} ${earliestSession?.time}`);
+    });
     
     return filtered;
   }, [openMats, activeFilters]);
@@ -439,63 +586,78 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     return null; // Let transitional loading handle this
   }
 
+  // Helper to open website
+  const openWebsite = (url: string) => {
+    if (url) Linking.openURL(url);
+  };
+
+  // Helper to open directions
+  const openDirections = (address: string) => {
+    if (!address || address === 'Tampa, FL' || address === 'Austin, TX') return;
+    const url = `https://maps.apple.com/?q=${encodeURIComponent(address)}`;
+    Linking.openURL(url);
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      {/* Touch handler to close dropdown when clicking outside */}
-      {showPriceDropdown && (
-        <TouchableOpacity
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999
-          }}
-          activeOpacity={1}
-          onPress={() => setShowPriceDropdown(false)}
-        />
-      )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={[styles.backIcon, { color: theme.text.primary }]}>←</Text>
-        </TouchableOpacity>
         <View style={styles.headerTextContainer}>
-          <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Open Mats Near You</Text>
-          <View style={styles.headerSubtitleRow}>
-            <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
-              {filteredGyms.length} results • {location}
-              {dateSelection && ` • ${getDateSelectionDisplay(dateSelection)}`}
-            </Text>
-            <TouchableOpacity 
-              style={styles.suggestionButton}
-              onPress={handleSuggestGym}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.suggestionButtonText}>Suggestion +</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Find Jiu Jitsu</Text>
+          <Text style={styles.locationContext}>Showing gyms in {location}</Text>
+          <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
+            {filteredGyms.length} results • {location}
+            {dateSelection && ` • ${getDateSelectionDisplay(dateSelection)}`}
+          </Text>
         </View>
+        <TouchableOpacity
+          style={styles.envelopeButton}
+          onPress={() => {
+            Alert.alert(
+              'Send us your suggestions!',
+              'glootieapp@gmail.com\n\nTap Copy to copy the email address and send us your feedback!',
+              [
+                {
+                  text: 'Copy',
+                  onPress: () => Clipboard.setStringAsync('glootieapp@gmail.com'),
+                },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          }}
+          accessibilityLabel="Send Suggestions"
+        >
+          <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Filter Pills */}
-      <View style={styles.filterSection}>
+      <View style={[styles.filterSection, { alignItems: 'center' }]}>
         <ScrollView 
           horizontal={true} 
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContainer}
+          contentContainerStyle={[
+            styles.filterContainer,
+            {
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              marginTop: 3, // was 5
+              marginBottom: 3 // was 5
+            }
+          ]}
         >
           {/* Gi Toggle Filter */}
           <TouchableOpacity 
             style={[
               styles.filterPill,
               {
-                backgroundColor: activeFilters.gi ? '#0C92F2' : '#F0F3F5',
+                backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
                 borderWidth: activeFilters.gi ? 0 : 1,
                 borderColor: activeFilters.gi ? 'transparent' : '#E0E0E0',
                 marginRight: 8,
-                shadowColor: activeFilters.gi ? '#0C92F2' : 'transparent',
+                shadowColor: activeFilters.gi ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: activeFilters.gi ? 0.3 : 0,
                 shadowRadius: 4,
@@ -521,11 +683,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             style={[
               styles.filterPill,
               {
-                backgroundColor: activeFilters.nogi ? '#0C92F2' : '#F0F3F5',
+                backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
                 borderWidth: activeFilters.nogi ? 0 : 1,
                 borderColor: activeFilters.nogi ? 'transparent' : '#E0E0E0',
                 marginRight: 8,
-                shadowColor: activeFilters.nogi ? '#0C92F2' : 'transparent',
+                shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: activeFilters.nogi ? 0.3 : 0,
                 shadowRadius: 4,
@@ -546,130 +708,116 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             </Text>
           </TouchableOpacity>
 
-          {/* Price Dropdown Filter */}
+          {/* Free Toggle Filter */}
           <TouchableOpacity 
             style={[
               styles.filterPill,
               {
-                backgroundColor: activeFilters.price ? '#0C92F2' : '#F0F3F5',
-                borderWidth: activeFilters.price ? 0 : 1,
-                borderColor: activeFilters.price ? 'transparent' : '#E0E0E0',
+                backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
+                borderWidth: activeFilters.price === 'free' ? 0 : 1,
+                borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
+                shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.price === 'free' ? 3 : 0,
               }
             ]}
-            onPress={() => handleFilterTap('Price')}
-            onLayout={handlePriceButtonLayout}
+            onPress={() => handleFilterTap('Free')}
             activeOpacity={0.7}
           >
             <Text style={[
               styles.filterPillText,
               { 
-                color: activeFilters.price ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.price ? '600' : '500'
+                color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
+                fontWeight: activeFilters.price === 'free' ? '700' : '500'
               }
             ]}>
-              {selectedPrice === null ? 'Price' : selectedPrice === 'free' ? 'Free' : '$$$'}
+              Free
             </Text>
-            <Ionicons 
-              name="chevron-down" 
-              size={16} 
-              color={activeFilters.price ? '#FFFFFF' : '#60798A'} 
-              style={styles.filterArrow} 
-            />
           </TouchableOpacity>
 
-          {/* Radius Dropdown Filter */}
-          <TouchableOpacity 
-            style={styles.filterPill}
-            onPress={() => handleFilterTap('Radius')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.filterPillText}>Radius</Text>
-            <Ionicons name="chevron-down" size={16} color="#111518" style={styles.filterArrow} />
-          </TouchableOpacity>
 
-          {/* Time of Day Dropdown Filter */}
-          <TouchableOpacity 
-            style={styles.filterPill}
-            onPress={() => handleFilterTap('Time of Day')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.filterPillText}>Time of Day</Text>
-            <Ionicons name="chevron-down" size={16} color="#111518" style={styles.filterArrow} />
-          </TouchableOpacity>
+
         </ScrollView>
 
-        {/* Price Dropdown Menu - Rendered outside ScrollView */}
-        {showPriceDropdown && (
-          <View style={{
-            position: 'absolute',
-            top: priceDropdownPosition.y,
-            left: priceDropdownPosition.x,
-            backgroundColor: '#FFFFFF',
-            borderRadius: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 5,
-            minWidth: 120,
-            zIndex: 1000,
-            borderWidth: 1,
-            borderColor: '#E0E0E0'
-          }}>
-            <TouchableOpacity
-              onPress={() => {
-                handlePriceFilter('free');
-                setShowPriceDropdown(false);
-              }}
-              style={{ 
-                padding: 12, 
-                borderBottomWidth: 1, 
-                borderBottomColor: '#F0F3F5',
-                backgroundColor: selectedPrice === 'free' ? '#F8FAFC' : 'transparent'
-              }}
-            >
-              <Text style={{ 
-                color: selectedPrice === 'free' ? '#0C92F2' : '#111518',
-                fontWeight: selectedPrice === 'free' ? '600' : 'normal'
-              }}>
-                Free
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => {
-                handlePriceFilter('paid');
-                setShowPriceDropdown(false);
-              }}
-              style={{ 
-                padding: 12,
-                backgroundColor: selectedPrice === 'paid' ? '#F8FAFC' : 'transparent'
-              }}
-            >
-              <Text style={{ 
-                color: selectedPrice === 'paid' ? '#0C92F2' : '#111518',
-                fontWeight: selectedPrice === 'paid' ? '600' : 'normal'
-              }}>
-                $$$
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+
       </View>
 
       {/* Content */}
       {filteredGyms.length === 0 ? (
-        // Empty state
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: theme.text.primary }]}>
-            No open mats found in {location}
-            {dateSelection && ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`}
+        // Enhanced Empty State
+        <View style={styles.emptyStateContainer}>
+          {/* Icon */}
+          <View style={styles.emptyStateIconContainer}>
+            <Ionicons 
+              name="search-outline" 
+              size={64} 
+              color={theme.text.secondary} 
+            />
+          </View>
+          
+          {/* Title */}
+          <Text style={[styles.emptyStateTitle, { color: theme.text.primary }]}>
+            No open mats found
           </Text>
-          <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
-            {dateSelection 
-              ? 'Try selecting a different date or check other days of the week.'
-              : 'Check back soon or add a gym in your city!'
-            }
+          
+          {/* Dynamic Subtitle based on filters */}
+          <Text style={[styles.emptyStateSubtitle, { color: theme.text.secondary }]}>
+            {(() => {
+              let subtitle = `No open mats in ${location}`;
+              
+              if (dateSelection) {
+                subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
+              }
+              
+              if (activeFilters.price === 'free') {
+                subtitle = `No free open mats in ${location}`;
+                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
+              }
+              
+              if (activeFilters.gi && !activeFilters.nogi) {
+                subtitle = `No Gi-only sessions found in ${location}`;
+                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
+              } else if (activeFilters.nogi && !activeFilters.gi) {
+                subtitle = `No No-Gi sessions found in ${location}`;
+                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
+              }
+              
+              return subtitle;
+            })()}
+          </Text>
+          
+          {/* Action Buttons */}
+          <View style={styles.emptyStateButtons}>
+            <TouchableOpacity 
+              style={[styles.emptyStateButton, styles.secondaryButton]}
+              onPress={() => {
+                // Clear local filters
+                setActiveFilters({
+                  gi: false,
+                  nogi: false,
+                  price: null,
+                });
+                setShowFreeOnly(false);
+                // Navigate back to TimeSelection to reset date selection
+                findNavigation.navigate('TimeSelection');
+              }}
+            >
+              <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Clear Filters</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.emptyStateButton, styles.secondaryButton]}
+              onPress={() => findNavigation.navigate('TimeSelection')}
+            >
+              <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Change Day</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Suggestion Text */}
+          <Text style={[styles.emptyStateSuggestion, { color: theme.text.secondary }]}>
+            Try checking different days or clearing your filters
           </Text>
         </View>
       ) : (
@@ -677,23 +825,46 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <FlatList
           data={filteredGyms}
           keyExtractor={(gym) => gym.id}
-          renderItem={({ item: gym }) => (
+          renderItem={({ item: gym }) => {
+            // Debug: Log website data for South Tampa Jiu Jitsu
+            if (gym.name.toLowerCase().includes('south tampa')) {
+              console.log('🔍 South Tampa Jiu Jitsu website debug:', {
+                name: gym.name,
+                website: gym.website,
+                hasWebsite: !!gym.website,
+                websiteType: typeof gym.website
+              });
+            }
+            return (
             <View key={gym.id} style={styles.card}>
-              {/* Header: Gym Name + Heart Button */}
+              {/* Header: Logo/Avatar + Gym Name + Heart */}
               <View style={styles.cardHeader}>
+                {gym.id.includes('10th-planet') ? (
+                  <Image source={tenthPlanetLogo} style={styles.gymLogo} />
+                ) : gym.id.includes('stjj') ? (
+                  <Image source={stjjLogo} style={styles.gymLogo} />
+                ) : gymLogos[gym.id] ? (
+                  <Image source={{ uri: gymLogos[gym.id] }} style={styles.gymLogo} />
+                ) : (
+                  <View style={styles.avatarCircle}>
+                    <Text style={styles.avatarText}>{gymLogoService.getInitials(gym.name)}</Text>
+                  </View>
+                )}
                 <Text style={styles.gymName}>{gym.name}</Text>
-                <TouchableOpacity 
-                  style={styles.heartButton}
-                  onPress={() => handleHeartPress(gym)}
-                >
-                  <Text style={styles.heartIcon}>
-                    {favorites.has(gym.id) ? '♥' : '♡'}
-                  </Text>
-                </TouchableOpacity>
+                <View style={styles.logoHeartContainer}>
+                  <TouchableOpacity 
+                    style={styles.heartButton}
+                    onPress={() => handleHeartPress(gym)}
+                  >
+                    <Text style={styles.heartIcon}>
+                      {favorites.has(gym.id) ? '♥' : '♡'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Session Type Subtitle */}
-              <Text style={styles.sessionSubtitle}>Open Mat Session</Text>
+              <Text style={styles.sessionSubtitle}>Jiu Jitsu Session</Text>
 
               {/* Sessions Section */}
               <View style={styles.sessionsSection}>
@@ -709,77 +880,100 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                 ))}
               </View>
 
-              {/* Info Section */}
-              <View style={styles.infoSection}>
-                {/* Fees Section */}
-                <View style={styles.feesSection}>
-                  <View style={styles.feesHeader}>
-                    <Text style={styles.infoIcon}>💵</Text>
-                    <Text style={styles.infoText}>Fees</Text>
-                  </View>
-                  <View style={styles.feeItem}>
-                    <Text style={styles.feeLabel}>Open mat - </Text>
-                    <Text style={styles.feeValue}>
-                      {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
-                    </Text>
-                  </View>
-                  <View style={styles.feeItem}>
-                    <Text style={styles.feeLabel}>Class Drop in - </Text>
-                    <Text style={styles.feeValue}>
-                      {gym.dropInFee === 0 ? 'Free' : gym.dropInFee ? `$${gym.dropInFee}` : '?/unknown'}
-                    </Text>
-                  </View>
+              {/* Fees Section */}
+              <View style={styles.feesSection}>
+                <View style={styles.feesHeader}>
+                  <Text style={styles.infoIcon}>💵</Text>
+                  <Text style={styles.infoText}>Fees</Text>
                 </View>
+                <View style={styles.feeItem}>
+                  <Text style={styles.feeLabel}>Open mat - </Text>
+                  <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}> {/* Green if free */}
+                    {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
+                  </Text>
+                </View>
+                <View style={styles.feeItem}>
+                  <Text style={styles.feeLabel}>Class Drop in - </Text>
+                  <Text style={styles.feeValue}>
+                    {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
+                  </Text>
+                </View>
+              </View>
 
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoIcon}>📍</Text>
-                  <Text style={styles.infoText}>{gym.distance} miles • {location}</Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoIcon}>⚠️</Text>
-                  <Text style={styles.infoText}>Waiver required on arrival</Text>
-                </View>
+              {/* Compact Location/Waiver Row */}
+              <View style={styles.infoRow}>
+                <Text style={styles.infoIcon}>⚠️</Text>
+                <Text style={[styles.infoText, { marginLeft: 4 }]}>Waiver required</Text>
               </View>
 
               {/* Action Buttons */}
               <View style={styles.buttonRow}>
+                {gym.website && (
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => openWebsite(gym.website)}
+                  >
+                    <Text style={styles.buttonText}>🌐 Website</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity 
+                  style={[styles.actionButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledButton]}
+                  onPress={() => openDirections(gym.address)}
+                  disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
+                >
+                  <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
+                </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.actionButton}
                   onPress={() => {
-                    // TODO: Implement call functionality
-                    Alert.alert('Call Gym', 'Call functionality coming soon!');
+                    // Get the first session for sharing details
+                    const firstSession = gym.openMats[0];
+                    const sessionDay = firstSession?.day || '';
+                    const sessionTime = firstSession?.time || '';
+                    const giType = firstSession?.type === 'gi' ? 'Gi' : firstSession?.type === 'nogi' ? 'No-Gi' : 'Mixed';
+                    
+                    // Use the full address
+                    const locationText = gym.address;
+                    
+                    // Build the share message
+                    const shareMessage = `🥋 ${gym.name} - Open Mat
+📅 ${sessionDay}, ${sessionTime}
+👕 ${giType} Session
+💵 ${gym.matFee === 0 ? 'FREE Open Mat' : `Open Mat: $${gym.matFee}`}
+📍 ${locationText}
+🏃 Join me for training!
+
+📱 Get the app:
+https://apps.apple.com/us/app/find-jiu-jitsu/id6747903814`;
+
+                    Share.share({
+                      message: shareMessage,
+                      title: `${gym.name} - Jiu Jitsu Gym`
+                    });
                   }}
                 >
-                  <Text style={styles.buttonText}>📞 Call</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.middleButton]}
-                  onPress={() => handleHeartPress(gym)}
-                >
-                  <Text style={styles.buttonText}>
-                    {favorites.has(gym.id) ? '💾 Saved' : '💾 Save'}
-                  </Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => {
-                    // TODO: Implement directions functionality
-                    Alert.alert('Get Directions', 'Directions functionality coming soon!');
-                  }}
-                >
-                  <Text style={styles.buttonText}>🧭 Go</Text>
+                  <Text style={styles.buttonText}>↗️ Share</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          )}
+            );
+          }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.1}
         />
       )}
+
+      {/* Hidden ShareCard for image generation - temporarily disabled */}
+      {/* {shareCardGym && (
+        <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+          <ShareCard
+            ref={shareCardRef}
+            gym={shareCardGym}
+            theme={theme}
+          />
+        </View>
+      )} */}
 
       {/* Gym Details Modal */}
       <GymDetailsModal
@@ -790,39 +984,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         isFavorited={selectedGym ? favorites.has(selectedGym.id) : false}
       />
 
-      {/* Suggest Gym Modal */}
-      <Modal
-        visible={suggestModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleCloseSuggestModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.suggestModal}>
-            <Text style={styles.suggestModalTitle}>Send gym suggestions to:</Text>
-            <Text style={styles.suggestModalEmail}>glootieapp@gmail.com</Text>
-            <Text style={styles.suggestModalNote}>Include gym name, location, and schedule</Text>
-            
-            <View style={styles.suggestModalButtons}>
-              <TouchableOpacity
-                style={styles.copyEmailButton}
-                onPress={handleCopyEmail}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.copyEmailButtonText}>Copy Email</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleCloseSuggestModal}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -839,7 +1000,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
-    gap: 12,
+    position: 'relative',
   },
   backButton: {
     padding: 8,
@@ -851,6 +1012,7 @@ const styles = StyleSheet.create({
   },
   headerTextContainer: {
     flex: 1,
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 22,
@@ -861,37 +1023,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     flex: 1,
+    textAlign: 'center',
   },
-  headerSubtitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  envelopeButton: {
+    position: 'absolute',
+    right: 20,
+    top: 24,
+    padding: 8,
   },
-  suggestionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#F0F3F5',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    marginLeft: 8,
-  },
-  suggestionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
+  locationContext: {
+    fontSize: 15,
     color: '#60798A',
+    fontWeight: '500',
+    marginBottom: 8,
+    textAlign: 'center',
   },
+
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 0,
     paddingBottom: 40,
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
-    marginBottom: 16,
-    padding: 16,
+    borderColor: '#E5E7EB',
+    marginBottom: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   logoCircle: {
     width: 48,
@@ -944,7 +1108,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    // Removed justifyContent: 'space-between' for left alignment
     marginBottom: 2,
     gap: 8,
   },
@@ -1027,6 +1191,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  // Enhanced Empty State Styles
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 40,
+  },
+  emptyStateIconContainer: {
+    marginBottom: 24,
+    opacity: 0.6,
+  },
+  emptyStateTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 32,
+  },
+  emptyStateSubtitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 22,
+    paddingHorizontal: 16,
+  },
+  emptyStateButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+    width: '100%',
+  },
+  emptyStateButton: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+  },
+  primaryButton: {
+    backgroundColor: '#0C92F2',
+    shadowColor: '#0C92F2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  secondaryButton: {
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  secondaryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyStateSuggestion: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: 16,
+    opacity: 0.8,
+  },
   suggestButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1046,75 +1282,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  suggestModal: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 16,
-    width: '80%',
-    maxHeight: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  suggestModalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
-    color: '#1F2937',
-    textAlign: 'center',
-  },
-  suggestModalEmail: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#0C92F2',
-    textAlign: 'center',
-  },
-  suggestModalNote: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 20,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  suggestModalButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  copyEmailButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#0C92F2',
-  },
-  copyEmailButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: 'white',
-  },
-  closeButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#6B7280',
-  },
-  closeButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: 'white',
-  },
+
   filterContainer: {
-    paddingVertical: 12,
+    paddingVertical: 0,
   },
   filterPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14, // was 20
+    paddingVertical: 6, // was 10
     borderRadius: 20,
     backgroundColor: '#F0F3F5',
-    marginRight: 12,
+    marginRight: 8, // was 16
   },
   filterPillText: {
     fontSize: 14,
@@ -1126,8 +1305,8 @@ const styles = StyleSheet.create({
   },
   filterSection: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 8,
+    paddingVertical: 0,
+    marginBottom: 0,
     position: 'relative',
   },
   // New compact card styles
@@ -1219,34 +1398,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
+
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
   },
-  // Premium card styles
+  // Card styles
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 10,
   },
-  gymName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111518',
-    flex: 1,
+  logoHeartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  heartButton: {
-    padding: 8,
+  logoPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  logoImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   heartIcon: {
     fontSize: 24,
@@ -1256,19 +1438,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#60798A',
     fontStyle: 'italic',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sessionsSection: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   sessionBlock: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   dayHeader: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111518',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   timeRange: {
     fontSize: 14,
@@ -1276,16 +1458,11 @@ const styles = StyleSheet.create({
     color: '#111518',
     marginBottom: 2,
   },
-  instructorText: {
-    fontSize: 13,
-    color: '#60798A',
-    fontStyle: 'italic',
-  },
   infoSection: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   feesSection: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   feesHeader: {
     flexDirection: 'row',
@@ -1308,42 +1485,61 @@ const styles = StyleSheet.create({
     color: '#111518',
     fontWeight: '600',
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
   infoIcon: {
     fontSize: 18,
-    marginRight: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#111518',
-    flex: 1,
+    marginRight: 6,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
+    marginTop: 8,
   },
   actionButton: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#F0F3F5',
-    borderRadius: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  middleButton: {
-    marginHorizontal: 6,
+    borderColor: '#E5E7EB',
+    minHeight: 44,
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#111518',
+    textAlign: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#F3F4F6',
+    borderColor: '#D1D5DB',
+    opacity: 0.7,
+  },
+  disabledText: {
+    color: '#9CA3AF',
+  },
+  avatarCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  gymLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    resizeMode: 'contain',
+    marginRight: 10,
   },
 });
 

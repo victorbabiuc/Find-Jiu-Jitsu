@@ -6,6 +6,7 @@ import { ViewType } from '../types';
 export type RootStackParamList = {
   Login: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
+  ProfileDetails: undefined;
 };
 
 // Main Tab Navigator Types
@@ -13,6 +14,7 @@ export type MainTabParamList = {
   Home: undefined;
   Find: NavigatorScreenParams<FindStackParamList>;
   Favorites: undefined;
+  Profile: undefined;
 };
 
 // Find Stack Types (nested within Find tab)

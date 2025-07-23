@@ -19,39 +19,39 @@ export const beltColors: Record<BeltType, {
     textOnColor: '#000000'
   },
   blue: {
-    primary: '#3B82F6',
-    secondary: '#60A5FA',
-    accent: '#2563EB',
-    surface: '#3B82F615',
-    gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-    cardGradient: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)',
+    primary: '#475569',
+    secondary: '#64748B',
+    accent: '#0F172A',
+    surface: '#47556915',
+    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
+    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
     textOnColor: '#FFFFFF'
   },
   purple: {
-    primary: '#A855F7',
-    secondary: '#C084FC',
-    accent: '#9333EA',
-    surface: '#A855F715',
-    gradient: 'linear-gradient(135deg, #A855F7 0%, #9333EA 100%)',
-    cardGradient: 'linear-gradient(135deg, #A855F7 0%, #C084FC 100%)',
+    primary: '#475569',
+    secondary: '#64748B',
+    accent: '#0F172A',
+    surface: '#47556915',
+    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
+    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
     textOnColor: '#FFFFFF'
   },
   brown: {
-    primary: '#D97706',
-    secondary: '#F59E0B',
-    accent: '#B45309',
-    surface: '#D9770615',
-    gradient: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)',
-    cardGradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+    primary: '#475569',
+    secondary: '#64748B',
+    accent: '#0F172A',
+    surface: '#47556915',
+    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
+    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
     textOnColor: '#FFFFFF'
   },
   black: {
-    primary: '#525252',
-    secondary: '#737373',
-    accent: '#404040',
-    surface: '#52525215',
-    gradient: 'linear-gradient(135deg, #525252 0%, #171717 100%)',
-    cardGradient: 'linear-gradient(135deg, #525252 0%, #737373 100%)',
+    primary: '#475569',
+    secondary: '#64748B',
+    accent: '#0F172A',
+    surface: '#47556915',
+    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
+    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
     textOnColor: '#FFFFFF'
   }
 };

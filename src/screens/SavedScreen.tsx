@@ -7,9 +7,12 @@ import {
   FlatList,
   Dimensions,
   SafeAreaView,
+  Alert,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
@@ -17,13 +20,15 @@ import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
-import { apiService } from '../services';
+import { apiService, gymLogoService } from '../services';
+import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
+import stjjLogo from '../../assets/logos/STJJ.png';
 
 const { width } = Dimensions.get('window');
 
 const SavedScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { favorites, toggleFavorite, userBelt } = useApp();
+  const { favorites, toggleFavorite, userBelt, selectedLocation } = useApp();
   const { showTransitionalLoading } = useLoading();
   const navigation = useMainTabNavigation();
   const beltColor = beltColors[userBelt];
@@ -35,6 +40,9 @@ const SavedScreen: React.FC = () => {
   // Modal state
   const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  
+  // Gym logo state
+  const [gymLogos, setGymLogos] = useState<Record<string, string>>({});
 
   // Fetch saved gyms data
   useEffect(() => {
@@ -45,7 +53,8 @@ const SavedScreen: React.FC = () => {
       try {
         setLoading(true);
         // Get all gyms from API and filter by favorites
-        const allGyms = await apiService.getOpenMats('Tampa'); // We'll need to handle multiple locations
+        const location = selectedLocation || 'Tampa';
+        const allGyms = await apiService.getOpenMats(location); // We'll need to handle multiple locations
         const saved = allGyms.filter(gym => favorites.has(gym.id));
         setSavedGyms(saved);
       } catch (error) {
@@ -57,7 +66,36 @@ const SavedScreen: React.FC = () => {
     };
 
     fetchSavedGyms();
-  }, [favorites, showTransitionalLoading]);
+  }, [favorites, showTransitionalLoading, selectedLocation]);
+
+  // Load gym logos when savedGyms data changes
+  useEffect(() => {
+    const loadGymLogos = async () => {
+      const logoUrls: Record<string, string> = {};
+      
+      for (const gym of savedGyms) {
+        // Skip gyms that already have hardcoded logos
+        if (gym.id.includes('10th-planet') || gym.id.includes('stjj')) {
+          continue;
+        }
+        
+        try {
+          const logoUrl = await gymLogoService.getGymLogo(gym.id, gym.name, gym.website);
+          if (logoUrl) {
+            logoUrls[gym.id] = logoUrl;
+          }
+        } catch (error) {
+          console.log(`Failed to load logo for ${gym.name}:`, error);
+        }
+      }
+      
+      setGymLogos(logoUrls);
+    };
+
+    if (savedGyms.length > 0) {
+      loadGymLogos();
+    }
+  }, [savedGyms]);
 
   const handleGymPress = (gym: OpenMat) => {
     setSelectedGym(gym);
@@ -90,22 +128,13 @@ const SavedScreen: React.FC = () => {
     );
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 3);
-  };
+
 
   const formatOpenMats = (openMats: any[]) => {
     return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
   };
 
-  const handleFindMats = () => {
-    navigation.navigate('Find', { screen: 'Location' });
-  };
+
 
   // Show loading state - removed in favor of transitional loading
   if (loading) {
@@ -115,13 +144,26 @@ const SavedScreen: React.FC = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTextContainer}>
-          <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Saved Gyms</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
-            {savedGyms.length} saved • Your favorites
-          </Text>
-        </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Saved Gyms</Text>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'Send us your suggestions!',
+              'glootieapp@gmail.com\n\nTap Copy to copy the email address and send us your feedback!',
+              [
+                {
+                  text: 'Copy',
+                  onPress: () => Clipboard.setStringAsync('glootieapp@gmail.com'),
+                },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          }}
+          accessibilityLabel="Send Suggestions"
+        >
+          <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -138,15 +180,7 @@ const SavedScreen: React.FC = () => {
           <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
             Heart gyms you like to save them here
           </Text>
-          <TouchableOpacity
-            style={[styles.findMatsButton, { backgroundColor: beltColor.primary }]}
-            onPress={handleFindMats}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.findMatsButtonText, { color: beltColor.textOnColor }]}>
-              Find Open Mats
-            </Text>
-          </TouchableOpacity>
+
         </View>
       ) : (
         // Saved Gyms List
@@ -163,16 +197,24 @@ const SavedScreen: React.FC = () => {
               onPress={() => handleGymPress(gym)}
             >
               {/* Logo/Initials */}
-              <LinearGradient
-                colors={[beltColor.primary, beltColor.secondary]}
-                style={styles.logoCircle}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
-                  {getInitials(gym.name)}
-                </Text>
-              </LinearGradient>
+              {gym.id.includes('10th-planet') ? (
+                <Image source={tenthPlanetLogo} style={styles.logoCircle} />
+              ) : gym.id.includes('stjj') ? (
+                <Image source={stjjLogo} style={styles.logoCircle} />
+              ) : gymLogos[gym.id] ? (
+                <Image source={{ uri: gymLogos[gym.id] }} style={styles.logoCircle} />
+              ) : (
+                <LinearGradient
+                  colors={[beltColor.primary, beltColor.secondary]}
+                  style={styles.logoCircle}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
+                    {gymLogoService.getInitials(gym.name)}
+                  </Text>
+                </LinearGradient>
+              )}
               
               {/* Card Content */}
               <View style={styles.cardContent}>
@@ -271,17 +313,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     lineHeight: 22,
   },
-  findMatsButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    minWidth: 160,
-  },
-  findMatsButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
+
   scrollContent: {
     padding: 20,
   },

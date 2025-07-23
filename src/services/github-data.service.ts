@@ -11,8 +11,10 @@ interface CSVRow {
   id: string;
   name: string;
   address: string;
+  website: string;
   distance: string;
   matFee: string;
+  dropInFee: string;
   sessionDay: string;
   sessionTime: string;
   sessionType: string;
@@ -24,9 +26,34 @@ class GitHubDataService {
   
   // GitHub raw URLs for CSV files
   private readonly CSV_URLS = {
-    'tampa': 'https://raw.githubusercontent.com/victorbabiuc/OpenMatFinder/main/data/tampa-gyms.csv',
-    'austin': 'https://raw.githubusercontent.com/victorbabiuc/OpenMatFinder/main/data/austin-gyms.csv'
+    'tampa': 'https://raw.githubusercontent.com/victorbabiuc/Find-Jiu-Jitsu/main/data/tampa-gyms.csv',
+    'austin': 'https://raw.githubusercontent.com/victorbabiuc/Find-Jiu-Jitsu/main/data/austin-gyms.csv'
   };
+
+  /**
+   * Check if cached data is stale and needs refreshing
+   * @param location - The location to check
+   * @returns Promise<boolean> - True if data needs refreshing
+   */
+  async isDataStale(location: string): Promise<boolean> {
+    try {
+      const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
+      const cachedString = await AsyncStorage.getItem(cacheKey);
+      
+      if (!cachedString) {
+        return true; // No cache, needs fresh data
+      }
+
+      const cached: CachedData = JSON.parse(cachedString);
+      const age = Date.now() - cached.timestamp;
+      
+      // Consider data stale after 1 hour instead of 24 hours for more frequent updates
+      return age > (60 * 60 * 1000); // 1 hour
+    } catch (error) {
+      console.error(`Error checking if data is stale for ${location}:`, error);
+      return true; // Assume stale if error
+    }
+  }
 
   /**
    * Fetch gym data for a specific location
@@ -35,13 +62,18 @@ class GitHubDataService {
    * @returns Promise<OpenMat[]> - Array of gym data
    */
   async getGymData(location: string, forceRefresh: boolean = false): Promise<OpenMat[]> {
-    console.log('�� GitHubDataService: Fetching data for', location);
+    // Ensure location is never undefined or empty
+    const safeLocation = location || 'tampa';
+    console.log('🌐 GitHubDataService: Fetching data for', safeLocation, forceRefresh ? '(force refresh)' : '(normal)');
     
     try {
-      const normalizedLocation = location.toLowerCase();
+      const normalizedLocation = safeLocation.toLowerCase();
       
-      // Check cache first (unless force refresh)
-      if (!forceRefresh) {
+      // Check if data is stale or force refresh is requested
+      const isStale = await this.isDataStale(normalizedLocation);
+      
+      // Check cache first (unless force refresh or data is stale)
+      if (!forceRefresh && !isStale) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
           console.log('✅ GitHubDataService: Using cached data -', cachedData.length, 'gyms');
@@ -59,17 +91,17 @@ class GitHubDataService {
       
       return parsedData;
     } catch (error) {
-      console.error(`❌ GitHubDataService: Error fetching data for ${location}:`, error);
+      console.error(`❌ GitHubDataService: Error fetching data for ${safeLocation}:`, error);
       
       // Fallback to cached data if available
-      const cachedData = await this.getCachedData(location.toLowerCase());
+      const cachedData = await this.getCachedData(safeLocation.toLowerCase());
       if (cachedData) {
         console.log('✅ GitHubDataService: Using fallback cached data -', cachedData.length, 'gyms');
         return cachedData;
       }
       
       // Return empty array if no cached data available
-      console.warn(`⚠️ GitHubDataService: No data available for ${location}`);
+      console.warn(`⚠️ GitHubDataService: No data available for ${safeLocation}`);
       return [];
     }
   }
@@ -96,6 +128,29 @@ class GitHubDataService {
   }
 
   /**
+   * Sort sessions by day order (Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday)
+   * @param sessions - Array of sessions to sort
+   * @returns Sorted array of sessions
+   */
+  private sortSessionsByDay(sessions: OpenMatSession[]): OpenMatSession[] {
+    const dayOrder = {
+      'Friday': 1,
+      'Saturday': 2, 
+      'Sunday': 3,
+      'Monday': 4,
+      'Tuesday': 5,
+      'Wednesday': 6,
+      'Thursday': 7
+    };
+
+    return sessions.sort((a, b) => {
+      const orderA = dayOrder[a.day as keyof typeof dayOrder] || 999;
+      const orderB = dayOrder[b.day as keyof typeof dayOrder] || 999;
+      return orderA - orderB;
+    });
+  }
+
+  /**
    * Parse CSV data into OpenMat objects
    * @param csvData - Raw CSV string
    * @returns OpenMat[] - Array of parsed gym data
@@ -104,8 +159,10 @@ class GitHubDataService {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
     
+
+    
     // Validate headers
-    const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'sessionDay', 'sessionTime', 'sessionType'];
+    const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'dropInFee', 'sessionDay', 'sessionTime', 'sessionType'];
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
     
     if (missingHeaders.length > 0) {
@@ -115,16 +172,22 @@ class GitHubDataService {
     // Parse CSV rows
     const csvRows: CSVRow[] = lines.slice(1).map(line => {
       const values = this.parseCSVLine(line);
-      return {
+      const row = {
         id: values[headers.indexOf('id')] || '',
         name: values[headers.indexOf('name')] || '',
         address: values[headers.indexOf('address')] || '',
+        website: values[headers.indexOf('website')] || '',
         distance: values[headers.indexOf('distance')] || '0',
         matFee: values[headers.indexOf('matFee')] || '0',
+        dropInFee: values[headers.indexOf('dropInFee')] || '',
         sessionDay: values[headers.indexOf('sessionDay')] || '',
         sessionTime: values[headers.indexOf('sessionTime')] || '',
         sessionType: values[headers.indexOf('sessionType')] || 'both'
       };
+      
+
+      
+      return row;
     });
 
     // Group by gym ID
@@ -138,14 +201,20 @@ class GitHubDataService {
 
       if (!gymMap.has(row.id)) {
         // Create new gym entry
-        gymMap.set(row.id, {
+        const gym = {
           id: row.id,
           name: row.name,
           address: row.address,
+          website: row.website && row.website.trim() !== '' ? row.website : undefined,
           distance: parseFloat(row.distance) || 0,
           matFee: parseInt(row.matFee) || 0,
+          dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
           openMats: []
-        });
+        };
+        
+
+        
+        gymMap.set(row.id, gym);
       }
 
       // Add session to existing gym
@@ -160,7 +229,20 @@ class GitHubDataService {
       }
     });
 
-    return Array.from(gymMap.values());
+    // Sort sessions by day order for each gym
+    const sortedGyms = Array.from(gymMap.values()).map(gym => ({
+      ...gym,
+      openMats: this.sortSessionsByDay(gym.openMats)
+    }));
+
+    // Debug log for South Tampa Jiu Jitsu to verify sorting
+    const stjjGym = sortedGyms.find(gym => gym.name.toLowerCase().includes('south tampa'));
+    if (stjjGym) {
+      console.log('🔍 GitHubDataService: South Tampa Jiu Jitsu sessions after sorting:', 
+        stjjGym.openMats.map(s => `${s.day} ${s.time} (${s.type})`));
+    }
+
+    return sortedGyms;
   }
 
   /**
@@ -195,9 +277,9 @@ class GitHubDataService {
   /**
    * Validate and normalize session type
    * @param type - Raw session type from CSV
-   * @returns 'gi' | 'nogi' | 'both' - Normalized session type
+   * @returns 'gi' | 'nogi' | 'both' | 'mma' | string - Normalized session type
    */
-  private validateSessionType(type: string): 'gi' | 'nogi' | 'both' {
+  private validateSessionType(type: string): 'gi' | 'nogi' | 'both' | 'mma' | string {
     const normalized = type.toLowerCase().trim();
     
     switch (normalized) {
@@ -211,8 +293,14 @@ class GitHubDataService {
         return 'nogi';
       case 'both':
       case 'b':
-      default:
         return 'both';
+      case 'mma':
+      case 'mma sparring':
+      case 'sparring':
+        return 'mma';
+      default:
+        // Preserve original session type for custom types like "MMA Sparring"
+        return type.trim();
     }
   }
 
@@ -268,18 +356,23 @@ class GitHubDataService {
   }
 
   /**
-   * Clear cache for a specific location or all locations
-   * @param location - Optional location to clear cache for. If not provided, clears all cache.
+   * Clear cache for a specific location
+   * @param location - The location to clear cache for
    */
   async clearCache(location?: string): Promise<void> {
     try {
       if (location) {
-        const cacheKey = this.CACHE_PREFIX + location.toLowerCase();
+        const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
         await AsyncStorage.removeItem(cacheKey);
+        console.log(`🧹 GitHubDataService: Cache cleared for ${location}`);
       } else {
-        const keys = await AsyncStorage.getAllKeys();
-        const cacheKeys = keys.filter(key => key.startsWith(this.CACHE_PREFIX));
-        await AsyncStorage.multiRemove(cacheKeys);
+        // Clear all location caches
+        const keys = Object.keys(this.CSV_URLS);
+        for (const key of keys) {
+          const cacheKey = `${this.CACHE_PREFIX}${key}`;
+          await AsyncStorage.removeItem(cacheKey);
+        }
+        console.log('🧹 GitHubDataService: All location caches cleared');
       }
     } catch (error) {
       console.error('Error clearing cache:', error);
@@ -292,7 +385,31 @@ class GitHubDataService {
    * @returns Promise<OpenMat[]> - Fresh data
    */
   async refreshData(location: string): Promise<OpenMat[]> {
+    // Clear cache first, then fetch fresh data
+    await this.clearCache(location);
     return this.getGymData(location, true);
+  }
+
+  /**
+   * Get the last update timestamp for a location
+   * @param location - The location to check
+   * @returns Promise<number | null> - Timestamp of last update or null if no cache
+   */
+  async getLastUpdateTime(location: string): Promise<number | null> {
+    try {
+      const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
+      const cachedString = await AsyncStorage.getItem(cacheKey);
+      
+      if (!cachedString) {
+        return null;
+      }
+
+      const cached: CachedData = JSON.parse(cachedString);
+      return cached.timestamp;
+    } catch (error) {
+      console.error(`Error getting last update time for ${location}:`, error);
+      return null;
+    }
   }
 
   /**
@@ -320,6 +437,36 @@ class GitHubDataService {
   }
 
   /**
+   * Clear all cached data and force refresh
+   * @returns Promise<void>
+   */
+  async clearAllCacheAndRefresh(): Promise<void> {
+    try {
+      console.log('🧹 GitHubDataService: Clearing all cache...');
+      await this.clearCache();
+      console.log('✅ GitHubDataService: All cache cleared');
+    } catch (error) {
+      console.error('❌ GitHubDataService: Error clearing cache:', error);
+    }
+  }
+
+  /**
+   * Force refresh data for all locations
+   * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[] }>
+   */
+  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[] }> {
+    console.log('🔄 GitHubDataService: Force refreshing all data...');
+    
+    const [tampaData, austinData] = await Promise.all([
+      this.getGymData('tampa', true),
+      this.getGymData('austin', true)
+    ]);
+    
+    console.log('✅ GitHubDataService: All data refreshed');
+    return { tampa: tampaData, austin: austinData };
+  }
+
+  /**
    * Get all available locations
    * @returns string[] - Array of available location keys
    */
@@ -338,4 +485,4 @@ class GitHubDataService {
 }
 
 // Export singleton instance
-export const githubDataService = new GitHubDataService(); 
+export const githubDataService = new GitHubDataService();

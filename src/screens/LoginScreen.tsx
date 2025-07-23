@@ -6,10 +6,14 @@ import {
   StyleSheet,
   SafeAreaView,
   Dimensions,
+  Platform,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useRootNavigation } from '../navigation/useNavigation';
 import { useLoading } from '../context';
 import { beltColors } from '../utils/constants';
@@ -19,6 +23,7 @@ const { width, height } = Dimensions.get('window');
 const LoginScreen = () => {
   const { theme } = useTheme();
   const { userBelt } = useApp();
+  const { signInWithGoogle, signInWithApple, loading } = useAuth();
   const navigation = useRootNavigation();
   const { showLoading } = useLoading();
   
@@ -28,27 +33,62 @@ const LoginScreen = () => {
   const currentBeltColor = beltColors[userBelt];
   const beltTypes: Array<'white' | 'blue' | 'purple' | 'brown' | 'black'> = ['white', 'blue', 'purple', 'brown', 'black'];
 
-  // Belt progression animation with continuous looping
+  // Belt progression animation (without auto-navigation)
   useEffect(() => {
     const beltProgression = () => {
       setCurrentBeltIndex(prev => {
-        // When we reach the end (black belt), reset to white
-        if (prev >= beltTypes.length - 1) {
-          return 0;
+        const nextIndex = prev + 1;
+        
+        // Stop at the last belt, don't auto-navigate
+        if (nextIndex >= beltTypes.length) {
+          return beltTypes.length - 1; // Stay at the last belt
         }
-        return prev + 1;
+        
+        return nextIndex;
       });
     };
 
-    // Start belt progression
     const timer = setTimeout(beltProgression, 600);
-
     return () => clearTimeout(timer);
   }, [currentBeltIndex]);
 
   const handleGetStarted = () => {
     showLoading();
-    navigation.navigate('Main', { screen: 'Home' });
+    // Use navigation.reset() to safely navigate to Main
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Main' }],
+    });
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      showLoading();
+      await signInWithGoogle();
+      // Only navigate if sign-in was successful (no error thrown)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
+    } catch (error) {
+      console.error('Google sign-in failed:', error);
+      // Don't navigate on error - let user try again
+      // The error is already handled in AuthContext
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      showLoading();
+      await signInWithApple();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
+    } catch (error) {
+      console.error('Apple sign-in failed:', error);
+      // Don't navigate on error - let user try again
+    }
   };
 
   return (
@@ -56,74 +96,97 @@ const LoginScreen = () => {
       <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.header}>
-          {/* Belt Logo */}
-          <View style={[styles.beltLogo, { backgroundColor: currentBeltColor.primary }]}>
-            <Text style={[styles.beltText, { color: currentBeltColor.textOnColor }]}>
-              🥋
-            </Text>
-          </View>
+          {/* App Logo */}
+          <Image 
+            source={require('../../assets/icon.png')}
+            style={styles.appLogo}
+          />
           
           {/* Title */}
           <Text style={[styles.title, { color: theme.text.primary }]}>
             FIND JIU JITSU
           </Text>
           <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
-            Your Jiu Jitsu Training Companion
+            Your Training Companion
           </Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.mainContent}>
-          {/* Get Started Button */}
-          <TouchableOpacity
-            style={styles.getStartedButton}
-            onPress={handleGetStarted}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={[currentBeltColor.primary, currentBeltColor.accent]}
-              style={styles.gradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={[styles.getStartedButtonText, { color: currentBeltColor.textOnColor }]}>
-                Get Started
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Belt progression animation positioned below the button */}
-          <View style={styles.beltBarsContainer}>
-            {beltTypes.map((beltType, index) => {
-              const beltColor = beltColors[beltType];
-              const isActive = index <= currentBeltIndex;
-              
-              // Special handling for white belt in light mode
-              const isWhiteBeltInLightMode = beltType === 'white';
-              
-              return (
-                <View
-                  key={beltType}
-                  style={[
-                    styles.beltBar,
-                    {
-                      backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
-                      opacity: isActive ? 1 : 0.3,
-                      // Add border for white belt in light mode for better visibility
-                      ...(isWhiteBeltInLightMode && {
-                        borderWidth: 1.5,
-                        borderColor: '#9CA3AF',  // More visible gray
-                      }),
-                      transform: [{
-                        scale: isActive && index === currentBeltIndex ? 1.1 : 1
-                      }]
-                    }
-                  ]}
+          {/* Authentication Buttons */}
+          <View style={styles.authContainer}>
+            <View style={styles.authButtons}>
+              {Platform.OS === 'ios' && (
+                <AppleAuthentication.AppleAuthenticationButton
+                  buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                  buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                  cornerRadius={12}
+                  style={styles.appleButton}
+                  onPress={handleAppleSignIn}
                 />
-              );
-            })}
+              )}
+              
+              <TouchableOpacity
+                onPress={handleGoogleSignIn}
+                disabled={loading}
+                style={[styles.googleButton, loading && styles.buttonDisabled]}
+              >
+                <Text style={styles.googleButtonText}>
+                  {loading ? 'Signing in...' : 'Continue with Google'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Skip authentication option */}
+              <TouchableOpacity
+                onPress={handleGetStarted}
+                style={{
+                  marginTop: 20,
+                  paddingVertical: 16,
+                  paddingHorizontal: 20,
+                  borderWidth: 1,
+                  borderColor: theme.text.secondary,
+                  borderRadius: 12,
+                }}
+              >
+                <Text style={[styles.skipButtonText, { color: theme.text.secondary }]}>
+                  Skip for now
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
+      </View>
+
+      {/* Belt progression animation moved to bottom */}
+      <View style={styles.beltBarsContainer}>
+        {beltTypes.map((beltType, index) => {
+          const beltColor = beltColors[beltType];
+          const isActive = index <= currentBeltIndex;
+          
+          // Special handling for white belt for better visibility
+          const isWhiteBeltInLightMode = beltType === 'white';
+          
+          return (
+            <View
+              key={beltType}
+              style={[
+                styles.beltBar,
+                {
+                  backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
+                  opacity: isActive ? 1 : 0.3,
+                  // Add border for white belt for better visibility
+                  ...(isWhiteBeltInLightMode && {
+                    borderWidth: 1.5,
+                    borderColor: '#9CA3AF',  // More visible gray
+                  }),
+                  transform: [{
+                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
+                  }]
+                }
+              ]}
+            />
+          );
+        })}
       </View>
 
       {/* More cities coming soon */}
@@ -146,24 +209,11 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.05,
     paddingBottom: 20,
   },
-  beltLogo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  beltText: {
-    fontSize: 32,
+  appLogo: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 20,
   },
   title: {
     fontSize: 28,
@@ -209,6 +259,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   beltBarsContainer: {
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -221,12 +275,72 @@ const styles = StyleSheet.create({
   },
   moreCitiesText: {
     position: 'absolute',
-    bottom: 12,
+    bottom: 25,
     alignSelf: 'center',
     color: '#F59E0B',
     fontSize: 13,
     fontWeight: '500',
     opacity: 0.85,
+  },
+  authContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  authTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  authButtons: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  appleButton: {
+    width: '100%',
+    height: 50,
+    marginBottom: 15,
+  },
+  googleButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#4285F4',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  googleButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  skipButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

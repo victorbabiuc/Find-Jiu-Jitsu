@@ -15,6 +15,8 @@ import { useApp } from '../context/AppContext';
 import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { useLoading } from '../context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 
 const LocationScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -131,12 +133,26 @@ const LocationScreen: React.FC = () => {
       />
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: theme.text.primary }]}>
-          Where do you want to train?
-        </Text>
-        
-
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Location</Text>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'Send us your suggestions!',
+              'glootieapp@gmail.com\n\nTap Copy to copy the email address and send us your feedback!',
+              [
+                {
+                  text: 'Copy',
+                  onPress: () => Clipboard.setStringAsync('glootieapp@gmail.com'),
+                },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          }}
+          accessibilityLabel="Send Suggestions"
+        >
+          <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Main Content */}

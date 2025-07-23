@@ -135,15 +135,19 @@ const DashboardScreen: React.FC = () => {
   };
 
   const getSessionTypeWithIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'gi':
         return 'Gi 🥋';
       case 'nogi':
         return 'No-Gi 👕';
       case 'both':
         return 'Gi & No-Gi 🥋👕';
+      case 'mma':
+      case 'mma sparring':
+        return 'MMA Sparring 🥊';
       default:
-        return 'Open Mat 🥋👕';
+        // For any other custom session types, preserve the original name
+        return `${type} 🥋👕`;
     }
   };
 

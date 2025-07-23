@@ -2,6 +2,12 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform, UIManager } from 'react-native';
+
+// Force hide any native navigation bars on iOS
+if (Platform.OS === 'ios') {
+  UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(false);
+}
 
 // Import context providers
 import { AuthProvider } from './src/context/AuthContext';
@@ -38,7 +44,12 @@ export default function App() {
               <LoadingProvider>
                 <AppNavigator />
                 <GlobalLoadingOverlay />
-                <StatusBar style="auto" />
+                <StatusBar 
+                  style="auto" 
+                  hidden={false}
+                  backgroundColor="transparent"
+                  translucent={true}
+                />
               </LoadingProvider>
             </AppProvider>
           </ThemeProvider>

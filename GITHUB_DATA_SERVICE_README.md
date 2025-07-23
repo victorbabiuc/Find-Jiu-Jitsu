@@ -97,8 +97,8 @@ Update the `CSV_URLS` in the service to point to your actual GitHub repository:
 
 ```typescript
 private readonly CSV_URLS = {
-  'tampa': 'https://raw.githubusercontent.com/your-repo/openmatfinder-data/main/tampa-gyms.csv',
-  'austin': 'https://raw.githubusercontent.com/your-repo/openmatfinder-data/main/austin-gyms.csv'
+  'tampa': 'https://raw.githubusercontent.com/your-repo/find-jiu-jitsu-data/main/tampa-gyms.csv',
+'austin': 'https://raw.githubusercontent.com/your-repo/find-jiu-jitsu-data/main/austin-gyms.csv'
 };
 ```
 

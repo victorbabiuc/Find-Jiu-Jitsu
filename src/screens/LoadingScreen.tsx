@@ -80,26 +80,19 @@ const LoadingScreen: React.FC = () => {
           const beltColor = beltColors[beltType];
           const isActive = index <= currentBeltIndex;
           
-          // Special handling for white belt in light mode
-          const isWhiteBeltInLightMode = beltType === 'white' && theme.name === 'light';
+          // Special handling for white belt for better visibility
+          const isWhiteBeltInLightMode = beltType === 'white' && false; // Simplified for now
           
           return (
             <View
               key={beltType}
               style={[
-                styles.beltBar,
-                {
-                  backgroundColor: beltType === 'brown' ? '#D97706' : beltColor.primary,
-                  opacity: isActive ? 1 : 0.3,
-                  // Add border for white belt in light mode for better visibility
-                  ...(isWhiteBeltInLightMode && {
-                    borderWidth: 1.5,
-                    borderColor: '#9CA3AF',  // More visible gray
-                  }),
-                  transform: [{
-                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
-                  }]
-                }
+                styles.belt,
+                { backgroundColor: beltColor.primary },
+                isWhiteBeltInLightMode ? {
+                  borderWidth: 1.5,
+                  borderColor: '#9CA3AF',  // More visible gray
+                } : {}
               ]}
             />
           );
@@ -117,7 +110,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  beltBar: {
+  belt: {
     width: 48,
     height: 12,
     borderRadius: 6,
