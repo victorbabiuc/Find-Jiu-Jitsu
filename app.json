@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "jsEngine": "jsc",
     "scheme": "findjiujitsu",
     "splash": {
       "image": "./assets/splash.png",
