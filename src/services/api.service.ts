@@ -4,145 +4,200 @@ import { githubDataService } from './github-data.service';
 // Mock data for Tampa gyms
 const mockTampaGyms: OpenMat[] = [
   {
-    id: '1',
-    name: 'STJJ',
-    address: 'Tampa, FL',
-    distance: 5.2,
+    id: 'tampa-stjj',
+    name: 'South Tampa Jiu Jitsu',
+    address: '4916 South Lois Ave, Tampa, FL 33611',
+    website: 'https://southtampajiujitsu.com/',
+    distance: 0,
+    matFee: 0,
+    dropInFee: 20,
     openMats: [
+      { day: 'Friday', time: '5:00 PM', type: 'nogi' },
       { day: 'Sunday', time: '9:00 AM', type: 'gi' },
-      { day: 'Thursday', time: '5:00 PM', type: 'nogi' }
-    ],
-    matFee: 0
+      { day: 'Saturday', time: '11:00 AM', type: 'both' }
+    ]
   },
   {
-    id: '2',
+    id: 'tampa-rmnu',
     name: 'RMNU',
-    address: 'Tampa, FL',
-    distance: 7.1,
+    address: '11220 W Hillsborough Ave, Tampa, FL 33635',
+    website: 'https://www.rmnu.com',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Wednesday', time: '6:00 PM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Friday', time: '6:00 PM', type: 'both' }
+    ]
   },
   {
-    id: '3',
+    id: 'tampa-gracie-humaita',
     name: 'Gracie Humaita',
-    address: 'Tampa, FL',
-    distance: 4.8,
+    address: '11220 Hillsborough Ave, Tampa, FL 33626',
+    website: 'https://www.graciehumaita.com',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Tuesday', time: '6:30 PM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Friday', time: '6:30 PM - 7:30 PM', type: 'both' }
+    ]
   },
   {
-    id: '4',
+    id: 'tampa-kaizen',
     name: 'Kaizen',
     address: 'Tampa, FL',
-    distance: 9.3,
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Sunday', time: '11:00 AM - 1:00 PM', type: 'both' }
+    ]
   },
   {
-    id: '5',
+    id: 'tampa-ybor-city-jj',
     name: 'Ybor City JJ',
-    address: 'Ybor City, Tampa, FL',
-    distance: 6.5,
+    address: '718 E Henderson Ave, Tampa, FL 33602',
+    website: 'https://www.facebook.com/ycjjc/',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Saturday', time: '12:00 PM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Sunday', time: '12:00 PM - 2:00 PM', type: 'both' }
+    ]
   },
   {
-    id: '6',
+    id: 'tampa-gracie-brandon',
     name: 'Gracie Brandon',
-    address: 'Brandon, FL',
-    distance: 12.4,
+    address: '1155 Nikki View Dr, Brandon, FL 33511',
+    website: 'https://graciebrandon.com',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Saturday', time: '1:30 PM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Sunday', time: '1:30 PM', type: 'both' }
+    ]
   },
   {
-    id: '7',
+    id: 'tampa-gracie-westchase',
     name: 'Gracie Westchase',
-    address: 'Westchase, Tampa, FL',
-    distance: 15.2,
+    address: '12807 W Hillsborough Ave Suite F, Tampa, FL 33635',
+    website: 'https://graciewestchase.com',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Saturday', time: '10:00 AM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Saturday', time: '10:00 AM - 12:00 PM', type: 'both' },
+      { day: 'Sunday', time: '9:00 AM - 12:00 PM', type: 'both' }
+    ]
   },
   {
-    id: '8',
+    id: 'tampa-tactics-jj',
     name: 'Tactics JJ',
     address: 'Tampa, FL',
-    distance: 8.7,
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Saturday', time: '10:30 AM', type: 'both' }
-    ],
-    matFee: 0
+    ]
   },
   {
-    id: '9',
+    id: 'tampa-northriver',
     name: 'NorthRiver',
-    address: 'North Tampa, FL',
-    distance: 11.3,
+    address: 'Tampa, FL',
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ],
-    matFee: 0
+    ]
   },
   {
-    id: '10',
+    id: 'tampa-tmt',
     name: 'TMT',
     address: 'Tampa, FL',
-    distance: 7.9,
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Saturday', time: '11:30 AM', type: 'both' }
-    ],
-    matFee: 0
+    ]
   },
   {
-    id: '11',
+    id: 'tampa-gracie-trinity',
     name: 'Gracie Trinity',
-    address: 'Trinity, FL',
-    distance: 18.6,
+    address: '11548 Pyramid Dr, Odessa, FL 33556',
+    website: 'https://gracietrinity.com/',
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ],
-    matFee: 0
+    ]
   },
   {
-    id: '12',
+    id: 'tampa-gracie-clermont',
     name: 'Gracie Clermont',
     address: 'Clermont, FL',
-    distance: 35.2,
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Saturday', time: '12:00 PM', type: 'both' }
-    ],
-    matFee: 0
+    ]
   },
   {
-    id: '13',
+    id: 'tampa-st-pete-bjj',
     name: 'St Pete BJJ',
-    address: 'St. Petersburg, FL',
-    distance: 22.4,
+    address: '5540 Haines Rd N, St Petersburg, FL 33714',
+    website: 'https://www.stpetebjj.com/',
+    distance: 0,
+    matFee: 0,
     openMats: [
-      { day: 'Saturday', time: '5:00 PM', type: 'both' }
-    ],
-    matFee: 0
+      { day: 'Sunday', time: '5:00 PM', type: 'both' }
+    ]
   },
   {
-    id: '14',
+    id: 'tampa-inside-control-st-pete',
     name: 'Inside Control St Pete',
-    address: 'St. Petersburg, FL',
-    distance: 23.1,
+    address: '4654 28th St N, St Petersburg, FL 33714',
+    website: 'https://insidecontrolacademy.com/',
+    distance: 0,
+    matFee: 0,
     openMats: [
       { day: 'Sunday', time: '11:00 AM', type: 'both' }
-    ],
-    matFee: 0
+    ]
+  },
+  {
+    id: 'tampa-jiu-jitsu',
+    name: 'Tampa Jiu Jitsu',
+    address: '11732 N Dale Mabry Hwy, Tampa, FL 33618',
+    distance: 0,
+    matFee: 0,
+    openMats: [
+      { day: 'Monday', time: '8:30 PM - 9:30 PM', type: 'both' },
+      { day: 'Tuesday', time: '9:00 PM - 10:00 PM', type: 'both' },
+      { day: 'Wednesday', time: '9:15 PM - 10:00 PM', type: 'both' },
+      { day: 'Thursday', time: '9:00 PM - 10:00 PM', type: 'both' },
+      { day: 'Saturday', time: '1:00 PM - 2:00 PM', type: 'both' }
+    ]
+  },
+  {
+    id: 'tampa-gracie-tampa-south',
+    name: 'Gracie Tampa South MMA',
+    address: '1345 W Gray St, Tampa, FL 33606',
+    distance: 0,
+    matFee: 0,
+    openMats: []
+  },
+  {
+    id: 'tampa-collective-jj',
+    name: 'Collective Jiu Jitsu & MMA',
+    address: '4316 S Manhattan Ave, Tampa, FL 33611',
+    distance: 0,
+    matFee: 0,
+    openMats: [
+      { day: 'Sunday', time: '1:00 PM - 3:00 PM', type: 'both' }
+    ]
+  },
+  {
+    id: 'tampa-underdog-mma',
+    name: 'Underdog Mixed Martial Arts',
+    address: '30052 FL-54, Wesley Chapel, FL 33543',
+    distance: 0,
+    matFee: 0,
+    openMats: [
+      { day: 'Friday', time: '7:00 PM - 8:00 PM', type: 'nogi' },
+      { day: 'Saturday', time: '11:00 AM - 12:00 PM', type: 'gi' }
+    ]
   }
 ];
 
@@ -244,17 +299,21 @@ class ApiService {
     };
   }
 
-  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): Promise<OpenMat[]> {
-    console.log('🌐 ApiService: Fetching data for', location, filters?.dateSelection);
+  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean): Promise<OpenMat[]> {
+    // Ensure location is never undefined or empty
+    const safeLocation = location || 'Tampa';
+    console.log('🌐 ApiService: Fetching data for', safeLocation, filters?.dateSelection, forceRefresh ? '(force refresh)' : '');
     
     try {
       // Determine city from location string
-      const city = location.toLowerCase().includes('austin') ? 'austin' : 
-                   location.toLowerCase().includes('tampa') ? 'tampa' : 'austin';
+      const city = safeLocation.toLowerCase().includes('austin') ? 'austin' : 
+                   safeLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
       
-      // Try GitHub service first
-      let githubData = await githubDataService.getGymData(city);
-      console.log('✅ ApiService: GitHub data loaded -', githubData.length, 'gyms');
+      // Try GitHub service first with force refresh if requested
+      let githubData = await githubDataService.getGymData(city, forceRefresh || false);
+      console.log('✅ ApiService: GitHub data loaded -', githubData.length, 'gyms', forceRefresh ? '(fresh data)' : '(cached data)');
+      
+
       
       // Apply date filtering if specified
       if (filters?.dateSelection || filters?.dates) {
@@ -268,7 +327,7 @@ class ApiService {
       console.log('❌ ApiService: GitHub service failed, using mock data');
       
       // Fallback to mock data
-      let mockData = location.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;
+      let mockData = safeLocation.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;
       
       // Apply date filtering to mock data as well
       if (filters?.dateSelection || filters?.dates) {
@@ -349,7 +408,7 @@ class ApiService {
         targetDays = [this.getDayName(tomorrow)];
         break;
       case 'weekend':
-        targetDays = ['Saturday', 'Sunday'];
+        targetDays = ['Friday', 'Saturday', 'Sunday'];
         break;
       case 'custom':
         if (filters.dates && filters.dates.length > 0) {
