@@ -7,8 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "FindJiuJitsu",
-    "main": "./index.ts",
+    "scheme": "findjiujitsu",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
@@ -21,11 +20,7 @@
       "buildNumber": "15",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "urlSchemes": [
-        "FindJiuJitsu",
-        "com.googleusercontent.apps.713938761178-9c5rfvvqfsgb01hinme07tsfo5naj31o"
-      ]
+      }
     },
     "android": {
       "adaptiveIcon": {
