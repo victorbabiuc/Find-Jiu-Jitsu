@@ -35,21 +35,7 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-web-browser",
-      [
-        "@react-native-firebase/app",
-        {
-          "ios": {
-            "googleServicesFile": "./GoogleService-Info.plist"
-          }
-        }
-      ],
-      [
-        "@react-native-firebase/auth",
-        {
-          "isEnabled": false
-        }
-      ]
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

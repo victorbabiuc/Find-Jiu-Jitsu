@@ -1,13 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User as FirebaseUser, signInWithCredential, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { getAuth, isFirebaseEnabled } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Simple user interface without Firebase dependencies
+interface SimpleUser {
+  id: string;
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+  provider: 'google' | 'apple' | 'anonymous';
+}
+
 interface AuthContextType {
-  user: FirebaseUser | null;
+  user: SimpleUser | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
@@ -18,13 +25,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<SimpleUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Google Sign-In setup
-  // Note: You need to configure Google Sign-In in Firebase Console and get client IDs
-  // Go to Firebase Console > Authentication > Sign-in method > Google > Configure
-  // Then get the client IDs from Google Cloud Console for your project
   const googleRequest = {
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || 'your-web-client-id-here',
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || 'your-ios-client-id-here',
@@ -34,23 +38,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [request, response, promptAsync] = Google.useAuthRequest(googleRequest);
 
+  // Load user from storage on app start
   useEffect(() => {
-    if (!isFirebaseEnabled()) {
-      setLoading(false);
-      return;
-    }
-    
-    const auth = getAuth();
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
-    
-    const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return unsubscribe;
+    const loadUserFromStorage = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.log('Error loading user from storage:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserFromStorage();
   }, []);
 
   // Handle Google Sign-In response
@@ -62,25 +65,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
       
-      const auth = getAuth();
-      if (!auth) {
-        return;
-      }
+      // Create a simple user object from Google response
+      const simpleUser: SimpleUser = {
+        id: `google_${Date.now()}`, // Generate a simple ID
+        email: response.params.email,
+        displayName: response.params.name,
+        photoURL: response.params.picture,
+        provider: 'google'
+      };
       
-      const credential = GoogleAuthProvider.credential(
-        id_token,
-        response.params.access_token
-      );
-      
-      signInWithCredential(auth, credential)
-        .then((result) => {
-          // Google sign-in successful
-        })
-        .catch((error) => {
-          // Google sign-in failed silently
-        });
+      // Save user to storage and state
+      AsyncStorage.setItem('user', JSON.stringify(simpleUser));
+      setUser(simpleUser);
     } else if (response?.type === 'error') {
       // Google auth response error handled silently
+      console.log('Google auth error:', response.error);
     }
   }, [response]);
 
@@ -129,6 +128,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Google sign-in initiated successfully
     } catch (error) {
       // Google sign-in error handled silently
+      console.log('Google sign-in error:', error);
       return;
     }
   };
@@ -137,11 +137,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       
-      if (!auth) {
-        setLoading(false);
-        return;
-      }
-      
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -149,16 +144,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ],
       });
 
-      const { identityToken } = credential;
-      const provider = new OAuthProvider('apple.com');
-      const firebaseCredential = provider.credential({
-        idToken: identityToken || undefined,
-        rawNonce: undefined, // Apple nonce handling can be added later
-      });
+      // Create a simple user object from Apple response
+      const simpleUser: SimpleUser = {
+        id: `apple_${Date.now()}`, // Generate a simple ID
+        email: credential.email || undefined,
+        displayName: credential.fullName?.givenName 
+          ? `${credential.fullName.givenName} ${credential.fullName.familyName || ''}`.trim()
+          : undefined,
+        provider: 'apple'
+      };
       
-      await signInWithCredential(auth, firebaseCredential);
+      // Save user to storage and state
+      await AsyncStorage.setItem('user', JSON.stringify(simpleUser));
+      setUser(simpleUser);
+      
       // Apple Sign-In successful
     } catch (error) {
+      console.log('Apple sign-in error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -169,29 +171,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       
-      if (!auth) {
-        // Still clear local storage
-        await AsyncStorage.multiRemove([
-          'user',
-          'token',
-          'auth_credentials'
-        ]);
-        setLoading(false);
-        return;
-      }
-      
-      // Sign out from Firebase
-      await auth.signOut();
-      
-      // Clear any stored authentication data
+      // Clear user from storage and state
       await AsyncStorage.multiRemove([
         'user',
         'token',
         'auth_credentials'
       ]);
       
+      setUser(null);
+      
       // Sign out successful
     } catch (error) {
+      console.log('Sign out error:', error);
       throw error;
     } finally {
       setLoading(false);
