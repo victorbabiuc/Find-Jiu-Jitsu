@@ -8,6 +8,10 @@ import {
   Dimensions,
   SafeAreaView,
   Alert,
+  Linking,
+  Share,
+  FlatList,
+  Image, // <-- Add Image import
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
@@ -15,160 +19,36 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
-import { OpenMat } from '../types';
+
 import { SafeAreaView as SafeAreaViewRN } from 'react-native-safe-area-context';
-import { apiService } from '../services';
+
+
+import appIcon from '../../assets/icon.png'; // <-- Import app icon
+import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 
 const { width } = Dimensions.get('window');
 
 // TODO: v2.0 - Replace with user's home gym info
 
 const DashboardScreen: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const { theme } = useTheme();
-  const { userBelt, selectedLocation, favorites, toggleFavorite } = useApp();
+  const { userBelt, selectedLocation, setSelectedLocation, favorites, toggleFavorite } = useApp();
   const navigation = useMainTabNavigation();
   
   const beltColor = beltColors[userBelt];
   
-  // State for next open mat
-  const [nextOpenMat, setNextOpenMat] = useState<OpenMat | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const handleFindMats = () => {
-    navigation.navigate('Find', { screen: 'Location' });
-  };
 
   const handleQuickToday = () => {
     navigation.navigate('Find', { screen: 'TimeSelection' });
   };
 
-  const handleQuickTomorrow = () => {
-    navigation.navigate('Find', { screen: 'TimeSelection' });
-  };
-
-  // Helper functions for next open mat logic
-  const getCurrentDay = () => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[new Date().getDay()];
-  };
-
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-  };
-
-  const parseTime = (timeStr: string) => {
-    const time = timeStr.toUpperCase();
-    const match = time.match(/(\d+):?(\d*)\s*(AM|PM)/);
-    if (!match) return 0;
-    
-    let hours = parseInt(match[1]);
-    const minutes = match[2] ? parseInt(match[2]) : 0;
-    const period = match[3];
-    
-    if (period === 'PM' && hours !== 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-    
-    return hours * 60 + minutes;
-  };
 
 
 
-  const findNextOpenMat = (gyms: OpenMat[]) => {
-    const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const currentDay = getCurrentDay();
-    const currentTime = parseTime(getCurrentTime());
-    const currentDayIndex = dayOrder.indexOf(currentDay);
-    
-    // Collect all sessions from all gyms
-    const allSessions: Array<{ gym: OpenMat; session: any; dayIndex: number; timeMinutes: number; weekOffset: number }> = [];
-    
-    gyms.forEach(gym => {
-      gym.openMats.forEach(session => {
-        const sessionDayIndex = dayOrder.indexOf(session.day);
-        const sessionTime = parseTime(session.time);
-        
-        // Calculate week offset and adjusted day index
-        let weekOffset = 0;
-        let adjustedDayIndex = sessionDayIndex;
-        
-        // If session is today, check if time is in future
-        if (sessionDayIndex === currentDayIndex) {
-          if (sessionTime > currentTime) {
-            // Session is later today
-            allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 0 });
-          }
-        } else if (sessionDayIndex > currentDayIndex) {
-          // Session is later this week
-          allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 0 });
-        } else {
-          // Session is earlier in the week, so it's next week
-          allSessions.push({ gym, session, dayIndex: sessionDayIndex, timeMinutes: sessionTime, weekOffset: 1 });
-        }
-      });
-    });
-    
-    // Sort by week offset first, then by day, then by time
-    allSessions.sort((a, b) => {
-      if (a.weekOffset !== b.weekOffset) {
-        return a.weekOffset - b.weekOffset;
-      }
-      if (a.dayIndex !== b.dayIndex) {
-        return a.dayIndex - b.dayIndex;
-      }
-      return a.timeMinutes - b.timeMinutes;
-    });
-    
-    // Always return the first session (there should always be at least one)
-    if (allSessions.length > 0) {
-      const nextSession = allSessions[0];
-      return {
-        ...nextSession.gym,
-        openMats: [nextSession.session]
-      };
-    }
-    
-    // Fallback: if somehow no sessions found, return the first gym's first session
-    if (gyms.length > 0 && gyms[0].openMats.length > 0) {
-      return {
-        ...gyms[0],
-        openMats: [gyms[0].openMats[0]]
-      };
-    }
-    
-    return null;
-  };
 
-  // Fetch and find next open mat
-  useEffect(() => {
-    const fetchNextOpenMat = async () => {
-      try {
-        setLoading(true);
-        const location = selectedLocation || 'Tampa';
-        const allGyms = await apiService.getOpenMats(location);
-        const next = findNextOpenMat(allGyms);
-        setNextOpenMat(next);
-      } catch (error) {
-        console.error('Error fetching next open mat:', error);
-        setNextOpenMat(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNextOpenMat();
-  }, [selectedLocation]);
-
-  const handleGymPress = (gym: OpenMat) => {
-    // Navigate to Find tab first, then to results
-    const location = selectedLocation || 'Tampa';
-    navigation.navigate('Find', { screen: 'Results', params: { location } });
-  };
 
   // Helper functions for gym card display
   const formatTimeRange = (sessionTime: string) => {
@@ -271,196 +151,184 @@ const DashboardScreen: React.FC = () => {
     toggleFavorite(gym.id);
   };
 
+  // Add openWebsite and openDirections helpers
+  const openWebsite = (url: string) => {
+    if (url) Linking.openURL(url);
+  };
+  const openDirections = (address: string) => {
+    if (!address || address === 'Tampa, FL' || address === 'Austin, TX') return;
+    const url = `https://maps.apple.com/?q=${encodeURIComponent(address)}`;
+    Linking.openURL(url);
+  };
+
   return (
     <ScrollView 
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={[styles.container, { backgroundColor: '#FFFFFF' }]}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContent}
     >
       {/* Welcome Section */}
       <SafeAreaViewRN edges={['top']}>
-        <LinearGradient
-          colors={[beltColor.primary, beltColor.secondary]}
-          style={styles.welcomeSection}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <View style={styles.headerRow}>
-            <View>
-              <Text style={[styles.welcomeText, { color: beltColor.textOnColor }]}> 
-                Welcome back,
-              </Text>
-              <Text style={[styles.userName, { color: beltColor.textOnColor }]}> 
-                {user?.name || 'Fighter'}
-              </Text>
-              <View style={styles.beltIndicator}>
-                <Text style={[styles.beltText, { color: beltColor.textOnColor }]}> 
-                  {userBelt.charAt(0).toUpperCase() + userBelt.slice(1)} Belt
-                </Text>
-              </View>
-            </View>
-
-          </View>
-        </LinearGradient>
+        <View style={{ backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+          <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Find Your Next Roll</Text>
+        </View>
       </SafeAreaViewRN>
 
-      {/* Quick Actions */}
+      {/* User Authentication Status */}
+      {isAuthenticated && (
+        <View style={styles.userSection}>
+          <Text style={styles.welcomeText}>Welcome back!</Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
+          <View style={styles.userActions}>
+            <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </TouchableOpacity>
+            <View style={styles.syncStatus}>
+              <Text style={styles.syncText}>🔄 Favorites synced to cloud</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* City Selection */}
       <View style={styles.section}>
+        <View style={styles.logoContainer}>
+          <Image source={appIcon} style={styles.logo} />
+        </View>
         <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-          Quick Actions
+          Where do you want to train?
         </Text>
         
+        {/* Search/Add City Card */}
         <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: beltColor.primary }]}
-          onPress={handleFindMats}
+          style={[styles.cityCard, { backgroundColor: theme.surface }]}
+          onPress={() => {
+            // TODO: Implement city search functionality
+            Alert.alert(
+              'Coming Soon!',
+              'City search functionality will be available in the next update.',
+              [{ text: 'OK' }]
+            );
+          }}
         >
-          <LinearGradient
-            colors={[beltColor.primary, beltColor.secondary]}
-            style={styles.buttonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <Text style={[styles.primaryButtonText, { color: beltColor.textOnColor }]}>
-              Find Open Mats
-            </Text>
-          </LinearGradient>
+          <View style={styles.cityCardContent}>
+            <Ionicons name="search" size={24} color={theme.text.secondary} />
+            <View style={styles.cityCardText}>
+              <Text style={[styles.cityCardTitle, { color: theme.text.primary }]}>
+                Search for a city
+              </Text>
+              <Text style={[styles.cityCardSubtitle, { color: theme.text.secondary }]}>
+                Add your city to find local gyms
+              </Text>
+            </View>
+            <Ionicons name="add-circle-outline" size={24} color={theme.text.secondary} />
+          </View>
         </TouchableOpacity>
-
-        {/* Quick Date Buttons */}
-        <View style={styles.quickDateContainer}>
+        
+        {/* Available Cities */}
+        <View style={styles.citiesContainer}>
           <TouchableOpacity
-            style={[styles.dateButton, { backgroundColor: theme.surface }]}
-            onPress={handleQuickToday}
+            style={[
+              styles.cityCard,
+              { backgroundColor: theme.surface },
+              selectedLocation === 'Tampa' && { backgroundColor: beltColor.primary }
+            ]}
+            onPress={() => {
+              setSelectedLocation('Tampa');
+              navigation.navigate('Find', { screen: 'TimeSelection' });
+            }}
           >
-            <Text style={[styles.dateButtonText, { color: theme.text.primary }]}>
-              Today
-            </Text>
+            <View style={styles.cityCardContent}>
+              <Text style={styles.cityEmoji}>🌴</Text>
+              <View style={styles.cityCardText}>
+                <Text style={[
+                  styles.cityCardTitle,
+                  { color: selectedLocation === 'Tampa' ? beltColor.textOnColor : theme.text.primary }
+                ]}>
+                  Tampa, FL
+                </Text>
+                <Text style={[
+                  styles.cityCardSubtitle,
+                  { color: selectedLocation === 'Tampa' ? beltColor.textOnColor : theme.text.secondary }
+                ]}>
+                  18 gyms available
+                </Text>
+              </View>
+              <Ionicons 
+                name="chevron-forward" 
+                size={20} 
+                color={selectedLocation === 'Tampa' ? beltColor.textOnColor : theme.text.secondary} 
+              />
+            </View>
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={[styles.dateButton, { backgroundColor: theme.surface }]}
-            onPress={handleQuickTomorrow}
+            style={[
+              styles.cityCard,
+              { backgroundColor: theme.surface },
+              selectedLocation === 'Austin' && { backgroundColor: beltColor.primary }
+            ]}
+            onPress={() => {
+              setSelectedLocation('Austin');
+              navigation.navigate('Find', { screen: 'TimeSelection' });
+            }}
           >
-            <Text style={[styles.dateButtonText, { color: theme.text.primary }]}>
-              Tomorrow
-            </Text>
+            <View style={styles.cityCardContent}>
+              <Text style={styles.cityEmoji}>🤠</Text>
+              <View style={styles.cityCardText}>
+                <Text style={[
+                  styles.cityCardTitle,
+                  { color: selectedLocation === 'Austin' ? beltColor.textOnColor : theme.text.primary }
+                ]}>
+                  Austin, TX
+                </Text>
+                <Text style={[
+                  styles.cityCardSubtitle,
+                  { color: selectedLocation === 'Austin' ? beltColor.textOnColor : theme.text.secondary }
+                ]}>
+                  30 gyms available
+                </Text>
+              </View>
+              <Ionicons 
+                name="chevron-forward" 
+                size={20} 
+                color={selectedLocation === 'Austin' ? beltColor.textOnColor : theme.text.secondary} 
+              />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Next Open Mat */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-          Next Open Mat
-        </Text>
-        
-        {loading ? (
-          <View style={[styles.loadingCard, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.loadingText, { color: theme.text.secondary }]}>
-              Finding your next session...
+      {/* More Cities Coming Soon */}
+      <View style={styles.moreCitiesSection}>
+        <TouchableOpacity
+          style={styles.moreCitiesContent}
+          onPress={() => {
+            Alert.alert(
+              'Send us your suggestions!',
+              'glootieapp@gmail.com\n\nTap Copy to copy the email address and send us your feedback!',
+              [
+                {
+                  text: 'Copy',
+                  onPress: () => Clipboard.setStringAsync('glootieapp@gmail.com'),
+                },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          }}
+        >
+          <View style={styles.moreCitiesTextContainer}>
+            <Text style={[styles.moreCitiesText, { color: theme.text.secondary }]}>
+              More cities coming soon!
             </Text>
-          </View>
-        ) : nextOpenMat ? (
-          <View style={[styles.card, { backgroundColor: theme.surface }]}>
-            {/* Header: Gym Name + Heart Button */}
-            <View style={styles.cardHeader}>
-              <Text style={styles.gymName}>{nextOpenMat.name}</Text>
-              <TouchableOpacity 
-                style={styles.heartButton}
-                onPress={() => handleHeartPress(nextOpenMat)}
-              >
-                <Text style={styles.heartIcon}>
-                  {favorites.has(nextOpenMat.id) ? '♥' : '♡'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Session Type Subtitle */}
-            <Text style={styles.sessionSubtitle}>Open Mat Session</Text>
-
-            {/* Sessions Section */}
-            <View style={styles.sessionsSection}>
-              {nextOpenMat.openMats.map((session, index) => (
-                <View key={index} style={styles.sessionBlock}>
-                  <Text style={styles.dayHeader}>
-                    {session.day.toUpperCase()}
-                  </Text>
-                  <Text style={styles.timeRange}>
-                    {formatTimeRange(session.time)} • {getSessionTypeWithIcon(session.type)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Info Section */}
-            <View style={styles.infoSection}>
-              {/* Fees Section */}
-              <View style={styles.feesSection}>
-                <View style={styles.feesHeader}>
-                  <Text style={styles.infoIcon}>💵</Text>
-                  <Text style={styles.infoText}>Fees</Text>
-                </View>
-                <View style={styles.feeItem}>
-                  <Text style={styles.feeLabel}>Open mat - </Text>
-                  <Text style={styles.feeValue}>
-                    {nextOpenMat.matFee === 0 ? 'Free' : nextOpenMat.matFee ? `$${nextOpenMat.matFee}` : '?/unknown'}
-                  </Text>
-                </View>
-                <View style={styles.feeItem}>
-                  <Text style={styles.feeLabel}>Class Drop in - </Text>
-                  <Text style={styles.feeValue}>
-                    {nextOpenMat.dropInFee === 0 ? 'Free' : nextOpenMat.dropInFee ? `$${nextOpenMat.dropInFee}` : '?/unknown'}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.infoRow}>
-                <Text style={styles.infoIcon}>📍</Text>
-                <Text style={styles.infoText}>{nextOpenMat.distance} miles • {selectedLocation || 'Tampa'}</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <Text style={styles.infoIcon}>⚠️</Text>
-                <Text style={styles.infoText}>Waiver required on arrival</Text>
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.buttonRow}>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => {
-                  Alert.alert('Call Gym', 'Call functionality coming soon!');
-                }}
-              >
-                <Text style={styles.buttonText}>📞 Call</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.middleButton]}
-                onPress={() => handleHeartPress(nextOpenMat)}
-              >
-                <Text style={styles.buttonText}>
-                  {favorites.has(nextOpenMat.id) ? '💾 Saved' : '💾 Save'}
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => {
-                  Alert.alert('Get Directions', 'Directions functionality coming soon!');
-                }}
-              >
-                <Text style={styles.buttonText}>🧭 Go</Text>
-              </TouchableOpacity>
+            <View style={styles.emailRow}>
+              <Text style={[styles.moreCitiesText, { color: theme.text.secondary }]}>
+                Email us suggestions or updates
+              </Text>
+              <Ionicons name="mail-outline" size={16} color={theme.text.secondary} />
             </View>
           </View>
-        ) : (
-          <View style={[styles.loadingCard, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.loadingText, { color: theme.text.secondary }]}>
-              Loading next session...
-            </Text>
-          </View>
-        )}
+        </TouchableOpacity>
       </View>
 
       {/* Bottom Spacing */}
@@ -472,6 +340,11 @@ const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 32,
   },
   welcomeSection: {
     padding: 24,
@@ -500,12 +373,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
-    padding: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 75,
+    height: 75,
+    borderRadius: 37.5,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 16,
+    textAlign: 'center',
   },
   primaryButton: {
     borderRadius: 12,
@@ -524,6 +409,9 @@ const styles = StyleSheet.create({
   quickDateContainer: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 400,
   },
   dateButton: {
     flex: 1,
@@ -541,7 +429,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: '#E5E7EB',
     marginBottom: 16,
     padding: 16,
     shadowColor: '#000',
@@ -549,6 +437,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    width: '100%',
+    maxWidth: 500,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -637,21 +527,18 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#F0F3F5',
-    borderRadius: 10,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    justifyContent: 'center',
   },
-  middleButton: {
-    marginHorizontal: 6,
-  },
+
   buttonText: {
     fontSize: 14,
     fontWeight: '600',
@@ -694,6 +581,165 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+  },
+  userSection: {
+    padding: 20,
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#60798A',
+    marginBottom: 12,
+  },
+  signOutButton: {
+    backgroundColor: '#FF6B6B',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  signOutText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  userActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  syncStatus: {
+    backgroundColor: '#E0F2F7',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  syncText: {
+    fontSize: 12,
+    color: '#007BFF',
+    fontWeight: '500',
+  },
+  cityButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 8,
+    width: '100%',
+    maxWidth: 400,
+    position: 'relative',
+  },
+  cityButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  chevronIcon: {
+    position: 'absolute',
+    right: 20,
+  },
+  cityDropdown: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+    marginBottom: 8,
+    width: '100%',
+    maxWidth: 400,
+    zIndex: 2,
+  },
+  cityOption: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  cityOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  dropdownBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
+  cityCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cityCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cityCardText: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 12,
+  },
+  cityCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  cityCardSubtitle: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  cityEmoji: {
+    fontSize: 24,
+  },
+  citiesContainer: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  moreCitiesSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 'auto',
+  },
+  moreCitiesContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moreCitiesTextContainer: {
+    alignItems: 'center',
+  },
+  moreCitiesText: {
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  emailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
 
 });
