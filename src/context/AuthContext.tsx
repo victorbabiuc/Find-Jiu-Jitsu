@@ -3,7 +3,7 @@ import { User as FirebaseUser, signInWithCredential, GoogleAuthProvider, OAuthPr
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { auth } from '../config/firebase';
+import { getAuth, isFirebaseEnabled } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
@@ -35,6 +35,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [request, response, promptAsync] = Google.useAuthRequest(googleRequest);
 
   useEffect(() => {
+    if (!isFirebaseEnabled()) {
+      setLoading(false);
+      return;
+    }
+    
+    const auth = getAuth();
     if (!auth) {
       setLoading(false);
       return;
@@ -56,6 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
       
+      const auth = getAuth();
       if (!auth) {
         return;
       }
