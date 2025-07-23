@@ -1,7 +1,7 @@
 id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType
 tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Friday,"5:00 PM",NoGi
 tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Sunday,"9:00 AM",Gi
-tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Saturday,"11:00 AM",Gi/NoGi
+tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Saturday,"11:00 AM",MMA Sparring 
 tampa-rmnu,"RMNU","11220 W Hillsborough Ave, Tampa, FL 33635","https://www.rmnu.com",0,0,,Friday,"6:00 PM",Gi/NoGi
 tampa-gracie-humaita,"Gracie Humaita","11220 Hillsborough Ave, Tampa, FL 33626","https://www.graciehumaita.com",0,0,,Friday,"6:30 PM - 7:30 PM",Gi/NoGi
 tampa-kaizen,"Kaizen","Tampa, FL","",0,0,,Sunday,"11:00 AM - 1:00 PM",Gi/NoGi
