@@ -85,7 +85,7 @@ const SavedScreen: React.FC = () => {
             logoUrls[gym.id] = logoUrl;
           }
         } catch (error) {
-          console.log(`Failed to load logo for ${gym.name}:`, error);
+          // Logo loading failed silently
         }
       }
       

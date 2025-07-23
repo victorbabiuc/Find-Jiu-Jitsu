@@ -72,5 +72,7 @@
     <string>Light</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Find Jiu Jitsu uses your location to show nearby gyms and provide directions.</string>
   </dict>
 </plist>

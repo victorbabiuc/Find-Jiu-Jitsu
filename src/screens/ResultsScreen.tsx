@@ -30,6 +30,7 @@ import { githubDataService } from '../services/github-data.service';
 import { FindStackRouteProp } from '../navigation/types';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
+import appIcon from '../../assets/icon.png';
 
 const { width } = Dimensions.get('window');
 
@@ -75,18 +76,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     price: null, // null or 'free'
   });
 
-  // Debug: Log when component mounts/unmounts
-  useEffect(() => {
-    console.log('🔍 ResultsScreen: Component mounted');
-    return () => {
-      console.log('🔍 ResultsScreen: Component unmounting');
-    };
-  }, []);
-
-  // Debug: Monitor activeFilters changes
-  useEffect(() => {
-    console.log(`🔍 Filter Debug: activeFilters changed at ${new Date().toISOString()}:`, activeFilters);
-  }, [activeFilters]);
+  // Component lifecycle tracking removed for production
 
   // Load gym logos when openMats data changes
   useEffect(() => {
@@ -105,7 +95,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             logoUrls[gym.id] = logoUrl;
           }
         } catch (error) {
-          console.log(`Failed to load logo for ${gym.name}:`, error);
+          // Logo loading failed silently
         }
       }
       
@@ -164,10 +154,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   //   fetchData();
   // }, [location, dateSelection, datesKey]); // Use stable datesKey instead of dates array
 
-  // TEMPORARY: Load data once on mount to stop infinite loop
+  // Load data once on mount
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔄 ResultsScreen: Fetching data for', location, dateSelection);
       showTransitionalLoading("Discovering open mat sessions...", 2000);
       try {
         setLoading(true);
@@ -179,9 +168,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         // Force refresh data from GitHub
         await githubDataService.refreshData(city);
         
-        // Debug: Check last update time
+        // Check last update time silently
         const lastUpdate = await githubDataService.getLastUpdateTime(city);
-        console.log('🔍 ResultsScreen: Last data update time:', lastUpdate ? new Date(lastUpdate).toISOString() : 'No cache');
         
         const filters: any = {};
         if (dateSelection) {
@@ -191,10 +179,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           filters.dates = dates;
         }
         const data = await apiService.getOpenMats(location, filters, true);
-        console.log('✅ ResultsScreen: Data loaded successfully -', data.length, 'gyms');
         setOpenMats(data);
       } catch (error) {
-        console.error('❌ ResultsScreen: Error fetching gyms:', error);
         setOpenMats([]);
       } finally {
         setLoading(false);
@@ -398,15 +384,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
 
   const toggleFilter = (filterType: 'gi' | 'nogi') => {
-    console.log(`🔍 Filter Debug: ${filterType} button pressed at ${new Date().toISOString()}`);
-    console.log(`🔍 Filter Debug: Current activeFilters:`, activeFilters);
-    
     setActiveFilters(prev => {
       const newFilters = {
         ...prev,
         [filterType]: !prev[filterType]
       };
-      console.log(`🔍 Filter Debug: Setting new activeFilters:`, newFilters);
       return newFilters;
     });
   };
@@ -423,8 +405,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   };
 
   const handleFilterTap = (filterName: string) => {
-    console.log(`Filter tapped: ${filterName}`);
-    
     if (filterName === 'Free') {
       handleFreeFilter();
     }
@@ -438,12 +418,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const filteredGyms = useMemo(() => {
     let filtered = [...openMats];
     
-    console.log(`🔍 Filter Debug: Starting with ${filtered.length} gyms`);
-    console.log(`🔍 Filter Debug: activeFilters:`, activeFilters);
-    
     // Apply Gi/No-Gi filters with smart logic
     if (activeFilters.gi || activeFilters.nogi) {
-      console.log(`🔍 Filter Debug: Applying Gi/No-Gi filters`);
       
       filtered = filtered.filter(gym => {
         // Check what session types this gym offers
@@ -452,22 +428,17 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         const hasNoGi = sessionTypes.includes('nogi');
         const hasBoth = sessionTypes.includes('both');
         
-        console.log(`🔍 Filter Debug: ${gym.name} - sessionTypes:`, sessionTypes, `hasGi:`, hasGi, `hasNoGi:`, hasNoGi, `hasBoth:`, hasBoth);
-        
         if (activeFilters.gi && activeFilters.nogi) {
           // Show gyms that have EITHER Gi OR No-Gi OR both
           const matches = hasGi || hasNoGi || hasBoth;
-          console.log(`🔍 Filter Debug: ${gym.name} - both filters active, matches:`, matches);
           return matches;
         } else if (activeFilters.gi) {
           // Show gyms with Gi or both types
           const matches = hasGi || hasBoth;
-          console.log(`🔍 Filter Debug: ${gym.name} - Gi filter active, matches:`, matches);
           return matches;
         } else if (activeFilters.nogi) {
           // Show gyms with No-Gi or both types
           const matches = hasNoGi || hasBoth;
-          console.log(`🔍 Filter Debug: ${gym.name} - No-Gi filter active, matches:`, matches);
           return matches;
         }
         return false;
@@ -490,7 +461,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         };
       });
       
-      console.log(`🔍 Filter Debug: After Gi/No-Gi filtering: ${filtered.length} gyms`);
+
     }
     
     // Apply free filter
@@ -571,12 +542,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       return minutesA - minutesB;
     });
     
-    // Debug: Log the sorted order of gyms
-    console.log('🔍 ResultsScreen: Gym sorting order:');
-    filtered.slice(0, 5).forEach((gym, index) => {
-      const earliestSession = gym.openMats[0];
-      console.log(`  ${index + 1}. ${gym.name} - ${earliestSession?.day} ${earliestSession?.time}`);
-    });
+    // Gym sorting completed silently
     
     return filtered;
   }, [openMats, activeFilters]);
@@ -602,6 +568,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
       <View style={styles.header}>
+        <Image source={appIcon} style={styles.headerLogo} />
         <View style={styles.headerTextContainer}>
           <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Find Jiu Jitsu</Text>
           <Text style={styles.locationContext}>Showing gyms in {location}</Text>
@@ -826,15 +793,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           data={filteredGyms}
           keyExtractor={(gym) => gym.id}
           renderItem={({ item: gym }) => {
-            // Debug: Log website data for South Tampa Jiu Jitsu
-            if (gym.name.toLowerCase().includes('south tampa')) {
-              console.log('🔍 South Tampa Jiu Jitsu website debug:', {
-                name: gym.name,
-                website: gym.website,
-                hasWebsite: !!gym.website,
-                websiteType: typeof gym.website
-              });
-            }
             return (
             <View key={gym.id} style={styles.card}>
               {/* Header: Logo/Avatar + Gym Name + Heart */}
@@ -1001,6 +959,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
     position: 'relative',
+    justifyContent: 'space-between',
   },
   backButton: {
     padding: 8,
@@ -1013,6 +972,13 @@ const styles = StyleSheet.create({
   headerTextContainer: {
     flex: 1,
     alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  headerLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
   },
   headerTitle: {
     fontSize: 22,
@@ -1026,10 +992,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   envelopeButton: {
-    position: 'absolute',
-    right: 20,
-    top: 24,
     padding: 8,
+    marginLeft: 16,
   },
   locationContext: {
     fontSize: 15,

@@ -1,7 +1,7 @@
 id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType
 tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Friday,"5:00 PM",NoGi
 tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Sunday,"9:00 AM",Gi
-tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Saturday,"11:00 AM",Gi/NoGi
+tampa-stjj,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Saturday,"11:00 AM",MMA Sparring 
 tampa-rmnu,"RMNU","11220 W Hillsborough Ave, Tampa, FL 33635","https://www.rmnu.com",0,0,,Friday,"6:00 PM",Gi/NoGi
 tampa-gracie-humaita,"Gracie Humaita","11220 Hillsborough Ave, Tampa, FL 33626","https://www.graciehumaita.com",0,0,,Friday,"6:30 PM - 7:30 PM",Gi/NoGi
 tampa-kaizen,"Kaizen","Tampa, FL","",0,0,,Sunday,"11:00 AM - 1:00 PM",Gi/NoGi
@@ -21,7 +21,7 @@ tampa-jiu-jitsu,"Tampa Jiu Jitsu","11732 N Dale Mabry Hwy, Tampa, FL 33618","",0
 tampa-jiu-jitsu,"Tampa Jiu Jitsu","11732 N Dale Mabry Hwy, Tampa, FL 33618","",0,0,,Wednesday,"9:15 PM - 10:00 PM",Gi/NoGi
 tampa-jiu-jitsu,"Tampa Jiu Jitsu","11732 N Dale Mabry Hwy, Tampa, FL 33618","",0,0,,Thursday,"9:00 PM - 10:00 PM",Gi/NoGi
 tampa-jiu-jitsu,"Tampa Jiu Jitsu","11732 N Dale Mabry Hwy, Tampa, FL 33618","",0,0,,Saturday,"1:00 PM - 2:00 PM",Gi/NoGi
-tampa-gracie-tampa-south,"Gracie Tampa South MMA","1345 W Gray St, Tampa, FL 33606","",0,0,,,,Gi/NoGi
+tampa-gracie-tampa-south,"Gracie Tampa South MMA","1345 W Gray St, Tampa, FL 33606","",0,0,,Saturday,"12:00 PM - 2:00 PM",Gi/NoGi
 tampa-collective-jj,"Collective Jiu Jitsu & MMA","4316 S Manhattan Ave, Tampa, FL 33611","",0,0,,Sunday,"1:00 PM - 3:00 PM",Gi/NoGi
 tampa-underdog-mma,"Underdog Mixed Martial Arts","30052 FL-54, Wesley Chapel, FL 33543","",0,0,,Friday,"7:00 PM - 8:00 PM",NoGi
 tampa-underdog-mma,"Underdog Mixed Martial Arts","30052 FL-54, Wesley Chapel, FL 33543","",0,0,,Saturday,"11:00 AM - 12:00 PM",Gi 

@@ -35,16 +35,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [request, response, promptAsync] = Google.useAuthRequest(googleRequest);
 
   useEffect(() => {
-    console.log('🔐 AuthContext: Initializing Firebase auth listener');
-    
     if (!auth) {
-      console.log('Firebase disabled - skipping auth listener');
       setLoading(false);
       return;
     }
     
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
-      console.log('🔐 AuthContext: Auth state changed', user ? 'User logged in' : 'No user');
       setUser(user);
       setLoading(false);
     });
@@ -57,16 +53,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { id_token } = response.params;
       
       if (!id_token) {
-        console.error('🔐 AuthContext: No ID token received from Google');
         return;
       }
       
       if (!auth) {
-        console.log('Firebase disabled - skipping Google sign-in to Firebase');
         return;
       }
       
-      console.log('🔐 AuthContext: Received ID token from Google, signing in to Firebase');
       const credential = GoogleAuthProvider.credential(
         id_token,
         response.params.access_token
@@ -74,21 +67,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       signInWithCredential(auth, credential)
         .then((result) => {
-          console.log('🔐 AuthContext: Google sign-in successful', result.user.email);
+          // Google sign-in successful
         })
         .catch((error) => {
-          console.error('🔐 AuthContext: Google sign-in failed', error);
-          // You might want to show a user-friendly error message here
+          // Google sign-in failed silently
         });
     } else if (response?.type === 'error') {
-      console.error('🔐 AuthContext: Google auth response error', response.error);
+      // Google auth response error handled silently
     }
   }, [response]);
 
   const signInWithGoogle = async () => {
     try {
-      console.log('🔐 AuthContext: Starting Google sign-in');
-      
       // Check if Google auth is properly configured
       if (!request) {
         throw new Error('Google authentication not configured. Please check your client IDs.');
@@ -106,19 +96,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Google iOS Client ID not configured. Please set EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID in your .env file.');
       }
       
-      console.log('🔐 AuthContext: Google client IDs validated, initiating sign-in');
-      
       const result = await promptAsync();
       
       if (result.type === 'cancel') {
-        console.log('🔐 AuthContext: Google sign-in cancelled by user');
         return;
       }
       
       if (result.type === 'error') {
         // Handle specific OAuth errors
         const errorMessage = result.error?.message || 'Unknown error';
-        console.error('🔐 AuthContext: Google sign-in error:', errorMessage);
         
         // Check for OAuth consent screen errors
         if (errorMessage.includes('unverified app') || errorMessage.includes('consent screen')) {
@@ -133,12 +119,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error(`Google sign-in error: ${errorMessage}`);
       }
       
-      console.log('🔐 AuthContext: Google sign-in initiated successfully');
+      // Google sign-in initiated successfully
     } catch (error) {
-      console.error('🔐 AuthContext: Google sign-in error', error);
-      
-      // Don't throw the error to prevent navigation crashes
-      // Instead, log it and let the UI handle it gracefully
+      // Google sign-in error handled silently
       return;
     }
   };
@@ -146,10 +129,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signInWithApple = async () => {
     try {
       setLoading(true);
-      console.log('🍎 Starting Apple Sign-In...');
       
       if (!auth) {
-        console.log('Firebase disabled - skipping Apple sign-in to Firebase');
         setLoading(false);
         return;
       }
@@ -169,9 +150,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       await signInWithCredential(auth, firebaseCredential);
-      console.log('✅ Apple Sign-In successful');
+      // Apple Sign-In successful
     } catch (error) {
-      console.error('❌ Apple Sign-In Error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -181,10 +161,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signOut = async () => {
     try {
       setLoading(true);
-      console.log('🔐 AuthContext: Starting sign out process');
       
       if (!auth) {
-        console.log('Firebase disabled - skipping Firebase sign out');
         // Still clear local storage
         await AsyncStorage.multiRemove([
           'user',
@@ -205,9 +183,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         'auth_credentials'
       ]);
       
-      console.log('✅ AuthContext: Sign out successful');
+      // Sign out successful
     } catch (error) {
-      console.error('❌ AuthContext: Sign out error', error);
       throw error;
     } finally {
       setLoading(false);

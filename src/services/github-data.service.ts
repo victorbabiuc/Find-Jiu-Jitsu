@@ -64,7 +64,6 @@ class GitHubDataService {
   async getGymData(location: string, forceRefresh: boolean = false): Promise<OpenMat[]> {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'tampa';
-    console.log('🌐 GitHubDataService: Fetching data for', safeLocation, forceRefresh ? '(force refresh)' : '(normal)');
     
     try {
       const normalizedLocation = safeLocation.toLowerCase();
@@ -76,7 +75,6 @@ class GitHubDataService {
       if (!forceRefresh && !isStale) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
-          console.log('✅ GitHubDataService: Using cached data -', cachedData.length, 'gyms');
           return cachedData;
         }
       }
@@ -84,7 +82,6 @@ class GitHubDataService {
       // Fetch fresh data from GitHub
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
       const parsedData = this.parseCSVToOpenMats(csvData);
-      console.log('✅ GitHubDataService: Fresh data loaded -', parsedData.length, 'gyms');
       
       // Cache the new data
       await this.cacheData(normalizedLocation, parsedData);
@@ -96,7 +93,6 @@ class GitHubDataService {
       // Fallback to cached data if available
       const cachedData = await this.getCachedData(safeLocation.toLowerCase());
       if (cachedData) {
-        console.log('✅ GitHubDataService: Using fallback cached data -', cachedData.length, 'gyms');
         return cachedData;
       }
       
@@ -236,11 +232,7 @@ class GitHubDataService {
     }));
 
     // Debug log for South Tampa Jiu Jitsu to verify sorting
-    const stjjGym = sortedGyms.find(gym => gym.name.toLowerCase().includes('south tampa'));
-    if (stjjGym) {
-      console.log('🔍 GitHubDataService: South Tampa Jiu Jitsu sessions after sorting:', 
-        stjjGym.openMats.map(s => `${s.day} ${s.time} (${s.type})`));
-    }
+    // Session sorting completed silently
 
     return sortedGyms;
   }
@@ -364,7 +356,7 @@ class GitHubDataService {
       if (location) {
         const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
         await AsyncStorage.removeItem(cacheKey);
-        console.log(`🧹 GitHubDataService: Cache cleared for ${location}`);
+
       } else {
         // Clear all location caches
         const keys = Object.keys(this.CSV_URLS);
@@ -372,7 +364,7 @@ class GitHubDataService {
           const cacheKey = `${this.CACHE_PREFIX}${key}`;
           await AsyncStorage.removeItem(cacheKey);
         }
-        console.log('🧹 GitHubDataService: All location caches cleared');
+
       }
     } catch (error) {
       console.error('Error clearing cache:', error);
@@ -442,9 +434,7 @@ class GitHubDataService {
    */
   async clearAllCacheAndRefresh(): Promise<void> {
     try {
-      console.log('🧹 GitHubDataService: Clearing all cache...');
       await this.clearCache();
-      console.log('✅ GitHubDataService: All cache cleared');
     } catch (error) {
       console.error('❌ GitHubDataService: Error clearing cache:', error);
     }
@@ -455,14 +445,11 @@ class GitHubDataService {
    * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[] }>
    */
   async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[] }> {
-    console.log('🔄 GitHubDataService: Force refreshing all data...');
-    
     const [tampaData, austinData] = await Promise.all([
       this.getGymData('tampa', true),
       this.getGymData('austin', true)
     ]);
     
-    console.log('✅ GitHubDataService: All data refreshed');
     return { tampa: tampaData, austin: austinData };
   }
 

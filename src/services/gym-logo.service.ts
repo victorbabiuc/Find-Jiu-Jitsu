@@ -106,7 +106,7 @@ class GymLogoService {
         this.logoCache = new Map(Object.entries(parsed));
       }
     } catch (error) {
-      console.log('Error loading logo cache:', error);
+      // Error loading logo cache handled silently
     }
   }
 
@@ -118,7 +118,7 @@ class GymLogoService {
       const cacheObject = Object.fromEntries(this.logoCache);
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(cacheObject));
     } catch (error) {
-      console.log('Error saving logo cache:', error);
+      // Error saving logo cache handled silently
     }
   }
 

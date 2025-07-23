@@ -380,6 +380,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     marginBottom: 8,
+    marginTop: 40, // Add top margin to move content down
   },
   logoContainer: {
     alignItems: 'center',

@@ -23,7 +23,6 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
       // Handle specific Apple Sign-In errors
       if (error instanceof Error) {
         if (error.message.includes('canceled')) {
-          console.log('Apple Sign-In was canceled by user');
           return;
         }
         if (error.message.includes('not available')) {

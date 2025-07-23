@@ -195,6 +195,55 @@ We welcome contributions! Here's how you can help:
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+## 🐛 Troubleshooting
+
+### Known Issues & Solutions
+
+#### Share Modal Not Appearing
+
+**Issue**: Modal not appearing when share button is tapped in `OpenMatCard` component.
+
+**Symptoms**: 
+- Share button responds to tap but no modal appears
+- Console logs show `handleShareOptions` is called but modal remains hidden
+- No error messages in console
+
+**Root Cause**: Modal was being rendered inside a `TouchableOpacity` wrapper, which can cause rendering issues in React Native.
+
+**Solution**: 
+1. Move the Modal component outside the main `TouchableOpacity` wrapper
+2. Ensure Modal is rendered at the root level of the component
+3. Add debugging console logs to track state changes
+
+**Files Involved**:
+- `src/components/OpenMatCard.tsx` - Main component with share functionality
+- `src/components/ShareCard.tsx` - Component for screenshot capture
+- `src/utils/screenshot.ts` - Screenshot utility functions
+
+**Debug Steps**:
+1. Add console logs in `handleShareOptions` function
+2. Track `showShareOptions` state changes with `useEffect`
+3. Verify Modal is outside TouchableOpacity wrapper
+4. Check for any parent component interference
+
+**Code Pattern**:
+```tsx
+// ❌ Wrong - Modal inside TouchableOpacity
+<TouchableOpacity>
+  <Modal visible={showShareOptions}>
+    {/* Modal content */}
+  </Modal>
+</TouchableOpacity>
+
+// ✅ Correct - Modal outside TouchableOpacity
+<TouchableOpacity>
+  {/* Card content */}
+</TouchableOpacity>
+<Modal visible={showShareOptions}>
+  {/* Modal content */}
+</Modal>
+```
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

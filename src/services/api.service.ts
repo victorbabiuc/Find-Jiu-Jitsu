@@ -302,7 +302,6 @@ class ApiService {
   async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean): Promise<OpenMat[]> {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'Tampa';
-    console.log('🌐 ApiService: Fetching data for', safeLocation, filters?.dateSelection, forceRefresh ? '(force refresh)' : '');
     
     try {
       // Determine city from location string
@@ -311,20 +310,18 @@ class ApiService {
       
       // Try GitHub service first with force refresh if requested
       let githubData = await githubDataService.getGymData(city, forceRefresh || false);
-      console.log('✅ ApiService: GitHub data loaded -', githubData.length, 'gyms', forceRefresh ? '(fresh data)' : '(cached data)');
       
 
       
       // Apply date filtering if specified
       if (filters?.dateSelection || filters?.dates) {
         githubData = this.filterGymsByDate(githubData, filters);
-        console.log('✅ ApiService: Date filtering applied -', githubData.length, 'gyms remaining');
       }
       
       return githubData;
       
     } catch (error) {
-      console.log('❌ ApiService: GitHub service failed, using mock data');
+      // GitHub service failed, using mock data
       
       // Fallback to mock data
       let mockData = safeLocation.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;

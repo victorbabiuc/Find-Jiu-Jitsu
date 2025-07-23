@@ -1,8 +1,4 @@
 {
-  "cli": {
-    "version": ">= 16.13.1",
-    "appVersionSource": "remote"
-  },
   "build": {
     "development": {
       "developmentClient": true,
@@ -12,10 +8,15 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": false
+      "distribution": "store"
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "v.babiuc@gmail.com",
+        "ascAppId": "6747903814"
+      }
+    }
   }
 }

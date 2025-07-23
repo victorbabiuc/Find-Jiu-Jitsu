@@ -97,11 +97,9 @@ const TimeSelectionScreen: React.FC = () => {
           selected.getFullYear() === date.getFullYear())
       );
       setSelectedDates(newDates);
-      console.log('🔍 TimeSelection: Dates deselected, count:', newDates.length);
     } else {
       const newDates = [...selectedDates, date];
       setSelectedDates(newDates);
-      console.log('🔍 TimeSelection: Date selected, count:', newDates.length);
     }
   };
 
@@ -588,10 +586,6 @@ const TimeSelectionScreen: React.FC = () => {
       </TouchableOpacity>
       
       {/* Floating Search Button - Only show when dates are manually selected */}
-      {(() => {
-        console.log('🔍 TimeSelection: Rendering search button, selectedDates.length:', selectedDates.length);
-        return null;
-      })()}
       {selectedDates.length > 0 && (
         <View style={{
           position: 'absolute',

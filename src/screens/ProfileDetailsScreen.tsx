@@ -51,11 +51,7 @@ const ProfileDetailsScreen: React.FC = () => {
     { label: 'Black Belt', value: 'black', color: '#525252' },
   ];
 
-  // Debug initial state
-  console.log('🔍 ProfileDetailsScreen - Initial state:');
-  console.log('🔍 selectedBelt:', selectedBelt);
-  console.log('🔍 showBeltDropdown:', showBeltDropdown);
-  console.log('🔍 beltOptions count:', beltOptions.length);
+  // Initial state tracking removed for production
 
   // Gi preference options
   const giPreferenceOptions = [
@@ -71,7 +67,7 @@ const ProfileDetailsScreen: React.FC = () => {
         const gyms = await apiService.getOpenMats(selectedLocation);
         setAvailableGyms(gyms);
       } catch (error) {
-        console.error('Error loading gyms:', error);
+        // Error loading gyms handled silently
       }
     };
 
@@ -82,16 +78,12 @@ const ProfileDetailsScreen: React.FC = () => {
 
   // Handle belt selection
   const handleBeltSelect = (belt: BeltType) => {
-    console.log('🔍 Belt selected:', belt);
-    console.log('🔍 Previous selectedBelt:', selectedBelt);
     setSelectedBelt(belt);
     setShowBeltDropdown(false);
-    console.log('🔍 Updated selectedBelt to:', belt);
   };
 
   // Handle backdrop press to close dropdowns
   const handleBackdropPress = () => {
-    console.log('🔍 Backdrop pressed - closing dropdowns');
     setShowBeltDropdown(false);
     setShowGymDropdown(false);
   };
@@ -137,7 +129,6 @@ const ProfileDetailsScreen: React.FC = () => {
 
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
-      console.error('Error saving profile:', error);
       Alert.alert('Error', 'Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
@@ -249,12 +240,7 @@ const ProfileDetailsScreen: React.FC = () => {
                   borderColor: theme.border
                 }]}
                 activeOpacity={0.8}
-                onPress={() => { 
-                  console.log('🔍 Belt dropdown pressed');
-                  console.log('🔍 Current showBeltDropdown:', showBeltDropdown);
-                  setShowBeltDropdown(!showBeltDropdown);
-                  console.log('🔍 Setting showBeltDropdown to:', !showBeltDropdown);
-                }}
+                onPress={() => setShowBeltDropdown(!showBeltDropdown)}
               >
                 <View style={styles.dropdownContent}>
                   <View style={[styles.beltIndicator, { backgroundColor: beltColors[selectedBelt].primary }]} />
@@ -272,25 +258,22 @@ const ProfileDetailsScreen: React.FC = () => {
               {/* Belt Dropdown */}
               {showBeltDropdown && (
                 <View style={[styles.dropdown, { backgroundColor: theme.surface }]}>
-                  {beltOptions.map((option) => {
-                    console.log('🔍 Rendering belt option:', option.label, option.value);
-                    return (
-                      <TouchableOpacity
-                        key={option.value}
-                        style={[
-                          styles.dropdownItem,
-                          selectedBelt === option.value && { backgroundColor: beltColor.surface }
-                        ]}
-                        activeOpacity={0.7}
-                        onPress={() => handleBeltSelect(option.value)}
-                      >
-                        <View style={[styles.beltIndicator, { backgroundColor: option.color }]} />
-                        <Text style={[styles.dropdownItemText, { color: theme.text.primary }]}>
-                          {option.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                  {beltOptions.map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={[
+                        styles.dropdownItem,
+                        selectedBelt === option.value && { backgroundColor: beltColor.surface }
+                      ]}
+                      activeOpacity={0.7}
+                      onPress={() => handleBeltSelect(option.value)}
+                    >
+                      <View style={[styles.beltIndicator, { backgroundColor: option.color }]} />
+                      <Text style={[styles.dropdownItemText, { color: theme.text.primary }]}>
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               )}
             </View>

@@ -1,8 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
+import { ShareCard } from './index';
+import { captureAndShareCard } from '../utils/screenshot';
+import { useTheme } from '../context/ThemeContext';
 
 interface OpenMatCardProps {
   gym: any;
@@ -30,6 +33,12 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   openWebsite,
   openDirections,
 }) => {
+  const cardRef = useRef<View>(null);
+  const { theme } = useTheme();
+  const [showShareOptions, setShowShareOptions] = useState(false);
+
+  // State tracking removed for production
+
   const handleShare = async () => {
     try {
       // Use the full address from the gym data
@@ -51,12 +60,46 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
         title: `${gym.name} - Jiu Jitsu Gym`
       });
     } catch (error) {
-      console.error('Error sharing gym:', error);
+      // Share error handled silently
     }
   };
 
+  const handleScreenshotShare = async () => {
+    try {
+      // Get the first session for the share card
+      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+      
+      if (!firstSession) {
+        Alert.alert('No Sessions', 'No sessions available to share.');
+        return;
+      }
+
+      await captureAndShareCard(cardRef, gym, firstSession);
+    } catch (error) {
+      Alert.alert(
+        'Sharing Error',
+        'Failed to create and share the image. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const handleShareOptions = () => {
+    setShowShareOptions(true);
+  };
+
   return (
-    <TouchableOpacity onPress={onPress ? () => onPress(gym) : undefined} activeOpacity={onPress ? 0.9 : 1} style={styles.card}>
+    <View style={styles.container}>
+      {/* Invisible ShareCard rendered off-screen */}
+      {gym.openMats && gym.openMats.length > 0 && (
+        <ShareCard 
+          ref={cardRef}
+          gym={gym}
+          session={gym.openMats[0]}
+        />
+      )}
+      
+      <TouchableOpacity onPress={onPress ? () => onPress(gym) : undefined} activeOpacity={onPress ? 0.9 : 1} style={styles.card}>
       {/* Header: Logo/Avatar + Gym Name + Heart */}
       <View style={styles.cardHeader}>
         {gym.id.includes('10th-planet') ? (
@@ -149,16 +192,102 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.actionButton}
-          onPress={handleShare}
+          onPress={handleShareOptions}
         >
           <Text style={styles.buttonText}>↗️ Share</Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      {/* Share Options Modal - Moved outside TouchableOpacity */}
+      <Modal
+        visible={showShareOptions}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowShareOptions(false)}
+      >
+        <TouchableOpacity 
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}
+          activeOpacity={1}
+          onPress={() => setShowShareOptions(false)}
+        >
+          <View style={{
+            backgroundColor: theme.surface,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 40,
+          }}>
+            <Text style={{ 
+              fontSize: 20, 
+              fontWeight: 'bold', 
+              marginBottom: 20, 
+              color: theme.text.primary,
+              textAlign: 'center'
+            }}>
+              Share Open Mat
+            </Text>
+            
+            <TouchableOpacity
+              style={{ 
+                padding: 16, 
+                backgroundColor: theme.surfaceHover, 
+                borderRadius: 12, 
+                marginBottom: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onPress={() => {
+                setShowShareOptions(false);
+                handleShare(); // Existing text share
+              }}
+            >
+              <Text style={{ fontSize: 18, color: theme.text.primary }}>📝 Share as Text</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={{ 
+                padding: 16, 
+                backgroundColor: theme.surfaceHover, 
+                borderRadius: 12, 
+                marginBottom: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onPress={() => {
+                setShowShareOptions(false);
+                handleScreenshotShare(); // Image share function
+              }}
+            >
+              <Text style={{ fontSize: 18, color: theme.text.primary }}>📸 Share as Image</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={{ padding: 16, marginTop: 8 }}
+              onPress={() => setShowShareOptions(false)}
+            >
+              <Text style={{ 
+                fontSize: 16, 
+                color: theme.text.secondary, 
+                textAlign: 'center' 
+              }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,

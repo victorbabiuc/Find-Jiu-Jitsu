@@ -4,4 +4,5 @@
 export * from './common';
 export * from './navigation';
 export * from './cards';
-export { default as GymDetailsModal } from './GymDetailsModal'; 
+export { default as GymDetailsModal } from './GymDetailsModal';
+export { default as ShareCard } from './ShareCard'; 
