@@ -260,3 +260,42 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **App Store Status**: ✅ Live  
 **Contact**: glootieapp@gmail.com
 
+## **✅ Consistent Website Button Layout Implemented!**
+
+### **What I've Done:**
+
+1. **Updated OpenMatCard**: Always shows the website button, but grays it out when no website is available
+2. **Updated ResultsScreen**: Same consistent layout across all gym cards
+3. **Applied Same Styling**: Uses the existing `disabledButton` and `disabledText` styles
+
+### **New Button Behavior:**
+
+**✅ With Website Available:**
+- Button is fully functional and clickable
+- Normal styling (white background, dark text)
+
+**🔘 No Website Available:**
+- Button is grayed out (light gray background, lighter text)
+- Disabled state (not clickable)
+- Consistent visual layout across all cards
+
+### **Benefits:**
+- **Professional Look**: All gym cards now have the same 3-button layout
+- **Better UX**: Users can see at a glance which gyms have websites
+- **Consistent Design**: Matches the existing directions button behavior
+- **Future-Proof**: Easy to add websites later without layout changes
+
+### **Visual Layout:**
+```
+[🌐 Website] [📍 Directions] [↗️ Share]
+```
+
+All cards now have this exact layout, with buttons grayed out when the feature isn't available.
+
+### **Next Steps:**
+1. **Rebuild the app** to see the new consistent layout
+2. **Test the functionality** - website buttons should work for gyms with URLs
+3. **Verify grayed-out buttons** for gyms without websites
+
+The layout will now look much more professional and organized! 🎉
+

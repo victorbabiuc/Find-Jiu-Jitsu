@@ -61,6 +61,8 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
             <Image source={require('../../assets/logos/STJJ.png')} style={styles.gymLogo} />
           ) : (String(gym.id || '').includes('gracie-tampa-south')) ? (
             <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.gymLogo} />
+          ) : (String(gym.id || '').includes('tmt')) ? (
+            <Image source={require('../../assets/logos/TMT.png')} style={styles.gymLogo} />
           ) : (
             <View style={styles.gymLogoPlaceholder}>
               <Text style={styles.gymLogoText}>{String(gym.name || '').split(' ').map(word => word[0]).join('').toUpperCase()}</Text>
