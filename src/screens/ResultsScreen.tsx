@@ -172,7 +172,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                      location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         
         // Force refresh data from GitHub
-        await githubDataService.refreshData(city);
+        if (city === 'tampa') {
+          await githubDataService.forceRefreshTampaData();
+        } else {
+          await githubDataService.refreshData(city);
+        }
         
         // Check last update time silently
         const lastUpdate = await githubDataService.getLastUpdateTime(city);

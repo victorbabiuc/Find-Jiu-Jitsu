@@ -47,8 +47,8 @@ class GitHubDataService {
       const cached: CachedData = JSON.parse(cachedString);
       const age = Date.now() - cached.timestamp;
       
-      // Consider data stale after 1 hour instead of 24 hours for more frequent updates
-      return age > (60 * 60 * 1000); // 1 hour
+      // Temporarily reduce cache duration to 5 minutes to force refresh for Gracie Tampa South website
+      return age > (5 * 60 * 1000); // 5 minutes
     } catch (error) {
       console.error(`Error checking if data is stale for ${location}:`, error);
       return true; // Assume stale if error
@@ -380,6 +380,16 @@ class GitHubDataService {
     // Clear cache first, then fetch fresh data
     await this.clearCache(location);
     return this.getGymData(location, true);
+  }
+
+  /**
+   * Force refresh Tampa data specifically for Gracie Tampa South website update
+   * @returns Promise<OpenMat[]> - Fresh Tampa data
+   */
+  async forceRefreshTampaData(): Promise<OpenMat[]> {
+    console.log('🔄 Force refreshing Tampa data for Gracie Tampa South website...');
+    await this.clearCache('tampa');
+    return this.getGymData('tampa', true);
   }
 
   /**

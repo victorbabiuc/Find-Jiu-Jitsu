@@ -55,11 +55,11 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
         {/* Gym Info */}
         <View style={styles.gymSection}>
           {/* Gym Logo */}
-          {String(gym.id || '').includes('10th-planet') ? (
+          {(String(gym.id || '').includes('10th-planet')) ? (
             <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.gymLogo} />
-          ) : String(gym.id || '').includes('stjj') ? (
+          ) : (String(gym.id || '').includes('stjj')) ? (
             <Image source={require('../../assets/logos/STJJ.png')} style={styles.gymLogo} />
-          ) : String(gym.id || '').includes('gracie-tampa-south') ? (
+          ) : (String(gym.id || '').includes('gracie-tampa-south')) ? (
             <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.gymLogo} />
           ) : (
             <View style={styles.gymLogoPlaceholder}>
@@ -92,17 +92,17 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
 
         {/* Pricing Info */}
         <View style={styles.pricingSection}>
-          {gym.matFee && gym.matFee !== 0 && (
+          {Boolean(gym.matFee) && gym.matFee !== 0 && (
             <Text style={[styles.pricing, { color: '#4A5568' }]}>
               Open Mat Fee: ${String(gym.matFee || 0)}
             </Text>
           )}
-          {gym.dropInFee && gym.dropInFee !== 0 && (
+          {Boolean(gym.dropInFee) && gym.dropInFee !== 0 && (
             <Text style={[styles.pricing, { color: '#4A5568' }]}>
               Drop-in Fee: ${String(gym.dropInFee || 0)}
             </Text>
           )}
-          {(!gym.matFee || gym.matFee === 0) && (
+          {(!Boolean(gym.matFee) || gym.matFee === 0) && (
             <Text style={[styles.pricing, { color: '#4A5568' }]}>
               Open Mat - Free
             </Text>
