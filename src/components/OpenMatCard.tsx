@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
@@ -38,6 +38,8 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const { theme } = useTheme();
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [includeImGoing, setIncludeImGoing] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   // State tracking removed for production
 
@@ -70,6 +72,9 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   };
 
   const handleScreenshotShare = async () => {
+    if (isSharing) return; // Prevent multiple clicks
+    
+    setIsSharing(true);
     try {
       // Get the first session for the share card
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
@@ -82,10 +87,12 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       await captureAndShareCard(cardRef, gym, firstSession);
     } catch (error) {
       Alert.alert(
-        'Sharing Error',
+        '❌ Sharing Error',
         'Failed to create and share the image. Please try again.',
         [{ text: 'OK' }]
       );
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -94,6 +101,9 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   };
 
   const handleCopy = async () => {
+    if (isCopying) return; // Prevent multiple clicks
+    
+    setIsCopying(true);
     try {
       // Get session info from the first session in openMats array
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
@@ -108,9 +118,13 @@ ${sessionInfo}
 📱 Get the app: https://bit.ly/40DjTlM`;
 
       await Clipboard.setStringAsync(copyText);
-      Alert.alert('Copied to clipboard!', 'Gym details copied successfully.');
+      
+      // Show success feedback
+      Alert.alert('✅ Copied!', 'Gym details copied to clipboard.');
     } catch (error) {
-      Alert.alert('Error', 'Failed to copy to clipboard.');
+      Alert.alert('❌ Error', 'Failed to copy to clipboard. Please try again.');
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -149,10 +163,15 @@ ${sessionInfo}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={styles.copyButton}
+            style={[styles.copyButton, isCopying && styles.disabledButton]}
             onPress={handleCopy}
+            disabled={isCopying}
           >
-            <Ionicons name="copy-outline" size={20} color="#60798A" />
+            {isCopying ? (
+              <ActivityIndicator size="small" color="#60798A" />
+            ) : (
+              <Ionicons name="copy-outline" size={20} color="#60798A" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -223,10 +242,15 @@ ${sessionInfo}
           <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.actionButton, isSharing && styles.disabledButton]}
           onPress={handleShareOptions}
+          disabled={isSharing}
         >
-          <Text style={styles.buttonText}>↗️ Share</Text>
+          {isSharing ? (
+            <ActivityIndicator size="small" color="#111518" />
+          ) : (
+            <Text style={styles.buttonText}>↗️ Share</Text>
+          )}
         </TouchableOpacity>
       </View>
       </TouchableOpacity>

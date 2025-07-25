@@ -14,6 +14,7 @@ import {
   LayoutAnimation,
   Share,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -81,6 +82,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const shareCardRef = useRef<View>(null);
   const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
   const [shareCardSession, setShareCardSession] = useState<any>(null);
+  
+  // Loading states for user actions
+  const [copyingGymId, setCopyingGymId] = useState<string | null>(null);
+  const [sharingGymId, setSharingGymId] = useState<string | null>(null);
 
   // Component lifecycle tracking removed for production
 
@@ -576,6 +581,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Helper to copy gym details
   const handleCopyGym = async (gym: OpenMat) => {
+    if (copyingGymId === gym.id) return; // Prevent multiple clicks
+    
+    setCopyingGymId(gym.id);
     try {
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       const sessionInfo = firstSession ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}` : '';
@@ -589,10 +597,13 @@ ${sessionInfo}
 📱 Get the app: https://bit.ly/40DjTlM`;
 
       await Clipboard.setStringAsync(copyText);
-      // Copy silently to avoid UI blocking
-      console.log('Copied to clipboard successfully');
+      
+      // Show success feedback
+      Alert.alert('✅ Copied!', 'Gym details copied to clipboard.');
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      Alert.alert('❌ Error', 'Failed to copy to clipboard. Please try again.');
+    } finally {
+      setCopyingGymId(null);
     }
   };
 
@@ -604,6 +615,9 @@ ${sessionInfo}
 
   // Direct image sharing function
   const handleShareImage = async (gym: OpenMat) => {
+    if (sharingGymId === gym.id) return; // Prevent multiple clicks
+    
+    setSharingGymId(gym.id);
     try {
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       
@@ -622,18 +636,21 @@ ${sessionInfo}
           await captureAndShareCard(shareCardRef, gym, firstSession);
         } catch (error) {
           Alert.alert(
-            'Sharing Error',
+            '❌ Sharing Error',
             'Failed to create and share the image. Please try again.',
             [{ text: 'OK' }]
           );
+        } finally {
+          setSharingGymId(null);
         }
       }, 100);
     } catch (error) {
       Alert.alert(
-        'Sharing Error',
+        '❌ Sharing Error',
         'Failed to create and share the image. Please try again.',
         [{ text: 'OK' }]
       );
+      setSharingGymId(null);
     }
   };
 
@@ -897,10 +914,15 @@ ${sessionInfo}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={styles.copyButton}
-                    onPress={() => handleCopyAndCloseModal(gym)}
+                    style={[styles.copyButton, copyingGymId === gym.id && styles.disabledButton]}
+                    onPress={() => handleCopyGym(gym)}
+                    disabled={copyingGymId === gym.id}
                   >
-                    <Ionicons name="copy-outline" size={20} color="#60798A" />
+                    {copyingGymId === gym.id ? (
+                      <ActivityIndicator size="small" color="#60798A" />
+                    ) : (
+                      <Ionicons name="copy-outline" size={20} color="#60798A" />
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -965,10 +987,15 @@ ${sessionInfo}
                   <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
-                  style={styles.actionButton}
+                  style={[styles.actionButton, sharingGymId === gym.id && styles.disabledButton]}
                   onPress={() => handleShareImage(gym)}
+                  disabled={sharingGymId === gym.id}
                 >
-                  <Text style={styles.buttonText}>↗️ Share</Text>
+                  {sharingGymId === gym.id ? (
+                    <ActivityIndicator size="small" color="#111518" />
+                  ) : (
+                    <Text style={styles.buttonText}>↗️ Share</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
