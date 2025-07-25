@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import { ShareCard } from './index';
@@ -36,6 +37,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const cardRef = useRef<View>(null);
   const { theme } = useTheme();
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [includeImGoing, setIncludeImGoing] = useState(false);
 
   // State tracking removed for production
 
@@ -48,12 +50,15 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       const sessionInfo = firstSession ? `⏰ ${firstSession.day.toUpperCase()} ${firstSession.time} - ${firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi'}` : '';
       
+      const inviteMessage = includeImGoing ? '🏃 I\'m going, come train with me!' : '🏃 Join me for training!';
+      
       const shareText = `${gym.name}\n` +
         (displayAddress && displayAddress.trim() !== '' ? `📍 ${displayAddress}\n` : '') +
         (gym.website ? `🌐 ${gym.website.replace(/^https?:\/\//, '')}\n` : '') +
         (sessionInfo ? `${sessionInfo}\n` : '') +
         `💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}\n\n` +
-        `📱 Get the app:\nhttps://apps.apple.com/us/app/find-jiu-jitsu/id6747903814`;
+        `${inviteMessage}\n\n` +
+        `📱 Get the app:\nhttps://bit.ly/40DjTlM`;
       
       Share.share({
         message: shareText,
@@ -88,6 +93,27 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
     setShowShareOptions(true);
   };
 
+  const handleCopy = async () => {
+    try {
+      // Get session info from the first session in openMats array
+      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+      const sessionInfo = firstSession ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}` : '';
+      
+      const copyText = `🥋 ${gym.name} - Open Mat
+${sessionInfo}
+👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
+💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}
+📍 ${gym.address}
+🏃 I'm going, come train with me!
+📱 Get the app: https://bit.ly/40DjTlM`;
+
+      await Clipboard.setStringAsync(copyText);
+      Alert.alert('Copied to clipboard!', 'Gym details copied successfully.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy to clipboard.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Invisible ShareCard rendered off-screen */}
@@ -96,6 +122,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
           ref={cardRef}
           gym={gym}
           session={gym.openMats[0]}
+          includeImGoing={includeImGoing}
         />
       )}
       
@@ -121,11 +148,17 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
               {favorites.has(gym.id) ? '♥' : '♡'}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.copyButton}
+            onPress={handleCopy}
+          >
+            <Ionicons name="copy-outline" size={20} color="#60798A" />
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Session Type Subtitle */}
-      <Text style={styles.sessionSubtitle}>Jiu Jitsu Session</Text>
+      <Text style={styles.sessionSubtitle}>Open Mat Sessions</Text>
 
       {/* Sessions Section */}
       <View style={styles.sessionsSection}>
@@ -228,6 +261,47 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
             }}>
               Share Open Mat
             </Text>
+            
+            {/* I'm Going Toggle */}
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              marginBottom: 20,
+              paddingHorizontal: 10
+            }}>
+              <Text style={{ 
+                fontSize: 16, 
+                color: theme.text.primary,
+                flex: 1
+              }}>
+                Say "I'm going"?
+              </Text>
+              <TouchableOpacity
+                style={{
+                  width: 50,
+                  height: 30,
+                  backgroundColor: includeImGoing ? '#007AFF' : '#ccc',
+                  borderRadius: 15,
+                  justifyContent: 'center',
+                  alignItems: includeImGoing ? 'flex-end' : 'flex-start',
+                  paddingHorizontal: 2
+                }}
+                onPress={() => setIncludeImGoing(!includeImGoing)}
+              >
+                <View style={{
+                  width: 26,
+                  height: 26,
+                  backgroundColor: 'white',
+                  borderRadius: 13,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 1,
+                  elevation: 2
+                }} />
+              </TouchableOpacity>
+            </View>
             
             <TouchableOpacity
               style={{ 
@@ -338,11 +412,15 @@ const styles = StyleSheet.create({
   logoHeartContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
+  },
+  copyButton: {
+    padding: 4,
+    marginLeft: 4,
   },
   heartButton: {
     padding: 4,
-    marginLeft: 8,
+    marginRight: 4,
   },
   heartIcon: {
     fontSize: 24,
@@ -418,17 +496,17 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     backgroundColor: '#F8F9FA',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    minHeight: 44,
+    minHeight: 36,
   },
   buttonText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: '#111518',
     textAlign: 'center',

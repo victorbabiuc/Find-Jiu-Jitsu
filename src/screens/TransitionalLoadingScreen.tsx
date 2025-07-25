@@ -115,19 +115,18 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
           const beltColor = beltColors[beltType];
           const isActive = index <= currentBeltIndex;
           
-          // Special handling for white belt for better visibility
-          const isWhiteBeltInLightMode = beltType === 'white' && false; // Simplified for now
-          
           return (
             <View
               key={beltType}
               style={[
                 styles.belt,
-                { backgroundColor: beltColor.primary },
-                isWhiteBeltInLightMode ? {
-                  borderWidth: 1.5,
-                  borderColor: '#9CA3AF',  // More visible gray
-                } : {}
+                { 
+                  backgroundColor: beltColor.primary,
+                  opacity: isActive ? 1 : 0.3,
+                  transform: [{
+                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
+                  }]
+                }
               ]}
             />
           );

@@ -28,30 +28,30 @@ export const beltColors: Record<BeltType, {
     textOnColor: '#FFFFFF'
   },
   purple: {
-    primary: '#475569',
-    secondary: '#64748B',
-    accent: '#0F172A',
-    surface: '#47556915',
-    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
-    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
+    primary: '#7C3AED',
+    secondary: '#8B5CF6',
+    accent: '#4C1D95',
+    surface: '#7C3AED15',
+    gradient: 'linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)',
+    cardGradient: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
     textOnColor: '#FFFFFF'
   },
   brown: {
-    primary: '#475569',
-    secondary: '#64748B',
-    accent: '#0F172A',
-    surface: '#47556915',
-    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
-    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
+    primary: '#D97706',
+    secondary: '#F59E0B',
+    accent: '#92400E',
+    surface: '#D9770615',
+    gradient: 'linear-gradient(135deg, #D97706 0%, #92400E 100%)',
+    cardGradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
     textOnColor: '#FFFFFF'
   },
   black: {
-    primary: '#475569',
-    secondary: '#64748B',
-    accent: '#0F172A',
-    surface: '#47556915',
-    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
-    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
+    primary: '#111827',
+    secondary: '#374151',
+    accent: '#000000',
+    surface: '#11182715',
+    gradient: 'linear-gradient(135deg, #111827 0%, #000000 100%)',
+    cardGradient: 'linear-gradient(135deg, #111827 0%, #374151 100%)',
     textOnColor: '#FFFFFF'
   }
 };

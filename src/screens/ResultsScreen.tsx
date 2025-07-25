@@ -24,10 +24,11 @@ import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
-import { GymDetailsModal } from '../components';
+import { GymDetailsModal, ShareCard } from '../components';
 import { apiService, gymLogoService } from '../services';
 import { githubDataService } from '../services/github-data.service';
 import { FindStackRouteProp } from '../navigation/types';
+import { captureAndShareCard } from '../utils/screenshot';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import appIcon from '../../assets/icon.png';
@@ -75,6 +76,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     nogi: false,
     price: null, // null or 'free'
   });
+
+  // Share card ref and state for image generation
+  const shareCardRef = useRef<View>(null);
+  const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
+  const [shareCardSession, setShareCardSession] = useState<any>(null);
 
   // Component lifecycle tracking removed for production
 
@@ -564,11 +570,79 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     Linking.openURL(url);
   };
 
+  // Helper to copy gym details
+  const handleCopyGym = async (gym: OpenMat) => {
+    try {
+      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+      const sessionInfo = firstSession ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}` : '';
+      
+      const copyText = `🥋 ${gym.name} - Open Mat
+${sessionInfo}
+👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
+💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}
+📍 ${gym.address}
+🏃 I'm going, come train with me!
+📱 Get the app: https://bit.ly/40DjTlM`;
+
+      await Clipboard.setStringAsync(copyText);
+      // Copy silently to avoid UI blocking
+      console.log('Copied to clipboard successfully');
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
+  };
+
+  // Copy function that closes the modal
+  const handleCopyAndCloseModal = async (gym: OpenMat) => {
+    await handleCopyGym(gym);
+    setShowShareOptions(false);
+  };
+
+  // Direct image sharing function
+  const handleShareImage = async (gym: OpenMat) => {
+    try {
+      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+      
+      if (!firstSession) {
+        Alert.alert('No Sessions', 'No sessions available to share.');
+        return;
+      }
+
+      // Set the gym and session for the ShareCard
+      setShareCardGym(gym);
+      setShareCardSession(firstSession);
+
+      // Wait a moment for the ShareCard to render, then capture
+      setTimeout(async () => {
+        try {
+          await captureAndShareCard(shareCardRef, gym, firstSession);
+        } catch (error) {
+          Alert.alert(
+            'Sharing Error',
+            'Failed to create and share the image. Please try again.',
+            [{ text: 'OK' }]
+          );
+        }
+      }, 100);
+    } catch (error) {
+      Alert.alert(
+        'Sharing Error',
+        'Failed to create and share the image. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
       <View style={styles.header}>
-        <Image source={appIcon} style={styles.headerLogo} />
+        <TouchableOpacity
+          onPress={() => findNavigation.navigate('Home')}
+          activeOpacity={0.7}
+        >
+          <Image source={appIcon} style={styles.headerLogo} />
+        </TouchableOpacity>
         <View style={styles.headerTextContainer}>
           <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Find Jiu Jitsu</Text>
           <Text style={styles.locationContext}>Showing gyms in {location}</Text>
@@ -818,11 +892,17 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                       {favorites.has(gym.id) ? '♥' : '♡'}
                     </Text>
                   </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.copyButton}
+                    onPress={() => handleCopyAndCloseModal(gym)}
+                  >
+                    <Ionicons name="copy-outline" size={20} color="#60798A" />
+                  </TouchableOpacity>
                 </View>
               </View>
 
               {/* Session Type Subtitle */}
-              <Text style={styles.sessionSubtitle}>Jiu Jitsu Session</Text>
+              <Text style={styles.sessionSubtitle}>Open Mat Sessions</Text>
 
               {/* Sessions Section */}
               <View style={styles.sessionsSection}>
@@ -883,32 +963,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.actionButton}
-                  onPress={() => {
-                    // Get the first session for sharing details
-                    const firstSession = gym.openMats[0];
-                    const sessionDay = firstSession?.day || '';
-                    const sessionTime = firstSession?.time || '';
-                    const giType = firstSession?.type === 'gi' ? 'Gi' : firstSession?.type === 'nogi' ? 'No-Gi' : 'Mixed';
-                    
-                    // Use the full address
-                    const locationText = gym.address;
-                    
-                    // Build the share message
-                    const shareMessage = `🥋 ${gym.name} - Open Mat
-📅 ${sessionDay}, ${sessionTime}
-👕 ${giType} Session
-💵 ${gym.matFee === 0 ? 'FREE Open Mat' : `Open Mat: $${gym.matFee}`}
-📍 ${locationText}
-🏃 Join me for training!
-
-📱 Get the app:
-https://apps.apple.com/us/app/find-jiu-jitsu/id6747903814`;
-
-                    Share.share({
-                      message: shareMessage,
-                      title: `${gym.name} - Jiu Jitsu Gym`
-                    });
-                  }}
+                  onPress={() => handleShareImage(gym)}
                 >
                   <Text style={styles.buttonText}>↗️ Share</Text>
                 </TouchableOpacity>
@@ -922,16 +977,18 @@ https://apps.apple.com/us/app/find-jiu-jitsu/id6747903814`;
         />
       )}
 
-      {/* Hidden ShareCard for image generation - temporarily disabled */}
-      {/* {shareCardGym && (
+
+      {/* Hidden ShareCard for image generation */}
+      {shareCardGym && shareCardSession && (
         <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
-          <ShareCard
+          <ShareCard 
             ref={shareCardRef}
             gym={shareCardGym}
-            theme={theme}
+            session={shareCardSession}
+            includeImGoing={true}
           />
         </View>
-      )} */}
+      )}
 
       {/* Gym Details Modal */}
       <GymDetailsModal
@@ -1111,9 +1168,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  copyButton: {
+    padding: 4,
+    marginLeft: 4,
+  },
   heartButton: {
     padding: 4,
-    marginLeft: 8,
+    marginRight: 4,
   },
   navigateButton: {
     marginLeft: 12,
@@ -1377,7 +1438,7 @@ const styles = StyleSheet.create({
   logoHeartContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   logoPlaceholder: {
     width: 32,
@@ -1461,17 +1522,17 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     backgroundColor: '#F8F9FA',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    minHeight: 44,
+    minHeight: 36,
   },
   buttonText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: '#111518',
     textAlign: 'center',
