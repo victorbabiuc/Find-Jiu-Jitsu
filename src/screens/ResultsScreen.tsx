@@ -950,14 +950,13 @@ ${sessionInfo}
 
               {/* Action Buttons */}
               <View style={styles.buttonRow}>
-                {gym.website && (
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={() => openWebsite(gym.website)}
-                  >
-                    <Text style={styles.buttonText}>🌐 Website</Text>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity 
+                  style={[styles.actionButton, (!gym.website || gym.website.trim() === '') && styles.disabledButton]}
+                  onPress={() => gym.website && gym.website.trim() !== '' ? openWebsite(gym.website) : null}
+                  disabled={!gym.website || gym.website.trim() === ''}
+                >
+                  <Text style={[styles.buttonText, (!gym.website || gym.website.trim() === '') && styles.disabledText]}>🌐 Website</Text>
+                </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.actionButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledButton]}
                   onPress={() => openDirections(gym.address)}
