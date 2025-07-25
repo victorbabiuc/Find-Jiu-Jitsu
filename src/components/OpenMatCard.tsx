@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
-import { ShareCard } from './index';
+import { ShareCard, Toast } from './index';
 import { captureAndShareCard } from '../utils/screenshot';
 import { useTheme } from '../context/ThemeContext';
 
@@ -40,6 +40,9 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const [includeImGoing, setIncludeImGoing] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   // State tracking removed for production
 
@@ -119,10 +122,15 @@ ${sessionInfo}
 
       await Clipboard.setStringAsync(copyText);
       
-      // Show success feedback
-      Alert.alert('✅ Copied!', 'Gym details copied to clipboard.');
+      // Show success toast
+      setToastMessage('Copied to clipboard!');
+      setToastType('success');
+      setShowToast(true);
     } catch (error) {
-      Alert.alert('❌ Error', 'Failed to copy to clipboard. Please try again.');
+      // Show error toast
+      setToastMessage('Failed to copy to clipboard');
+      setToastType('error');
+      setShowToast(true);
     } finally {
       setIsCopying(false);
     }
@@ -377,6 +385,14 @@ ${sessionInfo}
           </View>
         </TouchableOpacity>
       </Modal>
+      
+      {/* Toast Notification */}
+      <Toast
+        visible={showToast}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setShowToast(false)}
+      />
     </View>
   );
 };

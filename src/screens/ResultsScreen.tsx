@@ -25,7 +25,7 @@ import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation } from '../navigation/useNavigation';
 import { beltColors } from '../utils/constants';
 import { OpenMat } from '../types';
-import { GymDetailsModal, ShareCard } from '../components';
+import { GymDetailsModal, ShareCard, Toast } from '../components';
 import { apiService, gymLogoService } from '../services';
 import { githubDataService } from '../services/github-data.service';
 import { FindStackRouteProp } from '../navigation/types';
@@ -86,6 +86,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Loading states for user actions
   const [copyingGymId, setCopyingGymId] = useState<string | null>(null);
   const [sharingGymId, setSharingGymId] = useState<string | null>(null);
+  
+  // Toast state
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   // Component lifecycle tracking removed for production
 
@@ -598,10 +603,15 @@ ${sessionInfo}
 
       await Clipboard.setStringAsync(copyText);
       
-      // Show success feedback
-      Alert.alert('✅ Copied!', 'Gym details copied to clipboard.');
+      // Show success toast
+      setToastMessage('Copied to clipboard!');
+      setToastType('success');
+      setShowToast(true);
     } catch (error) {
-      Alert.alert('❌ Error', 'Failed to copy to clipboard. Please try again.');
+      // Show error toast
+      setToastMessage('Failed to copy to clipboard');
+      setToastType('error');
+      setShowToast(true);
     } finally {
       setCopyingGymId(null);
     }
@@ -1027,6 +1037,14 @@ ${sessionInfo}
         onClose={handleCloseModal}
         onHeartPress={selectedGym ? () => handleHeartPress(selectedGym) : undefined}
         isFavorited={selectedGym ? favorites.has(selectedGym.id) : false}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        visible={showToast}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setShowToast(false)}
       />
 
     </SafeAreaView>
