@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +19,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
-import { beltColors, haptics } from '../utils';
+import { beltColors, haptics, animations } from '../utils';
 import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -45,6 +46,10 @@ const SavedScreen: React.FC = () => {
   
   // Gym logo state
   const [gymLogos, setGymLogos] = useState<Record<string, string>>({});
+  
+  // Animation values
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const listAnim = useRef(new Animated.Value(0)).current;
 
   // Fetch saved gyms data
   useEffect(() => {
@@ -69,6 +74,21 @@ const SavedScreen: React.FC = () => {
 
     fetchSavedGyms();
   }, [favorites, showTransitionalLoading, selectedLocation]);
+
+  // Entrance animations
+  useEffect(() => {
+    const runEntranceAnimations = async () => {
+      // Stagger the animations for a smooth entrance
+      animations.stagger(
+        [headerAnim, listAnim],
+        (value, index) => animations.fadeIn(value, 400, index * 100)
+      ).start();
+    };
+
+    if (!loading) {
+      runEntranceAnimations();
+    }
+  }, [loading]);
 
   // Load gym logos when savedGyms data changes
   useEffect(() => {
@@ -165,7 +185,7 @@ const SavedScreen: React.FC = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }}>
+      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }, { opacity: headerAnim }]}>
         <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Saved Gyms</Text>
         <TouchableOpacity
           onPress={() => {
@@ -185,10 +205,11 @@ const SavedScreen: React.FC = () => {
         >
           <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Content */}
-      {savedGyms.length === 0 ? (
+      <Animated.View style={{ flex: 1, opacity: listAnim }}>
+        {savedGyms.length === 0 ? (
         // Empty state
         <View style={styles.emptyContainer}>
           <Ionicons 
@@ -279,6 +300,7 @@ const SavedScreen: React.FC = () => {
           )}
         />
       )}
+        </Animated.View>
 
       {/* Gym Details Modal */}
       {selectedGym && (

@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal, ActivityIndicator, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import { ShareCard, Toast } from './index';
 import { captureAndShareCard } from '../utils/screenshot';
-import { haptics } from '../utils';
+import { haptics, animations } from '../utils';
 import { useTheme } from '../context/ThemeContext';
 
 interface OpenMatCardProps {
@@ -44,8 +44,21 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const buttonScaleAnim = useRef(new Animated.Value(1)).current;
 
   // State tracking removed for production
+
+  // Entrance animation
+  useEffect(() => {
+    animations.parallel([
+      animations.fadeIn(fadeAnim, 400),
+      animations.scale(scaleAnim, 1, 400),
+    ]).start();
+  }, []);
 
   const handleShare = async () => {
     try {
@@ -112,6 +125,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
     if (isCopying) return; // Prevent multiple clicks
     
     haptics.light(); // Light haptic for button press
+    animations.bounce(buttonScaleAnim, 200).start(); // Button press animation
     setIsCopying(true);
     try {
       // Get session info from the first session in openMats array
@@ -145,7 +159,15 @@ ${sessionInfo}
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View 
+      style={[
+        styles.container,
+        {
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}
+    >
       {/* Invisible ShareCard rendered off-screen */}
       {gym.openMats && gym.openMats.length > 0 && (
         <ShareCard 
@@ -181,17 +203,19 @@ ${sessionInfo}
               {favorites.has(gym.id) ? '♥' : '♡'}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.copyButton, isCopying && styles.disabledButton]}
-            onPress={handleCopy}
-            disabled={isCopying}
-          >
-            {isCopying ? (
-              <ActivityIndicator size="small" color="#60798A" />
-            ) : (
-              <Ionicons name="copy-outline" size={20} color="#60798A" />
-            )}
-          </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: buttonScaleAnim }] }}>
+            <TouchableOpacity 
+              style={[styles.copyButton, isCopying && styles.disabledButton]}
+              onPress={handleCopy}
+              disabled={isCopying}
+            >
+              {isCopying ? (
+                <ActivityIndicator size="small" color="#60798A" />
+              ) : (
+                <Ionicons name="copy-outline" size={20} color="#60798A" />
+              )}
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       </View>
 
@@ -417,7 +441,7 @@ ${sessionInfo}
         type={toastType}
         onHide={() => setShowToast(false)}
       />
-    </View>
+    </Animated.View>
   );
 };
 

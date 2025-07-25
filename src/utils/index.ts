@@ -3,4 +3,5 @@
 
 export { beltColors, loadingMessages, quickDateOptions, timeOfDayOptions } from './constants';
 export { captureAndShareCard, captureCardAsImage } from './screenshot';
-export { haptics } from './haptics'; 
+export { haptics } from './haptics';
+export { animations, animationConfigs } from './animations'; 

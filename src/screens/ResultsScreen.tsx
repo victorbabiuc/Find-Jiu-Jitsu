@@ -16,6 +16,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +25,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation } from '../navigation/useNavigation';
-import { beltColors, haptics } from '../utils';
+import { beltColors, haptics, animations } from '../utils';
 import { OpenMat } from '../types';
 import { GymDetailsModal, ShareCard, Toast } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -93,8 +94,28 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  
+  // Animation values
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const filterAnim = useRef(new Animated.Value(0)).current;
+  const listAnim = useRef(new Animated.Value(0)).current;
 
   // Component lifecycle tracking removed for production
+
+  // Entrance animations
+  useEffect(() => {
+    const runEntranceAnimations = async () => {
+      // Stagger the animations for a smooth entrance
+      animations.stagger(
+        [headerAnim, filterAnim, listAnim],
+        (value, index) => animations.fadeIn(value, 400, index * 100)
+      ).start();
+    };
+
+    if (!loading) {
+      runEntranceAnimations();
+    }
+  }, [loading]);
 
   // Load gym logos when openMats data changes
   useEffect(() => {
@@ -723,7 +744,7 @@ ${sessionInfo}
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, { opacity: headerAnim }]}>
         <TouchableOpacity
           onPress={() => findNavigation.navigate('Home')}
           activeOpacity={0.7}
@@ -757,10 +778,10 @@ ${sessionInfo}
         >
           <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Filter Pills */}
-      <View style={[styles.filterSection, { alignItems: 'center' }]}>
+      <Animated.View style={[styles.filterSection, { alignItems: 'center' }, { opacity: filterAnim }]}>
         <ScrollView 
           horizontal={true} 
           showsHorizontalScrollIndicator={false}
@@ -870,12 +891,13 @@ ${sessionInfo}
         </ScrollView>
 
 
-      </View>
+      </Animated.View>
 
       {/* Content */}
-      {filteredGyms.length === 0 ? (
-        // Enhanced Empty State
-        <View style={styles.emptyStateContainer}>
+      <Animated.View style={{ flex: 1, opacity: listAnim }}>
+        {filteredGyms.length === 0 ? (
+          // Enhanced Empty State
+          <View style={styles.emptyStateContainer}>
           {/* Icon */}
           <View style={styles.emptyStateIconContainer}>
             <Ionicons 
@@ -1098,6 +1120,7 @@ ${sessionInfo}
           }
         />
       )}
+        </Animated.View>
 
 
       {/* Hidden ShareCard for image generation */}
