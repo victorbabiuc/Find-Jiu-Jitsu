@@ -6,6 +6,7 @@ import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import { ShareCard, Toast } from './index';
 import { captureAndShareCard } from '../utils/screenshot';
+import { haptics } from '../utils';
 import { useTheme } from '../context/ThemeContext';
 
 interface OpenMatCardProps {
@@ -77,18 +78,22 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const handleScreenshotShare = async () => {
     if (isSharing) return; // Prevent multiple clicks
     
+    haptics.light(); // Light haptic for button press
     setIsSharing(true);
     try {
       // Get the first session for the share card
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       
       if (!firstSession) {
+        haptics.warning(); // Warning haptic for no sessions
         Alert.alert('No Sessions', 'No sessions available to share.');
         return;
       }
 
       await captureAndShareCard(cardRef, gym, firstSession);
+      haptics.success(); // Success haptic for successful share
     } catch (error) {
+      haptics.error(); // Error haptic for failed share
       Alert.alert(
         '❌ Sharing Error',
         'Failed to create and share the image. Please try again.',
@@ -106,6 +111,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const handleCopy = async () => {
     if (isCopying) return; // Prevent multiple clicks
     
+    haptics.light(); // Light haptic for button press
     setIsCopying(true);
     try {
       // Get session info from the first session in openMats array
@@ -122,11 +128,13 @@ ${sessionInfo}
 
       await Clipboard.setStringAsync(copyText);
       
+      haptics.success(); // Success haptic for successful copy
       // Show success toast
       setToastMessage('Copied to clipboard!');
       setToastType('success');
       setShowToast(true);
     } catch (error) {
+      haptics.error(); // Error haptic for failed copy
       // Show error toast
       setToastMessage('Failed to copy to clipboard');
       setToastType('error');
@@ -164,7 +172,10 @@ ${sessionInfo}
         <View style={styles.logoHeartContainer}>
           <TouchableOpacity 
             style={styles.heartButton}
-            onPress={() => onHeartPress(gym)}
+            onPress={() => {
+              haptics.light(); // Light haptic for heart button
+              onHeartPress(gym);
+            }}
           >
             <Text style={styles.heartIcon}>
               {favorites.has(gym.id) ? '♥' : '♡'}
@@ -237,21 +248,34 @@ ${sessionInfo}
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={[styles.actionButton, (!gym.website || gym.website.trim() === '') && styles.disabledButton]}
-          onPress={() => gym.website && gym.website.trim() !== '' ? openWebsite(gym.website) : null}
+          onPress={() => {
+            if (gym.website && gym.website.trim() !== '') {
+              haptics.light(); // Light haptic for website button
+              openWebsite(gym.website);
+            }
+          }}
           disabled={!gym.website || gym.website.trim() === ''}
         >
           <Text style={[styles.buttonText, (!gym.website || gym.website.trim() === '') && styles.disabledText]}>🌐 Website</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.actionButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledButton]}
-          onPress={() => openDirections(gym.address)}
+          onPress={() => {
+            if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
+              haptics.light(); // Light haptic for directions button
+              openDirections(gym.address);
+            }
+          }}
           disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
         >
           <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.actionButton, isSharing && styles.disabledButton]}
-          onPress={handleShareOptions}
+          onPress={() => {
+            haptics.light(); // Light haptic for share button
+            handleShareOptions();
+          }}
           disabled={isSharing}
         >
           {isSharing ? (

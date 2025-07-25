@@ -24,7 +24,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation } from '../navigation/useNavigation';
-import { beltColors } from '../utils/constants';
+import { beltColors, haptics } from '../utils';
 import { OpenMat } from '../types';
 import { GymDetailsModal, ShareCard, Toast } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -253,11 +253,13 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       const data = await apiService.getOpenMats(location, filters, true);
       setOpenMats(data);
       
+      haptics.success(); // Success haptic for successful refresh
       // Show success toast
       setToastMessage('Data refreshed successfully!');
       setToastType('success');
       setShowToast(true);
     } catch (error) {
+      haptics.error(); // Error haptic for failed refresh
       // Show error toast
       setToastMessage('Failed to refresh data');
       setToastType('error');
@@ -448,6 +450,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
 
   const toggleFilter = (filterType: 'gi' | 'nogi') => {
+    haptics.selection(); // Selection haptic for filter changes
     setActiveFilters(prev => {
       const newFilters = {
         ...prev,
@@ -458,6 +461,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   };
 
   const handleFreeFilter = () => {
+    haptics.selection(); // Selection haptic for filter changes
     const newValue = !showFreeOnly;
     setShowFreeOnly(newValue);
     
@@ -632,6 +636,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const handleCopyGym = async (gym: OpenMat) => {
     if (copyingGymId === gym.id) return; // Prevent multiple clicks
     
+    haptics.light(); // Light haptic for button press
     setCopyingGymId(gym.id);
     try {
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
@@ -647,11 +652,13 @@ ${sessionInfo}
 
       await Clipboard.setStringAsync(copyText);
       
+      haptics.success(); // Success haptic for successful copy
       // Show success toast
       setToastMessage('Copied to clipboard!');
       setToastType('success');
       setShowToast(true);
     } catch (error) {
+      haptics.error(); // Error haptic for failed copy
       // Show error toast
       setToastMessage('Failed to copy to clipboard');
       setToastType('error');
@@ -671,11 +678,13 @@ ${sessionInfo}
   const handleShareImage = async (gym: OpenMat) => {
     if (sharingGymId === gym.id) return; // Prevent multiple clicks
     
+    haptics.light(); // Light haptic for button press
     setSharingGymId(gym.id);
     try {
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       
       if (!firstSession) {
+        haptics.warning(); // Warning haptic for no sessions
         Alert.alert('No Sessions', 'No sessions available to share.');
         return;
       }
@@ -688,7 +697,9 @@ ${sessionInfo}
       setTimeout(async () => {
         try {
           await captureAndShareCard(shareCardRef, gym, firstSession);
+          haptics.success(); // Success haptic for successful share
         } catch (error) {
+          haptics.error(); // Error haptic for failed share
           Alert.alert(
             '❌ Sharing Error',
             'Failed to create and share the image. Please try again.',
@@ -699,6 +710,7 @@ ${sessionInfo}
         }
       }, 100);
     } catch (error) {
+      haptics.error(); // Error haptic for failed share
       Alert.alert(
         '❌ Sharing Error',
         'Failed to create and share the image. Please try again.',
@@ -961,7 +973,10 @@ ${sessionInfo}
                 <View style={styles.logoHeartContainer}>
                   <TouchableOpacity 
                     style={styles.heartButton}
-                    onPress={() => handleHeartPress(gym)}
+                    onPress={() => {
+                      haptics.light(); // Light haptic for heart button
+                      handleHeartPress(gym);
+                    }}
                   >
                     <Text style={styles.heartIcon}>
                       {favorites.has(gym.id) ? '♥' : '♡'}
@@ -1028,21 +1043,34 @@ ${sessionInfo}
               <View style={styles.buttonRow}>
                 <TouchableOpacity 
                   style={[styles.actionButton, (!gym.website || gym.website.trim() === '') && styles.disabledButton]}
-                  onPress={() => gym.website && gym.website.trim() !== '' ? openWebsite(gym.website) : null}
+                  onPress={() => {
+                    if (gym.website && gym.website.trim() !== '') {
+                      haptics.light(); // Light haptic for website button
+                      openWebsite(gym.website);
+                    }
+                  }}
                   disabled={!gym.website || gym.website.trim() === ''}
                 >
                   <Text style={[styles.buttonText, (!gym.website || gym.website.trim() === '') && styles.disabledText]}>🌐 Website</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.actionButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledButton]}
-                  onPress={() => openDirections(gym.address)}
+                  onPress={() => {
+                    if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
+                      haptics.light(); // Light haptic for directions button
+                      openDirections(gym.address);
+                    }
+                  }}
                   disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
                 >
                   <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.actionButton, sharingGymId === gym.id && styles.disabledButton]}
-                  onPress={() => handleShareImage(gym)}
+                  onPress={() => {
+                    haptics.light(); // Light haptic for share button
+                    handleShareImage(gym);
+                  }}
                   disabled={sharingGymId === gym.id}
                 >
                   {sharingGymId === gym.id ? (

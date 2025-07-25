@@ -18,7 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
-import { beltColors } from '../utils/constants';
+import { beltColors, haptics } from '../utils';
 import { OpenMat } from '../types';
 import { GymDetailsModal } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -110,6 +110,7 @@ const SavedScreen: React.FC = () => {
   };
 
   const handleHeartPress = (gym: OpenMat) => {
+    haptics.light(); // Light haptic for heart button
     toggleFavorite(gym.id);
   };
 
@@ -122,8 +123,10 @@ const SavedScreen: React.FC = () => {
       const allGyms = await apiService.getOpenMats(location);
       const saved = allGyms.filter(gym => favorites.has(gym.id));
       setSavedGyms(saved);
+      haptics.success(); // Success haptic for successful refresh
     } catch (error) {
       console.error('Error refreshing saved gyms:', error);
+      haptics.error(); // Error haptic for failed refresh
     } finally {
       setRefreshing(false);
     }
@@ -258,7 +261,10 @@ const SavedScreen: React.FC = () => {
                   {getPriceDisplay(gym.matFee)}
                   <TouchableOpacity
                     style={styles.heartButton}
-                    onPress={() => handleHeartPress(gym)}
+                    onPress={() => {
+                      haptics.light(); // Light haptic for heart button
+                      handleHeartPress(gym);
+                    }}
                     activeOpacity={0.7}
                   >
                     <Ionicons 
