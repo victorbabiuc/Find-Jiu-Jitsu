@@ -15,6 +15,7 @@ import {
   Share,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,6 +67,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // State for API data
   const [openMats, setOpenMats] = useState<OpenMat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Filter state
   const [activeFilters, setActiveFilters] = useState<{
@@ -221,6 +223,48 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   const handleHeartPress = (gym: OpenMat) => {
     toggleFavorite(gym.id);
+  };
+
+  // Pull-to-refresh function
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Determine city from location string
+      const city = location.toLowerCase().includes('austin') ? 'austin' : 
+                   location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
+      
+      // Force refresh data from GitHub
+      if (city === 'tampa') {
+        await githubDataService.forceRefreshTampaData();
+      } else {
+        await githubDataService.refreshData(city);
+      }
+      
+      // Check last update time silently
+      const lastUpdate = await githubDataService.getLastUpdateTime(city);
+      
+      const filters: any = {};
+      if (dateSelection) {
+        filters.dateSelection = dateSelection;
+      }
+      if (dates) {
+        filters.dates = dates;
+      }
+      const data = await apiService.getOpenMats(location, filters, true);
+      setOpenMats(data);
+      
+      // Show success toast
+      setToastMessage('Data refreshed successfully!');
+      setToastType('success');
+      setShowToast(true);
+    } catch (error) {
+      // Show error toast
+      setToastMessage('Failed to refresh data');
+      setToastType('error');
+      setShowToast(true);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const getFeeDisplay = (matFee: number, dropInFee?: number) => {
@@ -1014,6 +1058,16 @@ ${sessionInfo}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.1}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#10B981']}
+              tintColor="#10B981"
+              title="Pull to refresh"
+              titleColor="#60798A"
+            />
+          }
         />
       )}
 

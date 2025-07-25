@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Alert,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,6 +37,7 @@ const SavedScreen: React.FC = () => {
   // State for saved gyms data
   const [savedGyms, setSavedGyms] = useState<OpenMat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Modal state
   const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
@@ -109,6 +111,22 @@ const SavedScreen: React.FC = () => {
 
   const handleHeartPress = (gym: OpenMat) => {
     toggleFavorite(gym.id);
+  };
+
+  // Pull-to-refresh function
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Get all gyms from API and filter by favorites
+      const location = selectedLocation || 'Tampa';
+      const allGyms = await apiService.getOpenMats(location);
+      const saved = allGyms.filter(gym => favorites.has(gym.id));
+      setSavedGyms(saved);
+    } catch (error) {
+      console.error('Error refreshing saved gyms:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const getPriceDisplay = (matFee: number) => {
@@ -190,6 +208,16 @@ const SavedScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
           bounces={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#10B981']}
+              tintColor="#10B981"
+              title="Pull to refresh"
+              titleColor="#60798A"
+            />
+          }
           renderItem={({ item: gym }) => (
             <TouchableOpacity
               style={[styles.card, { backgroundColor: theme.surface, borderLeftColor: beltColor.primary }]}
