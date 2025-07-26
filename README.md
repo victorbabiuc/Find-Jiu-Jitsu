@@ -2,7 +2,7 @@
 
 Your Jiu Jitsu Training Companion - Find open mat sessions at gyms near you!
 
-![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-iOS-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -12,19 +12,21 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 
 **Currently supports Tampa and Austin with 65+ open mat sessions across 40+ gyms.**
 
-## ✨ Current Features (v1.3.2)
+## ✨ Current Features (v1.4.0)
 
 ### 🎯 Core Functionality
 - **Browse open mat sessions by city** - Tampa and Austin with comprehensive gym coverage
 - **Smart filtering system** - Filter by Gi, No-Gi, or Free sessions with intelligent session-level filtering
 - **Calendar date selection** - Choose specific dates or use quick filters (Today, Tomorrow, Weekend)
-- **Enhanced sharing** - Share sessions with professional text formatting and app promotion
+- **Enhanced sharing** - Share sessions with professional image cards and app promotion
+- **Pull-to-refresh** - Swipe down to refresh gym data in real-time
 
 ### 🏢 Gym Information
 - **Complete session details** - Times, days, and session types (Gi/No-Gi)
 - **Pricing information** - Open mat fees (free or paid) and drop-in rates
 - **Contact details** - Gym addresses, phone numbers, and websites
 - **Requirements** - Waiver requirements and other important notes
+- **Gym logos** - Custom logos for major gyms (10th Planet, STJJ, Gracie Tampa South, TMT)
 
 ### 💾 User Experience
 - **Save favorite gyms** - Keep track of preferred training spots with local storage
@@ -32,12 +34,17 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 - **Dark/Light theme support** - Consistent design system with unified color scheme
 - **Intuitive navigation** - Streamlined flow from city selection to results
 - **Empty state handling** - Helpful messages and action buttons when no results found
+- **Smooth animations** - Professional entrance animations and micro-interactions
+- **Haptic feedback** - Tactile response for all user interactions
+- **Loading states** - Visual feedback for all async operations
+- **Toast notifications** - Non-intrusive success/error messages
 
 ### 🎨 Design Features
 - **Professional UI** - Modern, clean interface with consistent design language
 - **Responsive design** - Works perfectly on all iOS device sizes
 - **Circular splash screen** - Perfect circular app icon during loading
-- **Enhanced share functionality** - Professional text formatting with emojis and branding
+- **Enhanced share functionality** - Professional image cards with app branding
+- **Consistent button layout** - All gym cards have uniform website/directions/share buttons
 
 ## 🚀 How to Use
 
@@ -46,14 +53,17 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 3. **Filter results** - Apply Gi/No-Gi filters or show only free sessions
 4. **Explore gyms** - Tap gym cards to view detailed information
 5. **Save favorites** - Use the heart icon to save preferred gyms
-6. **Share sessions** - Share gym details with training partners
+6. **Share sessions** - Share professional image cards with training partners
 7. **Take action** - Call gyms, get directions, or visit websites directly from the app
+8. **Refresh data** - Pull down on gym lists to refresh with latest information
 
 ### 💡 Pro Tips
 - **Tap white space** on the calendar screen to clear date selections
 - **Drag across dates** to select multiple days at once
 - **Use filters** to find specific session types or free training
 - **Save favorites** to quickly access your preferred gyms
+- **Pull to refresh** for the latest gym data
+- **Copy gym details** using the copy button in the header
 
 ## 🛠️ Technical Stack
 
@@ -64,7 +74,10 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 - **Data Storage**: AsyncStorage for local favorites
 - **Data Source**: GitHub-hosted CSV files for easy updates
 - **Styling**: React Native StyleSheet with consistent design system
-- **Sharing**: Native text sharing with professional formatting
+- **Sharing**: Image sharing with react-native-view-shot and expo-sharing
+- **Animations**: React Native Animated API with custom utility service
+- **Haptics**: expo-haptics for tactile feedback
+- **Clipboard**: expo-clipboard for text copying
 
 ## 📊 Data Sources
 
@@ -72,11 +85,41 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 - **Currently tracking 40+ gyms** across Tampa and Austin
 - **65+ open mat sessions** with verified times and information
 - **Regular updates** to ensure accuracy and add new gyms
+- **Cache management** with automatic refresh and force refresh options
 
 ### CSV Format
 ```csv
 GymName,SessionDay,SessionTime,GiType,OpenMatFee,DropInFee,Requirements,Address,Phone,Website,Coordinates
 ```
+
+## 🎯 Recent Updates (v1.4.0)
+
+### ✨ Enhanced User Experience
+- **Smooth animations** - Entrance animations, button press feedback, and micro-interactions
+- **Haptic feedback** - Tactile response for all user interactions (light, success, error, warning)
+- **Pull-to-refresh** - Swipe down to refresh gym data in real-time
+- **Loading states** - Visual spinners and disabled states for all async operations
+- **Toast notifications** - Custom animated toast messages for copy/share success/error
+
+### 🎨 Improved Sharing
+- **Professional image cards** - Beautiful share cards with app branding
+- **Gym logos** - Custom logos for major gyms (10th Planet, STJJ, Gracie Tampa South, TMT)
+- **App promotion** - "Swipe up for app!" call-to-action on share cards
+- **Copy functionality** - One-tap copy of gym details with success feedback
+- **Direct image sharing** - Share cards optimized for social media
+
+### 🔧 Technical Improvements
+- **Animation utility service** - Reusable animation patterns and configurations
+- **Consistent button layout** - All gym cards have uniform website/directions/share buttons
+- **Error handling** - Graceful fallbacks for all user interactions
+- **Performance optimization** - Native driver animations and efficient rendering
+- **Code organization** - Modular utilities and clean component structure
+
+### 🏢 Gym Data Updates
+- **Website URLs** - Added websites for Gracie Tampa South, RMNU, and Kaizen
+- **Full addresses** - Complete address information for all gyms
+- **Logo support** - Custom logos for major gym chains
+- **Data validation** - Improved error handling for missing data
 
 ## 🎯 Future Features (v2.0+)
 
@@ -158,7 +201,7 @@ The app is distributed through the iOS App Store as a free app.
 - **Bundle ID**: com.anonymous.OpenMatFinder
 - **Category**: Sports
 - **Price**: Free
-- **Latest Version**: 1.3.2 (Build 17) - July 2025
+- **Latest Version**: 1.4.0 (Build 18) - January 2025
 - **Status**: ✅ Live on App Store
 
 ## 🤝 Contributing
@@ -195,55 +238,6 @@ We welcome contributions! Here's how you can help:
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 🐛 Troubleshooting
-
-### Known Issues & Solutions
-
-#### Share Modal Not Appearing
-
-**Issue**: Modal not appearing when share button is tapped in `OpenMatCard` component.
-
-**Symptoms**: 
-- Share button responds to tap but no modal appears
-- Console logs show `handleShareOptions` is called but modal remains hidden
-- No error messages in console
-
-**Root Cause**: Modal was being rendered inside a `TouchableOpacity` wrapper, which can cause rendering issues in React Native.
-
-**Solution**: 
-1. Move the Modal component outside the main `TouchableOpacity` wrapper
-2. Ensure Modal is rendered at the root level of the component
-3. Add debugging console logs to track state changes
-
-**Files Involved**:
-- `src/components/OpenMatCard.tsx` - Main component with share functionality
-- `src/components/ShareCard.tsx` - Component for screenshot capture
-- `src/utils/screenshot.ts` - Screenshot utility functions
-
-**Debug Steps**:
-1. Add console logs in `handleShareOptions` function
-2. Track `showShareOptions` state changes with `useEffect`
-3. Verify Modal is outside TouchableOpacity wrapper
-4. Check for any parent component interference
-
-**Code Pattern**:
-```tsx
-// ❌ Wrong - Modal inside TouchableOpacity
-<TouchableOpacity>
-  <Modal visible={showShareOptions}>
-    {/* Modal content */}
-  </Modal>
-</TouchableOpacity>
-
-// ✅ Correct - Modal outside TouchableOpacity
-<TouchableOpacity>
-  {/* Card content */}
-</TouchableOpacity>
-<Modal visible={showShareOptions}>
-  {/* Modal content */}
-</Modal>
-```
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
@@ -256,46 +250,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Current Version**: 1.3.2 (Build 17)  
+**Current Version**: 1.4.0 (Build 18)  
 **App Store Status**: ✅ Live  
 **Contact**: glootieapp@gmail.com
-
-## **✅ Consistent Website Button Layout Implemented!**
-
-### **What I've Done:**
-
-1. **Updated OpenMatCard**: Always shows the website button, but grays it out when no website is available
-2. **Updated ResultsScreen**: Same consistent layout across all gym cards
-3. **Applied Same Styling**: Uses the existing `disabledButton` and `disabledText` styles
-
-### **New Button Behavior:**
-
-**✅ With Website Available:**
-- Button is fully functional and clickable
-- Normal styling (white background, dark text)
-
-**🔘 No Website Available:**
-- Button is grayed out (light gray background, lighter text)
-- Disabled state (not clickable)
-- Consistent visual layout across all cards
-
-### **Benefits:**
-- **Professional Look**: All gym cards now have the same 3-button layout
-- **Better UX**: Users can see at a glance which gyms have websites
-- **Consistent Design**: Matches the existing directions button behavior
-- **Future-Proof**: Easy to add websites later without layout changes
-
-### **Visual Layout:**
-```
-[🌐 Website] [📍 Directions] [↗️ Share]
-```
-
-All cards now have this exact layout, with buttons grayed out when the feature isn't available.
-
-### **Next Steps:**
-1. **Rebuild the app** to see the new consistent layout
-2. **Test the functionality** - website buttons should work for gyms with URLs
-3. **Verify grayed-out buttons** for gyms without websites
-
-The layout will now look much more professional and organized! 🎉
 
