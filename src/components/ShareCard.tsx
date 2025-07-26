@@ -261,22 +261,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    marginRight: 15,
+    borderRadius: 30,
     backgroundColor: 'transparent',
     resizeMode: 'contain',
   },
   footerText: {
-    fontSize: 20,
+    fontSize: 28,
     textAlign: 'center',
-    marginRight: 10,
+    marginRight: 15,
+    fontWeight: '600',
   },
   ctaText: {
-    fontSize: 18,
+    fontSize: 24,
     fontStyle: 'italic',
     textAlign: 'center',
+    fontWeight: '500',
   },
 });
 
