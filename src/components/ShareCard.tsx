@@ -43,9 +43,10 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
         {/* Header */}
         <View style={styles.header}>
           <Image 
-            source={require('../../assets/adaptive-icon.png')} 
+            source={require('../../assets/splash.png')} 
             style={styles.headerLogo}
-            resizeMode="cover"
+            resizeMode="contain"
+            onError={(error) => console.log('Image loading error:', error)}
           />
           <Text style={[styles.appName, { color: '#2D3748' }]}>Find Jiu Jitsu</Text>
           <Text style={[styles.tagline, { color: '#4A5568' }]}>Open Mat Sessions</Text>
@@ -158,6 +159,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginBottom: 20,
     backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   appName: {
     fontSize: 48,
