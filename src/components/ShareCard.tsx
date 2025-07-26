@@ -114,7 +114,12 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Image source={require('../../assets/adaptive-icon.png')} style={styles.appIcon} />
+          <Image 
+            source={require('../../assets/icon.png')} 
+            style={styles.appIcon}
+            resizeMode="contain"
+            onError={(error) => console.log('Footer app icon error:', error)}
+          />
           <Text style={[styles.footerText, { color: theme.text.secondary }]}>
             Find Jiu Jitsu App
           </Text>
@@ -261,6 +266,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderRadius: 20,
     backgroundColor: 'transparent',
+    resizeMode: 'contain',
   },
   footerText: {
     fontSize: 20,
