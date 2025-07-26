@@ -159,9 +159,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   gymSection: {
-    marginBottom: 80,
+    marginBottom: 40,
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 10,
   },
   gymLogo: {
     width: 60,
@@ -197,13 +197,13 @@ const styles = StyleSheet.create({
   divider: {
     height: 2,
     backgroundColor: '#E2E8F0',
-    marginVertical: 20,
+    marginVertical: 10,
     borderRadius: 1,
   },
   sessionSection: {
     alignItems: 'center',
-    marginBottom: 80,
-    paddingVertical: 20,
+    marginBottom: 40,
+    paddingVertical: 10,
   },
   openMatLabel: {
     fontSize: 42,
@@ -232,8 +232,8 @@ const styles = StyleSheet.create({
   },
   pricingSection: {
     alignItems: 'center',
-    marginBottom: 60,
-    paddingVertical: 20,
+    marginBottom: 40,
+    paddingVertical: 10,
   },
   pricing: {
     fontSize: 28,
