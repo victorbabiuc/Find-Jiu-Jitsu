@@ -26,6 +26,7 @@ export type FindStackParamList = {
     dateSelection?: string;
     dates?: string[];
   };
+  MapView: undefined;
 };
 
 // Screen Names (matching ViewType)

@@ -24,6 +24,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import LocationScreen from '../screens/LocationScreen';
 import TimeSelectionScreen from '../screens/TimeSelectionScreen';
 import ResultsScreen from '../screens/ResultsScreen';
+import MapViewScreen from '../screens/MapViewScreen';
 import SavedScreen from '../screens/SavedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileDetailsScreen from '../screens/ProfileDetailsScreen';
@@ -72,6 +73,14 @@ const FindStackNavigator = () => {
       <FindStack.Screen 
         name="Results" 
         component={ResultsScreen}
+        options={{ 
+          headerShown: false,
+          gestureEnabled: false
+        }}
+      />
+      <FindStack.Screen 
+        name="MapView" 
+        component={MapViewScreen}
         options={{ 
           headerShown: false,
           gestureEnabled: false
