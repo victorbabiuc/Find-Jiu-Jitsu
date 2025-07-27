@@ -10,7 +10,7 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-import MapView, { Marker, Callout, Region } from 'react-native-maps';
+// Map component removed due to compatibility issues
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useApp } from '../context/AppContext';
@@ -41,7 +41,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const [gyms, setGyms] = useState<OpenMat[]>([]);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mapRegion, setMapRegion] = useState<Region>({
+  const [mapRegion, setMapRegion] = useState<any>({
     latitude: 27.9478, // Tampa default
     longitude: -82.4588,
     latitudeDelta: 0.1,
@@ -55,7 +55,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     price: null,
   });
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   // Get user location
   useEffect(() => {
@@ -318,80 +318,86 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={mapRegion}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-        showsCompass={true}
-        showsScale={true}
-      >
-        {filteredGyms.map((gym) => {
-          // Try to get coordinates from address (simplified fallback)
-          const coordinates = getCoordinatesFromAddress(gym.address);
+      return (
+      <View style={styles.container}>
+        {/* Location List View (Map Alternative) */}
+        <View style={styles.locationListContainer}>
+          <View style={styles.locationListHeader}>
+            <Ionicons name="location" size={24} color={theme.text.primary} />
+            <Text style={[styles.locationListTitle, { color: theme.text.primary }]}>
+              Gym Locations
+            </Text>
+          </View>
           
-          // Skip gyms without coordinates for now
-          if (!coordinates) return null;
-
-          return (
-            <Marker
-              key={gym.id}
-              coordinate={coordinates}
-              title={gym.name}
-              description={gym.address}
-              onCalloutPress={() => haptics.light()}
-            >
-              <Callout style={styles.callout}>
-                <View style={styles.calloutContent}>
-                  <Text style={styles.calloutTitle}>{gym.name}</Text>
-                  <Text style={styles.calloutAddress}>{gym.address}</Text>
-                  
-                  {gym.openMats && gym.openMats.length > 0 && (
-                    <Text style={styles.calloutSession}>
-                      {gym.openMats[0].day} {gym.openMats[0].time}
-                    </Text>
-                  )}
-                  
-                  <Text style={styles.calloutPricing}>
-                    {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
-                  </Text>
-                  
-                  <View style={styles.calloutButtons}>
-                    <TouchableOpacity
-                      style={styles.calloutButton}
-                      onPress={() => handleGymPress(gym)}
-                    >
-                      <Ionicons name="information-circle" size={16} color="#007AFF" />
-                      <Text style={styles.calloutButtonText}>Details</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={styles.calloutButton}
-                      onPress={() => handleDirections(gym)}
-                    >
-                      <Ionicons name="navigate" size={16} color="#007AFF" />
-                      <Text style={styles.calloutButtonText}>Directions</Text>
-                    </TouchableOpacity>
-                    
-                    {gym.website && (
+          <ScrollView style={styles.locationList} showsVerticalScrollIndicator={false}>
+            {filteredGyms.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="search-outline" size={48} color={theme.text.secondary} />
+                <Text style={[styles.emptyStateText, { color: theme.text.secondary }]}>
+                  No gyms found with current filters
+                </Text>
+              </View>
+            ) : (
+              filteredGyms.map((gym) => (
+                <TouchableOpacity
+                  key={gym.id}
+                  style={styles.locationItem}
+                  onPress={() => handleGymPress(gym)}
+                >
+                  <View style={styles.locationItemContent}>
+                    <View style={styles.locationItemHeader}>
+                      <Text style={[styles.locationItemTitle, { color: theme.text.primary }]}>
+                        {gym.name}
+                      </Text>
                       <TouchableOpacity
-                        style={styles.calloutButton}
-                        onPress={() => handleWebsite(gym)}
+                        style={styles.heartButton}
+                        onPress={() => handleHeartPress(gym)}
                       >
-                        <Ionicons name="globe" size={16} color="#007AFF" />
-                        <Text style={styles.calloutButtonText}>Website</Text>
+                        <Text style={styles.heartIcon}>
+                          {favorites.has(gym.id) ? '♥' : '♡'}
+                        </Text>
                       </TouchableOpacity>
+                    </View>
+                    
+                    <Text style={[styles.locationItemAddress, { color: theme.text.secondary }]}>
+                      {gym.address}
+                    </Text>
+                    
+                    {gym.openMats && gym.openMats.length > 0 && (
+                      <Text style={[styles.locationItemSession, { color: theme.text.secondary }]}>
+                        {gym.openMats[0].day} {gym.openMats[0].time}
+                      </Text>
                     )}
+                    
+                    <Text style={[styles.locationItemPricing, { color: gym.matFee === 0 ? '#10B981' : theme.text.secondary }]}>
+                      {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
+                    </Text>
+                    
+                    <View style={styles.locationItemActions}>
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => handleDirections(gym)}
+                      >
+                        <Ionicons name="navigate" size={16} color="#007AFF" />
+                        <Text style={styles.actionButtonText}>Directions</Text>
+                      </TouchableOpacity>
+                      
+                      {gym.website && (
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() => handleWebsite(gym)}
+                        >
+                          <Ionicons name="globe" size={16} color="#007AFF" />
+                          <Text style={styles.actionButtonText}>Website</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </Callout>
-            </Marker>
-          );
-        })}
-      </MapView>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </View>
       
       {/* Filter Section */}
       <View style={styles.filterSection}>
@@ -521,7 +527,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             Map View
           </Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}>
-            {filteredGyms.length} gyms in {selectedLocation}
+            {filteredGyms.length} gyms in {selectedLocation} • Location View
           </Text>
         </View>
       </View>
@@ -657,6 +663,104 @@ const styles = StyleSheet.create({
   filterPillText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  locationListContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  locationListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  locationListTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  locationList: {
+    flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  locationItem: {
+    backgroundColor: 'white',
+    marginHorizontal: 16,
+    marginVertical: 6,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  locationItemContent: {
+    flex: 1,
+  },
+  locationItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  locationItemTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  heartButton: {
+    padding: 4,
+  },
+  heartIcon: {
+    fontSize: 20,
+    color: '#EF4444',
+  },
+  locationItemAddress: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  locationItemSession: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  locationItemPricing: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  locationItemActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 6,
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginLeft: 4,
   },
 });
 

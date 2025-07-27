@@ -771,10 +771,10 @@ ${sessionInfo}
         <TouchableOpacity
           style={styles.viewToggleButton}
           onPress={toggleViewMode}
-          accessibilityLabel={`Switch to ${viewMode === 'list' ? 'map' : 'list'} view`}
+          accessibilityLabel={`Switch to ${viewMode === 'list' ? 'location' : 'list'} view`}
         >
           <Ionicons 
-            name={viewMode === 'list' ? 'map-outline' : 'list-outline'} 
+            name={viewMode === 'list' ? 'location-outline' : 'list-outline'} 
             size={24} 
             color={theme.text.secondary} 
           />
@@ -990,8 +990,92 @@ ${sessionInfo}
             Try checking different days or clearing your filters
           </Text>
         </View>
-      ) : viewMode === 'list' ? (
-        // Gym List
+      ) : (
+        // Location List View (Map Alternative)
+        <View style={styles.locationListContainer}>
+          <View style={styles.locationListHeader}>
+            <Ionicons name="location" size={24} color={theme.text.primary} />
+            <Text style={[styles.locationListTitle, { color: theme.text.primary }]}>
+              Gym Locations
+            </Text>
+          </View>
+          
+          <FlatList
+            data={filteredGyms}
+            keyExtractor={(gym) => gym.id}
+            renderItem={({ item: gym }) => (
+              <TouchableOpacity
+                style={styles.locationItem}
+                onPress={() => handleGymPress(gym)}
+              >
+                <View style={styles.locationItemContent}>
+                  <View style={styles.locationItemHeader}>
+                    <Text style={[styles.locationItemTitle, { color: theme.text.primary }]}>
+                      {gym.name}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.heartButton}
+                      onPress={() => handleHeartPress(gym)}
+                    >
+                      <Text style={styles.heartIcon}>
+                        {favorites.has(gym.id) ? '♥' : '♡'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <Text style={[styles.locationItemAddress, { color: theme.text.secondary }]}>
+                    {gym.address}
+                  </Text>
+                  
+                  {gym.openMats && gym.openMats.length > 0 && (
+                    <Text style={[styles.locationItemSession, { color: theme.text.secondary }]}>
+                      {gym.openMats[0].day} {gym.openMats[0].time}
+                    </Text>
+                  )}
+                  
+                  <Text style={[styles.locationItemPricing, { color: gym.matFee === 0 ? '#10B981' : theme.text.secondary }]}>
+                    {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
+                  </Text>
+                  
+                  <View style={styles.locationItemActions}>
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => openDirections(gym.address)}
+                    >
+                      <Ionicons name="navigate" size={16} color="#007AFF" />
+                      <Text style={styles.actionButtonText}>Directions</Text>
+                    </TouchableOpacity>
+                    
+                    {gym.website && (
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => openWebsite(gym.website!)}
+                      >
+                        <Ionicons name="globe" size={16} color="#007AFF" />
+                        <Text style={styles.actionButtonText}>Website</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            onEndReachedThreshold={0.1}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={['#10B981']}
+                tintColor="#10B981"
+                title="Pull to refresh"
+                titleColor="#60798A"
+              />
+            }
+          />
+        </View>
+      ) : (
+        // Gym List (Original Card View)
         <FlatList
           data={filteredGyms}
           keyExtractor={(gym) => gym.id}
@@ -1750,28 +1834,81 @@ const styles = StyleSheet.create({
     padding: 8,
     marginRight: 8,
   },
-  mapContainer: {
+  locationListContainer: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  locationListHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    padding: 16,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  mapPlaceholder: {
+  locationListTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontWeight: '700',
+    marginLeft: 8,
   },
-  mapToggleButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+  locationItem: {
+    backgroundColor: 'white',
+    marginHorizontal: 16,
+    marginVertical: 6,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  mapToggleButtonText: {
-    color: '#FFFFFF',
+  locationItemContent: {
+    flex: 1,
+  },
+  locationItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  locationItemTitle: {
     fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  locationItemAddress: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  locationItemSession: {
+    fontSize: 14,
     fontWeight: '600',
+    marginBottom: 4,
+  },
+  locationItemPricing: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  locationItemActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 6,
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginLeft: 4,
   },
 });
 

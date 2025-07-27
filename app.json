@@ -37,8 +37,7 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-web-browser",
-      "react-native-maps"
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
