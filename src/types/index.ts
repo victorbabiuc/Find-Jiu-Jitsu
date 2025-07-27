@@ -34,6 +34,7 @@ export interface User {
     website?: string; // Optional website URL
     instructor?: string; // Optional instructor name
     goingUsers?: any[]; // Optional array of users attending
+    coordinates?: string; // Optional coordinates in "latitude,longitude" format
   }
   
   export interface OpenMatSession {

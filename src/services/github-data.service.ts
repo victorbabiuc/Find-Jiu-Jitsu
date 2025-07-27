@@ -18,6 +18,7 @@ interface CSVRow {
   sessionDay: string;
   sessionTime: string;
   sessionType: string;
+  coordinates?: string;
 }
 
 class GitHubDataService {
@@ -178,7 +179,8 @@ class GitHubDataService {
         dropInFee: values[headers.indexOf('dropInFee')] || '',
         sessionDay: values[headers.indexOf('sessionDay')] || '',
         sessionTime: values[headers.indexOf('sessionTime')] || '',
-        sessionType: values[headers.indexOf('sessionType')] || 'both'
+        sessionType: values[headers.indexOf('sessionType')] || 'both',
+        coordinates: values[headers.indexOf('coordinates')] || undefined
       };
       
 
@@ -205,6 +207,7 @@ class GitHubDataService {
           distance: parseFloat(row.distance) || 0,
           matFee: parseInt(row.matFee) || 0,
           dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
+          coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
           openMats: []
         };
         

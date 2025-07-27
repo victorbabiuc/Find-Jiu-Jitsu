@@ -10,7 +10,7 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-// Map component removed due to compatibility issues
+import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useApp } from '../context/AppContext';
@@ -34,6 +34,8 @@ interface ActiveFilters {
 }
 
 const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
+  console.log('🔍 MapViewScreen: Component rendering');
+  
   const { theme } = useTheme();
   const { selectedLocation, favorites, toggleFavorite } = useApp();
   const { showTransitionalLoading } = useLoading();
@@ -41,7 +43,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const [gyms, setGyms] = useState<OpenMat[]>([]);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mapRegion, setMapRegion] = useState<any>({
+  const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 27.9478, // Tampa default
     longitude: -82.4588,
     latitudeDelta: 0.1,
@@ -55,15 +57,18 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     price: null,
   });
 
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapView>(null);
 
   // Get user location
   useEffect(() => {
+    console.log('🔍 MapViewScreen: Getting user location');
     const getUserLocation = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
+        console.log('🔍 MapViewScreen: Location permission status:', status);
         if (status === 'granted') {
           const location = await Location.getCurrentPositionAsync({});
+          console.log('🔍 MapViewScreen: User location obtained:', location.coords);
           setUserLocation(location);
           
           // Center map on user location if available
@@ -75,7 +80,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           });
         }
       } catch (error) {
-        console.log('Location permission denied or error:', error);
+        console.log('🔍 MapViewScreen: Location permission denied or error:', error);
       }
     };
 
@@ -84,6 +89,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
   // Load gym data
   useEffect(() => {
+    console.log('🔍 MapViewScreen: Loading gym data for:', selectedLocation);
     const fetchGymData = async () => {
       try {
         setLoading(true);
@@ -92,6 +98,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
                      selectedLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         
+        console.log('🔍 MapViewScreen: Fetching data for city:', city);
+        
         // Force refresh data from GitHub
         if (city === 'tampa') {
           await githubDataService.forceRefreshTampaData();
@@ -99,12 +107,33 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           await githubDataService.refreshData(city);
         }
         
-        const data = await apiService.getOpenMats(selectedLocation, {}, true);
-        setGyms(data);
+        // Get gym data
+        const gymData = await apiService.getOpenMats(city);
+        console.log('🔍 MapViewScreen: Gym data loaded:', gymData.length, 'gyms');
+        console.log('🔍 MapViewScreen: Sample gym with coordinates:', gymData.find(g => g.coordinates));
+        console.log('🔍 MapViewScreen: First gym data structure:', JSON.stringify(gymData[0], null, 2));
+        setGyms(gymData);
+        
+        // Center map on selected city
+        if (city === 'tampa') {
+          setMapRegion({
+            latitude: 27.9478,
+            longitude: -82.4588,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          });
+        } else if (city === 'austin') {
+          setMapRegion({
+            latitude: 30.2672,
+            longitude: -97.7431,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          });
+        }
+        
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching gym data:', error);
-        setGyms([]);
-      } finally {
+        console.error('🔍 MapViewScreen: Error fetching gym data:', error);
         setLoading(false);
       }
     };
@@ -112,161 +141,62 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     fetchGymData();
   }, [selectedLocation]);
 
-  // Update map region based on selected location
+  // Update map region when it changes
   useEffect(() => {
-    const region = selectedLocation.toLowerCase().includes('austin') 
-      ? {
-          latitude: 30.2672, // Austin
-          longitude: -97.7431,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        }
-      : {
-          latitude: 27.9478, // Tampa
-          longitude: -82.4588,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        };
-    
-    setMapRegion(region);
-    
-    // Animate to new region
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(region, 1000);
+    console.log('🔍 MapViewScreen: Map region updated:', mapRegion);
+    if (mapRef.current && mapRegion) {
+      mapRef.current.animateToRegion(mapRegion, 1000);
     }
-  }, [selectedLocation]);
+  }, [mapRegion]);
 
-  // Filter and sort gyms based on active filters (same logic as ResultsScreen)
+  // Filter and sort gyms (matching ResultsScreen logic)
   const filteredGyms = useMemo(() => {
     let filtered = [...gyms];
-    
-    // Apply Gi/No-Gi filters with smart logic
+
+    // Apply Gi/No-Gi filters
     if (activeFilters.gi || activeFilters.nogi) {
       filtered = filtered.filter(gym => {
-        // Check what session types this gym offers
-        const sessionTypes = gym.openMats.map(mat => mat.type);
-        const hasGi = sessionTypes.includes('gi');
-        const hasNoGi = sessionTypes.includes('nogi');
-        const hasBoth = sessionTypes.includes('both');
+        if (!gym.openMats || gym.openMats.length === 0) return false;
         
-        if (activeFilters.gi && activeFilters.nogi) {
-          // Show gyms that have EITHER Gi OR No-Gi OR both
-          const matches = hasGi || hasNoGi || hasBoth;
-          return matches;
-        } else if (activeFilters.gi) {
-          // Show gyms with Gi or both types
-          const matches = hasGi || hasBoth;
-          return matches;
-        } else if (activeFilters.nogi) {
-          // Show gyms with No-Gi or both types
-          const matches = hasNoGi || hasBoth;
-          return matches;
-        }
-        return false;
-      }).map(gym => {
-        // Filter the sessions within each gym based on active filters
-        let filteredSessions = gym.openMats;
-        
-        if (activeFilters.gi && !activeFilters.nogi) {
-          // Only show Gi sessions
-          filteredSessions = gym.openMats.filter(session => session.type === 'gi' || session.type === 'both');
-        } else if (activeFilters.nogi && !activeFilters.gi) {
-          // Only show No-Gi sessions
-          filteredSessions = gym.openMats.filter(session => session.type === 'nogi' || session.type === 'both');
-        }
-        // If both filters are active, show all sessions (no filtering needed)
-        
-        return {
-          ...gym,
-          openMats: filteredSessions
-        };
+        return gym.openMats.some(session => {
+          const sessionType = session.type.toLowerCase();
+          if (activeFilters.gi && (sessionType.includes('gi') || sessionType.includes('both'))) {
+            return true;
+          }
+          if (activeFilters.nogi && (sessionType.includes('nogi') || sessionType.includes('both'))) {
+            return true;
+          }
+          return false;
+        });
       });
     }
-    
-    // Apply free filter
+
+    // Apply price filter
     if (activeFilters.price === 'free') {
       filtered = filtered.filter(gym => gym.matFee === 0);
     }
-    
-    // Sort gyms by their earliest session time (same logic as ResultsScreen)
-    filtered.sort((a, b) => {
-      const earliestSessionA = a.openMats[0];
-      const earliestSessionB = b.openMats[0];
-      
-      if (!earliestSessionA && !earliestSessionB) return 0;
-      if (!earliestSessionA) return 1;
-      if (!earliestSessionB) return -1;
-      
-      // Define day order for sorting (Friday first, then Saturday, then Sunday)
-      const dayOrder = {
-        'Friday': 1,
-        'Saturday': 2,
-        'Sunday': 3,
-        'Monday': 4,
-        'Tuesday': 5,
-        'Wednesday': 6,
-        'Thursday': 7
-      };
-      
-      const dayA = dayOrder[earliestSessionA.day as keyof typeof dayOrder] || 999;
-      const dayB = dayOrder[earliestSessionB.day as keyof typeof dayOrder] || 999;
-      
-      // First sort by day
-      if (dayA !== dayB) {
-        return dayA - dayB;
-      }
-      
-      // If same day, sort by time (earlier time first)
-      const timeA = earliestSessionA.time;
-      const timeB = earliestSessionB.time;
-      
-      // Convert time to minutes for comparison
-      const getMinutesFromTime = (timeStr: string): number => {
-        const cleanTime = timeStr.trim().toLowerCase();
-        
-        // Handle time ranges like "6:30 PM - 7:30 PM" by taking the start time
-        const timeRangeMatch = cleanTime.match(/^(.+?)\s*-\s*(.+)$/);
-        if (timeRangeMatch) {
-          return getMinutesFromTime(timeRangeMatch[1]); // Use start time
-        }
-        
-        // Handle formats like "5:00 PM", "6pm", "12:30 AM"
-        const match = cleanTime.match(/^(\d+):?(\d*)\s*(am|pm)$/);
-        if (match) {
-          let hour = parseInt(match[1]);
-          const minute = match[2] ? parseInt(match[2]) : 0;
-          const period = match[3];
-          
-          if (period === 'pm' && hour !== 12) hour += 12;
-          if (period === 'am' && hour === 12) hour = 0;
-          
-          return hour * 60 + minute;
-        }
-        
-        // Handle 24-hour format like "18:00"
-        const militaryMatch = cleanTime.match(/^(\d+):(\d+)$/);
-        if (militaryMatch) {
-          const hour = parseInt(militaryMatch[1]);
-          const minute = parseInt(militaryMatch[2]);
-          return hour * 60 + minute;
-        }
-        
-        return 999; // Default for unparseable times
-      };
-      
-      const minutesA = getMinutesFromTime(timeA);
-      const minutesB = getMinutesFromTime(timeB);
-      
-      return minutesA - minutesB;
-    });
-    
+
+    // Sort by distance (for now, just keep original order)
+    console.log('🔍 MapViewScreen: Filtered gyms:', filtered.length, 'gyms');
     return filtered;
   }, [gyms, activeFilters]);
 
-  // Parse coordinates from address (fallback method)
+  // Helper function to get minutes from time string
+  const getMinutesFromTime = (timeStr: string): number => {
+    const time = timeStr.toLowerCase().replace(/\s/g, '');
+    const isPM = time.includes('pm');
+    let [hours, minutes] = time.replace(/[ap]m/g, '').split(':').map(Number);
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    return hours * 60 + (minutes || 0);
+  };
+
+  // Helper function to get coordinates from address (placeholder)
   const getCoordinatesFromAddress = (address: string): { latitude: number; longitude: number } | null => {
-    // This is a simplified fallback - in production, you'd use a geocoding service
-    // For now, return null to skip pins without coordinates
+    // This would normally use a geocoding service
+    // For now, return null to use pre-stored coordinates
     return null;
   };
 
@@ -274,7 +204,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const handleGymPress = (gym: OpenMat) => {
     haptics.light();
     // Navigate to gym details or show modal
-    navigation.navigate('Results', { gym });
+    console.log('🔍 MapViewScreen: Gym pressed:', gym.name);
   };
 
   // Handle directions
@@ -285,8 +215,9 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
       ? `http://maps.apple.com/?daddr=${address}`
       : `https://maps.google.com/?daddr=${address}`;
     
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open maps app');
+    Linking.openURL(url).catch(err => {
+      console.error('Error opening directions:', err);
+      Alert.alert('Error', 'Could not open directions');
     });
   };
 
@@ -294,7 +225,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const handleWebsite = (gym: OpenMat) => {
     haptics.light();
     if (gym.website) {
-      Linking.openURL(gym.website).catch(() => {
+      Linking.openURL(gym.website).catch(err => {
+        console.error('Error opening website:', err);
         Alert.alert('Error', 'Could not open website');
       });
     }
@@ -307,6 +239,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   };
 
   if (loading) {
+    console.log('🔍 MapViewScreen: Showing loading state');
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.loadingContainer}>
@@ -318,199 +251,71 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     );
   }
 
-      return (
-      <View style={styles.container}>
-        {/* Location List View (Map Alternative) */}
-        <View style={styles.locationListContainer}>
-          <View style={styles.locationListHeader}>
-            <Ionicons name="location" size={24} color={theme.text.primary} />
-            <Text style={[styles.locationListTitle, { color: theme.text.primary }]}>
-              Gym Locations
-            </Text>
-          </View>
-          
-          <ScrollView style={styles.locationList} showsVerticalScrollIndicator={false}>
-            {filteredGyms.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={theme.text.secondary} />
-                <Text style={[styles.emptyStateText, { color: theme.text.secondary }]}>
-                  No gyms found with current filters
-                </Text>
-              </View>
-            ) : (
-              filteredGyms.map((gym) => (
-                <TouchableOpacity
-                  key={gym.id}
-                  style={styles.locationItem}
-                  onPress={() => handleGymPress(gym)}
-                >
-                  <View style={styles.locationItemContent}>
-                    <View style={styles.locationItemHeader}>
-                      <Text style={[styles.locationItemTitle, { color: theme.text.primary }]}>
-                        {gym.name}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.heartButton}
-                        onPress={() => handleHeartPress(gym)}
-                      >
-                        <Text style={styles.heartIcon}>
-                          {favorites.has(gym.id) ? '♥' : '♡'}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    
-                    <Text style={[styles.locationItemAddress, { color: theme.text.secondary }]}>
-                      {gym.address}
-                    </Text>
-                    
-                    {gym.openMats && gym.openMats.length > 0 && (
-                      <Text style={[styles.locationItemSession, { color: theme.text.secondary }]}>
-                        {gym.openMats[0].day} {gym.openMats[0].time}
-                      </Text>
-                    )}
-                    
-                    <Text style={[styles.locationItemPricing, { color: gym.matFee === 0 ? '#10B981' : theme.text.secondary }]}>
-                      {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
-                    </Text>
-                    
-                    <View style={styles.locationItemActions}>
-                      <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => handleDirections(gym)}
-                      >
-                        <Ionicons name="navigate" size={16} color="#007AFF" />
-                        <Text style={styles.actionButtonText}>Directions</Text>
-                      </TouchableOpacity>
-                      
-                      {gym.website && (
-                        <TouchableOpacity
-                          style={styles.actionButton}
-                          onPress={() => handleWebsite(gym)}
-                        >
-                          <Ionicons name="globe" size={16} color="#007AFF" />
-                          <Text style={styles.actionButtonText}>Website</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
-        </View>
+  console.log('🔍 MapViewScreen: Rendering main component with', filteredGyms.length, 'gyms');
+
+  // MINIMAL TEST IMPLEMENTATION WITH DIAGNOSTICS
+  return (
+    <View style={styles.container}>
+      <Text style={styles.debugText}>🔍 DEBUG: MapViewScreen is rendering</Text>
       
-      {/* Filter Section */}
-      <View style={styles.filterSection}>
-        <ScrollView 
-          horizontal={true} 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContainer}
-        >
-          {/* Gi Toggle Filter */}
-          <TouchableOpacity 
-            style={[
-              styles.filterPill,
-              {
-                backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.gi ? 0 : 1,
-                borderColor: activeFilters.gi ? 'transparent' : '#E0E0E0',
-                marginRight: 8,
-                shadowColor: activeFilters.gi ? '#374151' : 'transparent',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: activeFilters.gi ? 0.3 : 0,
-                shadowRadius: 4,
-                elevation: activeFilters.gi ? 3 : 0,
-              }
-            ]}
-            onPress={() => {
-              haptics.light();
-              setActiveFilters(prev => ({ ...prev, gi: !prev.gi }));
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.filterPillText,
-              { 
-                color: activeFilters.gi ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.gi ? '700' : '500'
-              }
-            ]}>
-              Gi
-            </Text>
-          </TouchableOpacity>
+      {/* Simple MapView Test with Diagnostics */}
+      <MapView
+        ref={mapRef}
+        style={[styles.map, { backgroundColor: 'red' }]} // Red background to see if it's there
+        initialRegion={mapRegion}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        onMapReady={() => {
+          console.log('🔍 MapViewScreen: Map is ready!');
+        }}
+        onError={(e) => {
+          console.log('🔍 MapViewScreen: Map error:', e);
+        }}
+        onPress={(e) => {
+          console.log('🔍 MapViewScreen: Map pressed at:', e.nativeEvent.coordinate);
+        }}
+      >
+        {/* Test with just one marker */}
+        <Marker
+          coordinate={{ latitude: 27.9478, longitude: -82.4588 }}
+          title="Test Gym"
+          description="Test Address"
+          onPress={() => {
+            console.log('🔍 MapViewScreen: Test marker pressed');
+          }}
+        />
+        
+        {/* Add gym markers if coordinates exist */}
+        {filteredGyms.map((gym) => {
+          console.log('🔍 MapViewScreen: Checking gym', gym.name, 'coordinates:', gym.coordinates, 'type:', typeof gym.coordinates);
+          if (!gym.coordinates) {
+            console.log('🔍 MapViewScreen: Gym', gym.name, 'has no coordinates');
+            return null;
+          }
+          
+          const [latitude, longitude] = gym.coordinates.split(',').map(Number);
+          if (isNaN(latitude) || isNaN(longitude)) {
+            console.log('🔍 MapViewScreen: Gym', gym.name, 'has invalid coordinates:', gym.coordinates);
+            return null;
+          }
+          
+          console.log('🔍 MapViewScreen: Adding marker for', gym.name, 'at', latitude, longitude);
+          
+          return (
+            <Marker
+              key={gym.id}
+              coordinate={{ latitude, longitude }}
+              title={gym.name}
+              description={gym.address}
+              onPress={() => {
+                console.log('🔍 MapViewScreen: Gym marker pressed:', gym.name);
+              }}
+            />
+          );
+        })}
+      </MapView>
 
-          {/* No-Gi Toggle Filter */}
-          <TouchableOpacity 
-            style={[
-              styles.filterPill,
-              {
-                backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.nogi ? 0 : 1,
-                borderColor: activeFilters.nogi ? 'transparent' : '#E0E0E0',
-                marginRight: 8,
-                shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: activeFilters.nogi ? 0.3 : 0,
-                shadowRadius: 4,
-                elevation: activeFilters.nogi ? 3 : 0,
-              }
-            ]}
-            onPress={() => {
-              haptics.light();
-              setActiveFilters(prev => ({ ...prev, nogi: !prev.nogi }));
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.filterPillText,
-              { 
-                color: activeFilters.nogi ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.nogi ? '700' : '500'
-              }
-            ]}>
-              No-Gi
-            </Text>
-          </TouchableOpacity>
-
-          {/* Free Filter */}
-          <TouchableOpacity 
-            style={[
-              styles.filterPill,
-              {
-                backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.price === 'free' ? 0 : 1,
-                borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
-                marginRight: 8,
-                shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
-                shadowRadius: 4,
-                elevation: activeFilters.price === 'free' ? 3 : 0,
-              }
-            ]}
-            onPress={() => {
-              haptics.light();
-              setActiveFilters(prev => ({ 
-                ...prev, 
-                price: prev.price === 'free' ? null : 'free' 
-              }));
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.filterPillText,
-              { 
-                color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.price === 'free' ? '700' : '500'
-              }
-            ]}>
-              Free
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      {/* Header with back button */}
+      {/* Simple Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -527,7 +332,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             Map View
           </Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}>
-            {filteredGyms.length} gyms in {selectedLocation} • Location View
+            {filteredGyms.length} gyms in {selectedLocation}
           </Text>
         </View>
       </View>
@@ -541,6 +346,18 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  debugText: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: 'yellow',
+    color: 'black',
+    padding: 10,
+    zIndex: 1000,
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   loadingContainer: {
     flex: 1,
@@ -582,185 +399,6 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 14,
     fontWeight: '500',
-  },
-  callout: {
-    width: 200,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 0,
-  },
-  calloutContent: {
-    padding: 12,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
-    color: '#2D3748',
-  },
-  calloutAddress: {
-    fontSize: 12,
-    color: '#4A5568',
-    marginBottom: 6,
-  },
-  calloutSession: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginBottom: 4,
-  },
-  calloutPricing: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#10B981',
-    marginBottom: 8,
-  },
-  calloutButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    paddingTop: 8,
-  },
-  calloutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  calloutButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#007AFF',
-    marginLeft: 4,
-  },
-  filterSection: {
-    position: 'absolute',
-    top: 120,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 12,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  filterContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  filterPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  filterPillText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  locationListContainer: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  locationListHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  locationListTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: 8,
-  },
-  locationList: {
-    flex: 1,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  locationItem: {
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginVertical: 6,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  locationItemContent: {
-    flex: 1,
-  },
-  locationItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  locationItemTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-  },
-  heartButton: {
-    padding: 4,
-  },
-  heartIcon: {
-    fontSize: 20,
-    color: '#EF4444',
-  },
-  locationItemAddress: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  locationItemSession: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  locationItemPricing: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  locationItemActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 6,
-  },
-  actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#007AFF',
-    marginLeft: 4,
   },
 });
 
