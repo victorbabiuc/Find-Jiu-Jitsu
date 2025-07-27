@@ -99,6 +99,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const headerAnim = useRef(new Animated.Value(0)).current;
   const filterAnim = useRef(new Animated.Value(0)).current;
   const listAnim = useRef(new Animated.Value(0)).current;
+  
+  // View mode state
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Component lifecycle tracking removed for production
 
@@ -741,6 +744,12 @@ ${sessionInfo}
     }
   };
 
+  // Toggle between list and map view
+  const toggleViewMode = () => {
+    haptics.light();
+    setViewMode(viewMode === 'list' ? 'map' : 'list');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
@@ -759,6 +768,17 @@ ${sessionInfo}
             {dateSelection && ` • ${getDateSelectionDisplay(dateSelection)}`}
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.viewToggleButton}
+          onPress={toggleViewMode}
+          accessibilityLabel={`Switch to ${viewMode === 'list' ? 'map' : 'list'} view`}
+        >
+          <Ionicons 
+            name={viewMode === 'list' ? 'map-outline' : 'list-outline'} 
+            size={24} 
+            color={theme.text.secondary} 
+          />
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.envelopeButton}
           onPress={() => {
@@ -970,7 +990,7 @@ ${sessionInfo}
             Try checking different days or clearing your filters
           </Text>
         </View>
-      ) : (
+      ) : viewMode === 'list' ? (
         // Gym List
         <FlatList
           data={filteredGyms}
@@ -1113,6 +1133,19 @@ ${sessionInfo}
             />
           }
         />
+      ) : (
+        // Map View
+        <View style={styles.mapContainer}>
+          <Text style={[styles.mapPlaceholder, { color: theme.text.secondary }]}>
+            Map view coming soon...
+          </Text>
+          <TouchableOpacity
+            style={styles.mapToggleButton}
+            onPress={() => findNavigation.navigate('MapView')}
+          >
+            <Text style={styles.mapToggleButtonText}>Open Map View</Text>
+          </TouchableOpacity>
+        </View>
       )}
         </Animated.View>
 
@@ -1712,6 +1745,33 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     resizeMode: 'contain',
     marginRight: 10,
+  },
+  viewToggleButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  mapContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  mapPlaceholder: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  mapToggleButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  mapToggleButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
