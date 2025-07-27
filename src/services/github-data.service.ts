@@ -48,8 +48,8 @@ class GitHubDataService {
       const cached: CachedData = JSON.parse(cachedString);
       const age = Date.now() - cached.timestamp;
       
-      // Temporarily reduce cache duration to 5 minutes to force refresh for Gracie Tampa South website
-      return age > (5 * 60 * 1000); // 5 minutes
+      // Temporarily reduce cache duration to 1 minute to force refresh for coordinates
+      return age > (1 * 60 * 1000); // 1 minute
     } catch (error) {
       console.error(`Error checking if data is stale for ${location}:`, error);
       return true; // Assume stale if error
