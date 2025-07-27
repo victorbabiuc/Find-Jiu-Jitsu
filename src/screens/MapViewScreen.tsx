@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Linking,
   Platform,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +26,13 @@ interface MapViewScreenProps {
   navigation: any;
 }
 
+// Filter interface to match ResultsScreen
+interface ActiveFilters {
+  gi: boolean;
+  nogi: boolean;
+  price: 'free' | null;
+}
+
 const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const { theme } = useTheme();
   const { selectedLocation, favorites, toggleFavorite } = useApp();
@@ -38,6 +46,13 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     longitude: -82.4588,
     latitudeDelta: 0.1,
     longitudeDelta: 0.1,
+  });
+  
+  // Filter state (matching ResultsScreen)
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
+    gi: false,
+    nogi: false,
+    price: null,
   });
 
   const mapRef = useRef<MapView>(null);
@@ -121,6 +136,133 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     }
   }, [selectedLocation]);
 
+  // Filter and sort gyms based on active filters (same logic as ResultsScreen)
+  const filteredGyms = useMemo(() => {
+    let filtered = [...gyms];
+    
+    // Apply Gi/No-Gi filters with smart logic
+    if (activeFilters.gi || activeFilters.nogi) {
+      filtered = filtered.filter(gym => {
+        // Check what session types this gym offers
+        const sessionTypes = gym.openMats.map(mat => mat.type);
+        const hasGi = sessionTypes.includes('gi');
+        const hasNoGi = sessionTypes.includes('nogi');
+        const hasBoth = sessionTypes.includes('both');
+        
+        if (activeFilters.gi && activeFilters.nogi) {
+          // Show gyms that have EITHER Gi OR No-Gi OR both
+          const matches = hasGi || hasNoGi || hasBoth;
+          return matches;
+        } else if (activeFilters.gi) {
+          // Show gyms with Gi or both types
+          const matches = hasGi || hasBoth;
+          return matches;
+        } else if (activeFilters.nogi) {
+          // Show gyms with No-Gi or both types
+          const matches = hasNoGi || hasBoth;
+          return matches;
+        }
+        return false;
+      }).map(gym => {
+        // Filter the sessions within each gym based on active filters
+        let filteredSessions = gym.openMats;
+        
+        if (activeFilters.gi && !activeFilters.nogi) {
+          // Only show Gi sessions
+          filteredSessions = gym.openMats.filter(session => session.type === 'gi' || session.type === 'both');
+        } else if (activeFilters.nogi && !activeFilters.gi) {
+          // Only show No-Gi sessions
+          filteredSessions = gym.openMats.filter(session => session.type === 'nogi' || session.type === 'both');
+        }
+        // If both filters are active, show all sessions (no filtering needed)
+        
+        return {
+          ...gym,
+          openMats: filteredSessions
+        };
+      });
+    }
+    
+    // Apply free filter
+    if (activeFilters.price === 'free') {
+      filtered = filtered.filter(gym => gym.matFee === 0);
+    }
+    
+    // Sort gyms by their earliest session time (same logic as ResultsScreen)
+    filtered.sort((a, b) => {
+      const earliestSessionA = a.openMats[0];
+      const earliestSessionB = b.openMats[0];
+      
+      if (!earliestSessionA && !earliestSessionB) return 0;
+      if (!earliestSessionA) return 1;
+      if (!earliestSessionB) return -1;
+      
+      // Define day order for sorting (Friday first, then Saturday, then Sunday)
+      const dayOrder = {
+        'Friday': 1,
+        'Saturday': 2,
+        'Sunday': 3,
+        'Monday': 4,
+        'Tuesday': 5,
+        'Wednesday': 6,
+        'Thursday': 7
+      };
+      
+      const dayA = dayOrder[earliestSessionA.day as keyof typeof dayOrder] || 999;
+      const dayB = dayOrder[earliestSessionB.day as keyof typeof dayOrder] || 999;
+      
+      // First sort by day
+      if (dayA !== dayB) {
+        return dayA - dayB;
+      }
+      
+      // If same day, sort by time (earlier time first)
+      const timeA = earliestSessionA.time;
+      const timeB = earliestSessionB.time;
+      
+      // Convert time to minutes for comparison
+      const getMinutesFromTime = (timeStr: string): number => {
+        const cleanTime = timeStr.trim().toLowerCase();
+        
+        // Handle time ranges like "6:30 PM - 7:30 PM" by taking the start time
+        const timeRangeMatch = cleanTime.match(/^(.+?)\s*-\s*(.+)$/);
+        if (timeRangeMatch) {
+          return getMinutesFromTime(timeRangeMatch[1]); // Use start time
+        }
+        
+        // Handle formats like "5:00 PM", "6pm", "12:30 AM"
+        const match = cleanTime.match(/^(\d+):?(\d*)\s*(am|pm)$/);
+        if (match) {
+          let hour = parseInt(match[1]);
+          const minute = match[2] ? parseInt(match[2]) : 0;
+          const period = match[3];
+          
+          if (period === 'pm' && hour !== 12) hour += 12;
+          if (period === 'am' && hour === 12) hour = 0;
+          
+          return hour * 60 + minute;
+        }
+        
+        // Handle 24-hour format like "18:00"
+        const militaryMatch = cleanTime.match(/^(\d+):(\d+)$/);
+        if (militaryMatch) {
+          const hour = parseInt(militaryMatch[1]);
+          const minute = parseInt(militaryMatch[2]);
+          return hour * 60 + minute;
+        }
+        
+        return 999; // Default for unparseable times
+      };
+      
+      const minutesA = getMinutesFromTime(timeA);
+      const minutesB = getMinutesFromTime(timeB);
+      
+      return minutesA - minutesB;
+    });
+    
+    return filtered;
+  }, [gyms, activeFilters]);
+
   // Parse coordinates from address (fallback method)
   const getCoordinatesFromAddress = (address: string): { latitude: number; longitude: number } | null => {
     // This is a simplified fallback - in production, you'd use a geocoding service
@@ -187,7 +329,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         showsCompass={true}
         showsScale={true}
       >
-        {gyms.map((gym) => {
+        {filteredGyms.map((gym) => {
           // Try to get coordinates from address (simplified fallback)
           const coordinates = getCoordinatesFromAddress(gym.address);
           
@@ -251,6 +393,117 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         })}
       </MapView>
       
+      {/* Filter Section */}
+      <View style={styles.filterSection}>
+        <ScrollView 
+          horizontal={true} 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContainer}
+        >
+          {/* Gi Toggle Filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
+                borderWidth: activeFilters.gi ? 0 : 1,
+                borderColor: activeFilters.gi ? 'transparent' : '#E0E0E0',
+                marginRight: 8,
+                shadowColor: activeFilters.gi ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.gi ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.gi ? 3 : 0,
+              }
+            ]}
+            onPress={() => {
+              haptics.light();
+              setActiveFilters(prev => ({ ...prev, gi: !prev.gi }));
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText,
+              { 
+                color: activeFilters.gi ? '#FFFFFF' : '#60798A',
+                fontWeight: activeFilters.gi ? '700' : '500'
+              }
+            ]}>
+              Gi
+            </Text>
+          </TouchableOpacity>
+
+          {/* No-Gi Toggle Filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
+                borderWidth: activeFilters.nogi ? 0 : 1,
+                borderColor: activeFilters.nogi ? 'transparent' : '#E0E0E0',
+                marginRight: 8,
+                shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.nogi ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.nogi ? 3 : 0,
+              }
+            ]}
+            onPress={() => {
+              haptics.light();
+              setActiveFilters(prev => ({ ...prev, nogi: !prev.nogi }));
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText,
+              { 
+                color: activeFilters.nogi ? '#FFFFFF' : '#60798A',
+                fontWeight: activeFilters.nogi ? '700' : '500'
+              }
+            ]}>
+              No-Gi
+            </Text>
+          </TouchableOpacity>
+
+          {/* Free Filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
+                borderWidth: activeFilters.price === 'free' ? 0 : 1,
+                borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
+                marginRight: 8,
+                shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.price === 'free' ? 3 : 0,
+              }
+            ]}
+            onPress={() => {
+              haptics.light();
+              setActiveFilters(prev => ({ 
+                ...prev, 
+                price: prev.price === 'free' ? null : 'free' 
+              }));
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText,
+              { 
+                color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
+                fontWeight: activeFilters.price === 'free' ? '700' : '500'
+              }
+            ]}>
+              Free
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
       {/* Header with back button */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -268,7 +521,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             Map View
           </Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}>
-            {gyms.length} gyms in {selectedLocation}
+            {filteredGyms.length} gyms in {selectedLocation}
           </Text>
         </View>
       </View>
@@ -374,6 +627,36 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#007AFF',
     marginLeft: 4,
+  },
+  filterSection: {
+    position: 'absolute',
+    top: 120,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  filterContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  filterPillText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 
