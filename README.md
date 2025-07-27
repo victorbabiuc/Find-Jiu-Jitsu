@@ -25,7 +25,6 @@ Find Jiu Jitsu is an iOS app designed to help Brazilian Jiu-Jitsu practitioners 
 - **Complete session details** - Times, days, and session types (Gi/No-Gi)
 - **Pricing information** - Open mat fees (free or paid) and drop-in rates
 - **Contact details** - Gym addresses, phone numbers, and websites
-- **Requirements** - Waiver requirements and other important notes
 - **Gym logos** - Custom logos for major gyms (10th Planet, STJJ, Gracie Tampa South, TMT)
 
 ### 💾 User Experience
@@ -224,7 +223,6 @@ We welcome contributions! Here's how you can help:
 - **GiType**: "gi", "nogi", or "both"
 - **OpenMatFee**: "Free" or dollar amount
 - **DropInFee**: Dollar amount for regular classes
-- **Requirements**: Any special requirements (waiver, etc.)
 - **Address**: Full street address
 - **Phone**: Contact phone number
 - **Website**: Gym website URL

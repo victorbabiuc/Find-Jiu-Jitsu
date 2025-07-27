@@ -1055,12 +1055,6 @@ ${sessionInfo}
                 </View>
               </View>
 
-              {/* Compact Location/Waiver Row */}
-              <View style={styles.infoRow}>
-                <Text style={styles.infoIcon}>⚠️</Text>
-                <Text style={[styles.infoText, { marginLeft: 4 }]}>Waiver required</Text>
-              </View>
-
               {/* Action Buttons */}
               <View style={styles.buttonRow}>
                 <TouchableOpacity 
