@@ -20,7 +20,8 @@
       "bundleIdentifier": "com.anonymous.OpenMatFinder",
       "buildNumber": "15",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Find Jiu Jitsu uses your location to show nearby gyms on the map and calculate distances."
       }
     },
     "android": {
@@ -36,7 +37,8 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      "react-native-maps"
     ],
     "extra": {
       "eas": {
