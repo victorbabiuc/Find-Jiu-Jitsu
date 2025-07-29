@@ -7,9 +7,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Simple user interface without Firebase dependencies
 interface SimpleUser {
   id: string;
+  uid?: string; // Alias for id for compatibility
   email?: string;
   displayName?: string;
   photoURL?: string;
+  emailVerified?: boolean;
+  metadata?: {
+    creationTime?: string;
+    lastSignInTime?: string;
+  };
   provider: 'google' | 'apple' | 'anonymous';
 }
 
@@ -68,9 +74,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Create a simple user object from Google response
       const simpleUser: SimpleUser = {
         id: `google_${Date.now()}`, // Generate a simple ID
+        uid: `google_${Date.now()}`, // Alias for compatibility
         email: response.params.email,
         displayName: response.params.name,
         photoURL: response.params.picture,
+        emailVerified: true, // Google accounts are typically verified
+        metadata: {
+          creationTime: new Date().toISOString(),
+          lastSignInTime: new Date().toISOString(),
+        },
         provider: 'google'
       };
       
@@ -147,10 +159,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Create a simple user object from Apple response
       const simpleUser: SimpleUser = {
         id: `apple_${Date.now()}`, // Generate a simple ID
+        uid: `apple_${Date.now()}`, // Alias for compatibility
         email: credential.email || undefined,
         displayName: credential.fullName?.givenName 
           ? `${credential.fullName.givenName} ${credential.fullName.familyName || ''}`.trim()
           : undefined,
+        emailVerified: true, // Apple accounts are typically verified
+        metadata: {
+          creationTime: new Date().toISOString(),
+          lastSignInTime: new Date().toISOString(),
+        },
         provider: 'apple'
       };
       

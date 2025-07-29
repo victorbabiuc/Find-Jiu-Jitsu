@@ -1,5 +1,8 @@
 import { BeltType } from '../types';
 
+// Selection color for UI elements (buttons, tabs, etc.) - matches active filter buttons
+export const selectionColor = '#374151'; // Subtle gray for selections
+
 export const beltColors: Record<BeltType, {
   primary: string;
   secondary: string;
@@ -19,39 +22,39 @@ export const beltColors: Record<BeltType, {
     textOnColor: '#000000'
   },
   blue: {
-    primary: '#475569',
-    secondary: '#64748B',
-    accent: '#0F172A',
-    surface: '#47556915',
-    gradient: 'linear-gradient(135deg, #475569 0%, #0F172A 100%)',
-    cardGradient: 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
+    primary: '#60A5FA', // Brighter blue
+    secondary: '#3B82F6',
+    accent: '#1D4ED8',
+    surface: '#2563EB15',
+    gradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+    cardGradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
     textOnColor: '#FFFFFF'
   },
   purple: {
-    primary: '#7C3AED',
+    primary: '#A78BFA', // Brighter purple
     secondary: '#8B5CF6',
     accent: '#4C1D95',
     surface: '#7C3AED15',
-    gradient: 'linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)',
-    cardGradient: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
+    gradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+    cardGradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
     textOnColor: '#FFFFFF'
   },
   brown: {
-    primary: '#D97706',
-    secondary: '#F59E0B',
+    primary: '#F59E0B', // Brighter brown/orange
+    secondary: '#FBBF24',
     accent: '#92400E',
     surface: '#D9770615',
-    gradient: 'linear-gradient(135deg, #D97706 0%, #92400E 100%)',
-    cardGradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+    gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)',
+    cardGradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)',
     textOnColor: '#FFFFFF'
   },
   black: {
-    primary: '#111827',
-    secondary: '#374151',
+    primary: '#374151', // Brighter black/gray
+    secondary: '#6B7280',
     accent: '#000000',
     surface: '#11182715',
-    gradient: 'linear-gradient(135deg, #111827 0%, #000000 100%)',
-    cardGradient: 'linear-gradient(135deg, #111827 0%, #374151 100%)',
+    gradient: 'linear-gradient(135deg, #374151 0%, #6B7280 100%)',
+    cardGradient: 'linear-gradient(135deg, #374151 0%, #6B7280 100%)',
     textOnColor: '#FFFFFF'
   }
 };

@@ -1,0 +1,130 @@
+[2025-07-29T12:24:35.997Z] INFO: Starting geocoding for austin
+[2025-07-29T12:24:36.008Z] INFO: CSV file: /Users/vik/Documents/Startup/VibeCoding/FindJiuJitsu/data/austin-gyms.csv
+[2025-07-29T12:24:36.010Z] INFO: Backup file: /Users/vik/Documents/Startup/VibeCoding/FindJiuJitsu/data/austin-gyms-backup.csv
+[2025-07-29T12:24:36.010Z] INFO: Log file: /Users/vik/Documents/Startup/VibeCoding/FindJiuJitsu/geocoding-austin-2025-07-29T12-24-35.log
+[2025-07-29T12:24:36.011Z] INFO: Reading CSV file...
+[2025-07-29T12:24:36.031Z] INFO: Found 41 rows in CSV
+[2025-07-29T12:24:36.031Z] INFO: Headers: id, name, address, website, distance, matFee, dropInFee, sessionDay, sessionTime, sessionType, coordinates, last_updated
+[2025-07-29T12:24:36.031Z] INFO: Creating backup...
+[2025-07-29T12:24:36.032Z] INFO: Backup created successfully
+[2025-07-29T12:24:36.033Z] INFO: Found 30 unique addresses to geocode
+[2025-07-29T12:24:36.033Z] INFO: 11 rows already have coordinates or no address
+[2025-07-29T12:24:36.033Z] INFO: Starting geocoding process...
+[2025-07-29T12:24:36.034Z] INFO: Rate limit: 1500ms between requests
+[2025-07-29T12:24:36.034Z] INFO: Geocoding 1/30: 4509 Freidrich Ln #210, Austin, TX 78744
+[2025-07-29T12:24:36.538Z] SUCCESS: ✅ Success: 30.2070873,-97.750738
+[2025-07-29T12:24:38.039Z] INFO: Geocoding 2/30: 3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664
+[2025-07-29T12:24:38.627Z] WARN: Retrying geocoding for "3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664" (attempt 2)
+[2025-07-29T12:24:41.276Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:24:42.776Z] INFO: Geocoding 3/30: 11701 Bee Caves Rd Suite 110, Austin, TX 78738
+[2025-07-29T12:24:43.363Z] WARN: Retrying geocoding for "11701 Bee Caves Rd Suite 110, Austin, TX 78738" (attempt 2)
+[2025-07-29T12:24:45.883Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:24:47.383Z] INFO: Geocoding 4/30: 11940 Menchaca Rd #104, Austin, TX 78748
+[2025-07-29T12:24:47.778Z] WARN: Retrying geocoding for "11940 Menchaca Rd #104, Austin, TX 78748" (attempt 2)
+[2025-07-29T12:24:50.250Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:24:51.752Z] INFO: Geocoding 5/30: 2007 Kramer Ln #101, Austin, TX 78758
+[2025-07-29T12:24:51.974Z] SUCCESS: ✅ Success: 30.388225,-97.7101372
+[2025-07-29T12:24:53.475Z] INFO: Geocoding 6/30: 9313 Anderson Mill Rd, Austin, TX 78729
+[2025-07-29T12:24:54.003Z] SUCCESS: ✅ Success: 30.4502058,-97.7839624
+[2025-07-29T12:24:55.504Z] INFO: Geocoding 7/30: 12112 Ranch Rd 620 N, Austin, TX 78750
+[2025-07-29T12:24:56.142Z] SUCCESS: ✅ Success: 30.4615711,-97.8196109
+[2025-07-29T12:24:57.642Z] INFO: Geocoding 8/30: 12129 N FM 620 Suite # 330, Austin, TX 78750
+[2025-07-29T12:24:58.594Z] WARN: Retrying geocoding for "12129 N FM 620 Suite # 330, Austin, TX 78750" (attempt 2)
+[2025-07-29T12:25:01.468Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:02.970Z] INFO: Geocoding 9/30: 1202 Farm To Market 685, Pflugerville, TX 78660
+[2025-07-29T12:25:03.747Z] WARN: Retrying geocoding for "1202 Farm To Market 685, Pflugerville, TX 78660" (attempt 2)
+[2025-07-29T12:25:06.343Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:07.843Z] INFO: Geocoding 10/30: 321 W Ben White Blvd Suite 108, Austin, TX 78704
+[2025-07-29T12:25:09.249Z] WARN: Retrying geocoding for "321 W Ben White Blvd Suite 108, Austin, TX 78704" (attempt 2)
+[2025-07-29T12:25:12.498Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:14.000Z] INFO: Geocoding 11/30: 1600 W Stassney Ln c, Austin, TX 78745
+[2025-07-29T12:25:14.543Z] WARN: Retrying geocoding for "1600 W Stassney Ln c, Austin, TX 78745" (attempt 2)
+[2025-07-29T12:25:16.977Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:18.478Z] INFO: Geocoding 12/30: 4955 Bell Springs Rd #5, Dripping Springs, TX 78620
+[2025-07-29T12:25:18.940Z] WARN: Retrying geocoding for "4955 Bell Springs Rd #5, Dripping Springs, TX 78620" (attempt 2)
+[2025-07-29T12:25:21.380Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:22.881Z] INFO: Geocoding 13/30: 11416 Ranch Rd 620 N, Austin, TX 78726
+[2025-07-29T12:25:23.516Z] SUCCESS: ✅ Success: 30.4077225,-97.8519533
+[2025-07-29T12:25:25.017Z] INFO: Geocoding 14/30: 1921 Cedar Bend Dr APT 146, Austin, TX 78758
+[2025-07-29T12:25:26.250Z] WARN: Retrying geocoding for "1921 Cedar Bend Dr APT 146, Austin, TX 78758" (attempt 2)
+[2025-07-29T12:25:29.115Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:30.615Z] INFO: Geocoding 15/30: 2100 Cypress Creek Road Suite 500, Cedar Park, TX 78613
+[2025-07-29T12:25:31.824Z] WARN: Retrying geocoding for "2100 Cypress Creek Road Suite 500, Cedar Park, TX 78613" (attempt 2)
+[2025-07-29T12:25:34.754Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:36.255Z] INFO: Geocoding 16/30: 6800 West Gate Blvd APT 116, Austin, TX 78745
+[2025-07-29T12:25:36.910Z] WARN: Retrying geocoding for "6800 West Gate Blvd APT 116, Austin, TX 78745" (attempt 2)
+[2025-07-29T12:25:39.510Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:41.012Z] INFO: Geocoding 17/30: 4631 Airport Blvd STE 114, Austin, TX 78751
+[2025-07-29T12:25:41.871Z] WARN: Retrying geocoding for "4631 Airport Blvd STE 114, Austin, TX 78751" (attempt 2)
+[2025-07-29T12:25:44.572Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:46.074Z] INFO: Geocoding 18/30: Austin, TX
+[2025-07-29T12:25:46.493Z] SUCCESS: ✅ Success: 30.2711286,-97.7436995
+[2025-07-29T12:25:47.994Z] INFO: Geocoding 19/30: 13642 N Hwy 183 #300, Austin, TX 78750
+[2025-07-29T12:25:48.651Z] WARN: Retrying geocoding for "13642 N Hwy 183 #300, Austin, TX 78750" (attempt 2)
+[2025-07-29T12:25:51.329Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:25:52.830Z] INFO: Geocoding 20/30: 2415 Commerce St, Marble Falls, TX 78654
+[2025-07-29T12:25:53.385Z] SUCCESS: ✅ Success: 30.5949523,-98.2695239
+[2025-07-29T12:25:54.887Z] INFO: Geocoding 21/30: 2111 Sam Bass Rd, Round Rock, TX 78681
+[2025-07-29T12:25:55.297Z] SUCCESS: ✅ Success: 30.5252573,-97.7107625
+[2025-07-29T12:25:56.798Z] INFO: Geocoding 22/30: 12110 Menchaca Rd #401, Austin, TX 78748
+[2025-07-29T12:25:57.407Z] WARN: Retrying geocoding for "12110 Menchaca Rd #401, Austin, TX 78748" (attempt 2)
+[2025-07-29T12:26:00.111Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:01.612Z] INFO: Geocoding 23/30: 1609 Ohlen Rd ste. B, Austin, TX 78758
+[2025-07-29T12:26:02.109Z] WARN: Retrying geocoding for "1609 Ohlen Rd ste. B, Austin, TX 78758" (attempt 2)
+[2025-07-29T12:26:04.525Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:06.026Z] INFO: Geocoding 24/30: 5555 N Lamar Blvd C109, Austin, TX 78751
+[2025-07-29T12:26:06.523Z] WARN: Retrying geocoding for "5555 N Lamar Blvd C109, Austin, TX 78751" (attempt 2)
+[2025-07-29T12:26:09.099Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:10.600Z] INFO: Geocoding 25/30: 8204 Brodie Ln #102, Austin, TX 78745
+[2025-07-29T12:26:11.138Z] WARN: Retrying geocoding for "8204 Brodie Ln #102, Austin, TX 78745" (attempt 2)
+[2025-07-29T12:26:13.578Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:15.079Z] INFO: Geocoding 26/30: 979 Springdale Rd #111, Austin, TX 78702
+[2025-07-29T12:26:15.674Z] WARN: Retrying geocoding for "979 Springdale Rd #111, Austin, TX 78702" (attempt 2)
+[2025-07-29T12:26:18.190Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:19.690Z] INFO: Geocoding 27/30: 8868 Research Blvd #608, Austin, TX 78758
+[2025-07-29T12:26:20.439Z] WARN: Retrying geocoding for "8868 Research Blvd #608, Austin, TX 78758" (attempt 2)
+[2025-07-29T12:26:24.325Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:25.825Z] INFO: Geocoding 28/30: 9607 Research Blvd #675, Austin, TX 78759
+[2025-07-29T12:26:26.460Z] WARN: Retrying geocoding for "9607 Research Blvd #675, Austin, TX 78759" (attempt 2)
+[2025-07-29T12:26:29.210Z] ERROR: ❌ Failed: No valid coordinates found in response
+[2025-07-29T12:26:30.711Z] INFO: Geocoding 29/30: 6120 US-290, Austin, TX 78735
+[2025-07-29T12:26:32.002Z] SUCCESS: ✅ Success: 30.2350282,-97.8614734
+[2025-07-29T12:26:33.503Z] INFO: Geocoding 30/30: 1309 Leander Dr #604, Leander, TX 78641
+[2025-07-29T12:26:33.867Z] SUCCESS: ✅ Success: 30.5616098,-97.8437661
+[2025-07-29T12:26:33.868Z] INFO: Writing updated CSV file...
+[2025-07-29T12:26:33.869Z] INFO: CSV file updated successfully
+[2025-07-29T12:26:33.870Z] INFO: ==================================================
+[2025-07-29T12:26:33.870Z] INFO: GEOCODING SUMMARY
+[2025-07-29T12:26:33.870Z] INFO: ==================================================
+[2025-07-29T12:26:33.871Z] INFO: City: austin
+[2025-07-29T12:26:33.871Z] INFO: Total addresses: 30
+[2025-07-29T12:26:33.871Z] INFO: Successfully geocoded: 10
+[2025-07-29T12:26:33.871Z] INFO: Failed: 20
+[2025-07-29T12:26:33.872Z] INFO: Skipped (already had coordinates): 11
+[2025-07-29T12:26:33.872Z] INFO: Success rate: 33%
+[2025-07-29T12:26:33.872Z] INFO: 
+[2025-07-29T12:26:33.872Z] INFO: FAILED ADDRESSES:
+[2025-07-29T12:26:33.873Z] INFO:   - 3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664: No valid coordinates found in response
+[2025-07-29T12:26:33.873Z] INFO:   - 11701 Bee Caves Rd Suite 110, Austin, TX 78738: No valid coordinates found in response
+[2025-07-29T12:26:33.873Z] INFO:   - 11940 Menchaca Rd #104, Austin, TX 78748: No valid coordinates found in response
+[2025-07-29T12:26:33.873Z] INFO:   - 12129 N FM 620 Suite # 330, Austin, TX 78750: No valid coordinates found in response
+[2025-07-29T12:26:33.873Z] INFO:   - 1202 Farm To Market 685, Pflugerville, TX 78660: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 321 W Ben White Blvd Suite 108, Austin, TX 78704: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 1600 W Stassney Ln c, Austin, TX 78745: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 4955 Bell Springs Rd #5, Dripping Springs, TX 78620: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 1921 Cedar Bend Dr APT 146, Austin, TX 78758: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 2100 Cypress Creek Road Suite 500, Cedar Park, TX 78613: No valid coordinates found in response
+[2025-07-29T12:26:33.874Z] INFO:   - 6800 West Gate Blvd APT 116, Austin, TX 78745: No valid coordinates found in response
+[2025-07-29T12:26:33.875Z] INFO:   - 4631 Airport Blvd STE 114, Austin, TX 78751: No valid coordinates found in response
+[2025-07-29T12:26:33.875Z] INFO:   - 13642 N Hwy 183 #300, Austin, TX 78750: No valid coordinates found in response
+[2025-07-29T12:26:33.875Z] INFO:   - 12110 Menchaca Rd #401, Austin, TX 78748: No valid coordinates found in response
+[2025-07-29T12:26:33.875Z] INFO:   - 1609 Ohlen Rd ste. B, Austin, TX 78758: No valid coordinates found in response
+[2025-07-29T12:26:33.875Z] INFO:   - 5555 N Lamar Blvd C109, Austin, TX 78751: No valid coordinates found in response
+[2025-07-29T12:26:33.876Z] INFO:   - 8204 Brodie Ln #102, Austin, TX 78745: No valid coordinates found in response
+[2025-07-29T12:26:33.876Z] INFO:   - 979 Springdale Rd #111, Austin, TX 78702: No valid coordinates found in response
+[2025-07-29T12:26:33.876Z] INFO:   - 8868 Research Blvd #608, Austin, TX 78758: No valid coordinates found in response
+[2025-07-29T12:26:33.876Z] INFO:   - 9607 Research Blvd #675, Austin, TX 78759: No valid coordinates found in response
+[2025-07-29T12:26:33.876Z] INFO: 
+[2025-07-29T12:26:33.877Z] INFO: Backup saved to: /Users/vik/Documents/Startup/VibeCoding/FindJiuJitsu/data/austin-gyms-backup.csv
+[2025-07-29T12:26:33.877Z] INFO: Log saved to: /Users/vik/Documents/Startup/VibeCoding/FindJiuJitsu/geocoding-austin-2025-07-29T12-24-35.log
+[2025-07-29T12:26:33.877Z] INFO: ==================================================

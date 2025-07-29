@@ -7,6 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
+  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
@@ -17,12 +18,16 @@ import { beltColors } from '../utils/constants';
 import { useLoading } from '../context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { searchService } from '../services';
 
 const LocationScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userBelt, setSelectedLocation } = useApp();
   const navigation = useFindNavigation();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ cities: Array<{ name: string; count: number }>; gyms: any[] }>({ cities: [], gyms: [] });
+  const [isSearching, setIsSearching] = useState(false);
   const { showLoading, hideLoading } = useLoading();
   
   const beltColor = beltColors[userBelt];
@@ -122,6 +127,75 @@ const LocationScreen: React.FC = () => {
     navigation.navigate('TimeSelection');
   };
 
+  const CityButton: React.FC<{ city: { name: string; count: number } }> = ({ city }) => (
+    <TouchableOpacity
+      style={[styles.cityButton, { backgroundColor: theme.surface }]}
+      onPress={() => handleLocationSelect(city.name)}
+    >
+      <View style={styles.cityButtonContent}>
+        <Text style={[styles.cityName, { color: theme.text.primary }]}>
+          {city.name}
+        </Text>
+        <Text style={[styles.cityCount, { color: theme.text.secondary }]}>
+          {city.count} gyms
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={theme.text.secondary} />
+    </TouchableOpacity>
+  );
+
+  const GymQuickCard: React.FC<{ gym: any }> = ({ gym }) => (
+    <TouchableOpacity
+      style={[styles.gymCard, { backgroundColor: theme.surface }]}
+      onPress={() => {
+        // Navigate to results with this gym pre-selected
+        setSelectedLocation(gym.address.includes('Tampa') ? 'Tampa, FL' : 'Austin, TX');
+        showLoading();
+        navigation.navigate('TimeSelection');
+      }}
+    >
+      <View style={styles.gymCardContent}>
+        <Text style={[styles.gymName, { color: theme.text.primary }]}>
+          {gym.name}
+        </Text>
+        <Text style={[styles.gymAddress, { color: theme.text.secondary }]}>
+          {gym.address}
+        </Text>
+        <Text style={[styles.gymSessions, { color: theme.text.secondary }]}>
+          {gym.openMats.length} session{gym.openMats.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={theme.text.secondary} />
+    </TouchableOpacity>
+  );
+
+  const handleSearch = async (text: string) => {
+    setSearchQuery(text);
+    
+    if (text.trim().length === 0) {
+      setSearchResults({ cities: [], gyms: [] });
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      const results = await searchService.searchAll(text);
+      setSearchResults(results);
+      console.log('Search results:', results);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults({ cities: [], gyms: [] });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddCityPress = () => {
+    if (searchQuery.trim()) {
+      handleSearch(searchQuery);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Belt Status Bar */}
@@ -157,6 +231,68 @@ const LocationScreen: React.FC = () => {
 
       {/* Main Content */}
       <View style={styles.content}>
+        {/* Search Input */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search-outline" size={20} color={theme.text.secondary} style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search for a city or gym"
+              value={searchQuery}
+              onChangeText={handleSearch}
+              onSubmitEditing={() => handleAddCityPress()}
+              returnKeyType="search"
+              style={[styles.searchInput, { 
+                backgroundColor: theme.surface,
+                color: theme.text.primary,
+                borderColor: theme.text.secondary 
+              }]}
+              placeholderTextColor={theme.text.secondary}
+            />
+            {searchQuery.trim() && (
+              <TouchableOpacity 
+                style={styles.searchButton}
+                onPress={handleAddCityPress}
+              >
+                <Ionicons name="search" size={24} color={theme.text.secondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Search Results */}
+        {(searchResults.cities.length > 0 || searchResults.gyms.length > 0) && (
+          <View style={styles.searchResultsContainer}>
+            {isSearching && (
+              <View style={styles.searchingContainer}>
+                <ActivityIndicator size="small" color={theme.text.secondary} />
+                <Text style={[styles.searchingText, { color: theme.text.secondary }]}>
+                  Searching...
+                </Text>
+              </View>
+            )}
+            
+            {/* City Results */}
+            {searchResults.cities.length > 0 && (
+              <View style={styles.resultsSection}>
+                <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>Cities</Text>
+                {searchResults.cities.map((city, index) => (
+                  <CityButton key={`city-${index}`} city={city} />
+                ))}
+              </View>
+            )}
+            
+            {/* Gym Results */}
+            {searchResults.gyms.length > 0 && (
+              <View style={styles.resultsSection}>
+                <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>Gyms</Text>
+                {searchResults.gyms.map((gym, index) => (
+                  <GymQuickCard key={`gym-${gym.id || index}`} gym={gym} />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
         <View style={styles.locationOptions}>
           {/* Near Me Button */}
           <TouchableOpacity
@@ -259,6 +395,102 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
+  },
+  searchContainer: {
+    marginBottom: 24,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 12,
+    zIndex: 1,
+  },
+  searchButton: {
+    position: 'absolute',
+    right: 12,
+    padding: 8,
+  },
+  searchInput: {
+    height: 48,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingLeft: 44, // Extra padding for the search icon
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  searchResultsContainer: {
+    marginBottom: 24,
+  },
+  searchingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  searchingText: {
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  resultsSection: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  cityButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  cityButtonContent: {
+    flex: 1,
+  },
+  cityName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  cityCount: {
+    fontSize: 14,
+  },
+  gymCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  gymCardContent: {
+    flex: 1,
+  },
+  gymName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  gymAddress: {
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  gymSessions: {
+    fontSize: 12,
   },
   locationOptions: {
     gap: 16,

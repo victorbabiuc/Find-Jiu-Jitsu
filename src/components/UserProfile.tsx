@@ -50,7 +50,7 @@ export const UserProfile: React.FC = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>Account Created:</Text>
           <Text style={styles.value}>
-            {user?.metadata.creationTime 
+            {user?.metadata?.creationTime 
               ? new Date(user.metadata.creationTime).toLocaleDateString()
               : 'Not available'
             }
@@ -60,7 +60,7 @@ export const UserProfile: React.FC = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>Last Sign In:</Text>
           <Text style={styles.value}>
-            {user?.metadata.lastSignInTime 
+            {user?.metadata?.lastSignInTime 
               ? new Date(user.metadata.lastSignInTime).toLocaleDateString()
               : 'Not available'
             }

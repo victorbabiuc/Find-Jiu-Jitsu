@@ -19,11 +19,12 @@ interface CSVRow {
   sessionTime: string;
   sessionType: string;
   coordinates?: string;
+  lastUpdated?: string; // Optional YYYY-MM-DD format date
 }
 
 class GitHubDataService {
   private readonly CACHE_PREFIX = 'github_gym_data_';
-  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
   
   // GitHub raw URLs for CSV files
   private readonly CSV_URLS = {
@@ -48,8 +49,8 @@ class GitHubDataService {
       const cached: CachedData = JSON.parse(cachedString);
       const age = Date.now() - cached.timestamp;
       
-      // Temporarily reduce cache duration to 1 minute to force refresh for coordinates
-      return age > (1 * 60 * 1000); // 1 minute
+      // Cache duration: 1 hour
+      return age > (60 * 60 * 1000); // 1 hour
     } catch (error) {
       console.error(`Error checking if data is stale for ${location}:`, error);
       return true; // Assume stale if error
@@ -115,13 +116,78 @@ class GitHubDataService {
       throw new Error(`No CSV URL configured for location: ${location}`);
     }
 
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch CSV data: ${response.status} ${response.statusText}`);
+    try {
+      const response = await fetch(url);
+      
+      if (response.status === 429) {
+        // Rate limited - try to use cached data
+        console.log('⚠️ GitHubDataService: Rate limited, falling back to cache');
+        const cachedData = await this.getCachedData(location);
+        if (cachedData) {
+          console.log('✅ Using cached data due to rate limit');
+          return this.convertOpenMatsToCSV(cachedData);
+        }
+        throw new Error('Rate limited and no cached data available');
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CSV data: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.text();
+    } catch (error) {
+      // Always try cache on any error
+      const cachedData = await this.getCachedData(location);
+      if (cachedData) {
+        console.log('✅ Using cached data due to error:', error);
+        return this.convertOpenMatsToCSV(cachedData);
+      }
+      throw error;
     }
+  }
 
-    return await response.text();
+  /**
+   * Convert OpenMat[] back to CSV format for cache fallback
+   * @param openMats - Array of OpenMat objects
+   * @returns string - CSV formatted data
+   */
+  private convertOpenMatsToCSV(openMats: OpenMat[]): string {
+    // CSV header
+    const headers = ['id', 'name', 'address', 'website', 'distance', 'matFee', 'dropInFee', 'sessionDay', 'sessionTime', 'sessionType', 'coordinates', 'lastUpdated'];
+    const csvRows = [headers.join(',')];
+    
+    // Convert each gym and its sessions to CSV rows
+    openMats.forEach(gym => {
+      gym.openMats?.forEach(session => {
+        const row = [
+          gym.id,
+          gym.name,
+          gym.address,
+          gym.website || '',
+          gym.distance.toString(),
+          gym.matFee?.toString() || '0',
+          gym.dropInFee?.toString() || '',
+          session.day,
+          session.time,
+          session.type,
+          gym.coordinates || '',
+          gym.lastUpdated || ''
+        ];
+        
+        // Escape commas in fields and wrap in quotes if needed
+        const escapedRow = row.map(field => {
+          const str = field.toString();
+          if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        });
+        
+        csvRows.push(escapedRow.join(','));
+      });
+    });
+    
+    return csvRows.join('\n');
   }
 
   /**
@@ -180,7 +246,8 @@ class GitHubDataService {
         sessionDay: values[headers.indexOf('sessionDay')] || '',
         sessionTime: values[headers.indexOf('sessionTime')] || '',
         sessionType: values[headers.indexOf('sessionType')] || 'both',
-        coordinates: values[headers.indexOf('coordinates')] || undefined
+        coordinates: values[headers.indexOf('coordinates')] || undefined,
+        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined
       };
       
 
@@ -208,6 +275,7 @@ class GitHubDataService {
           matFee: parseInt(row.matFee) || 0,
           dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
           coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
+          lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
           openMats: []
         };
         
@@ -296,6 +364,24 @@ class GitHubDataService {
       default:
         // Preserve original session type for custom types like "MMA Sparring"
         return type.trim();
+    }
+  }
+
+  /**
+   * Parse last updated date from CSV string (YYYY-MM-DD) to ISO string
+   * @param lastUpdated - YYYY-MM-DD string or undefined
+   * @returns ISO string or undefined
+   */
+  private parseLastUpdatedDate(lastUpdated: string | undefined): string | undefined {
+    if (!lastUpdated) {
+      return undefined;
+    }
+    try {
+      const date = new Date(lastUpdated);
+      return date.toISOString();
+    } catch (e) {
+      console.warn(`Could not parse lastUpdated date: ${lastUpdated}`, e);
+      return undefined;
     }
   }
 

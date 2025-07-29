@@ -18,10 +18,10 @@ This service fetches gym data from GitHub-hosted CSV files and provides caching,
 The service expects CSV files with the following format:
 
 ```csv
-id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
-1,STJJ,Tampa FL,5.2,0,Sunday,9:00 AM,gi
-1,STJJ,Tampa FL,5.2,0,Thursday,5:00 PM,nogi
-2,RMNU,Tampa FL,7.1,0,Wednesday,6:00 PM,both
+id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
+1,STJJ,Tampa FL,https://stjj.com,5.2,0,20,Sunday,9:00 AM,gi,"27.8896,-82.4948",2025-01-28
+1,STJJ,Tampa FL,https://stjj.com,5.2,0,20,Thursday,5:00 PM,nogi,"27.8896,-82.4948",2025-01-28
+2,RMNU,Tampa FL,https://rmnu.com,7.1,0,25,Wednesday,6:00 PM,both,"28.0123,-82.5869",2025-01-15
 ```
 
 ### Required Headers
@@ -29,11 +29,15 @@ id,name,address,distance,matFee,sessionDay,sessionTime,sessionType
 - `id` - Unique gym identifier (string)
 - `name` - Gym name (string)
 - `address` - Full address (string)
+- `website` - Gym website URL (optional, string)
 - `distance` - Distance in miles (number)
 - `matFee` - Mat fee in dollars (number)
+- `dropInFee` - Drop-in class fee in dollars (optional, number)
 - `sessionDay` - Day of the week (string)
 - `sessionTime` - Time of session (string)
-- `sessionType` - Type of session: 'gi', 'nogi', or 'both' (string)
+- `sessionType` - Type of session: 'gi', 'nogi', 'both', or custom (string)
+- `coordinates` - GPS coordinates in "latitude,longitude" format (optional, string)
+- `last_updated` - Date when gym data was last manually updated in YYYY-MM-DD format (optional, string)
 
 ### Multiple Sessions
 

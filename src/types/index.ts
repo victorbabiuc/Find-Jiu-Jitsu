@@ -35,6 +35,7 @@ export interface User {
     instructor?: string; // Optional instructor name
     goingUsers?: any[]; // Optional array of users attending
     coordinates?: string; // Optional coordinates in "latitude,longitude" format
+    lastUpdated?: string; // Optional ISO date string for when data was last updated
   }
   
   export interface OpenMatSession {

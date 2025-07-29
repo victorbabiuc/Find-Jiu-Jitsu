@@ -1,21 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
-import { useApp } from '../context/AppContext';
-import { useLoading } from '../context';
-import { beltColors } from '../utils/constants';
+import { useApp, useLoading, useTheme, useAuth } from '../context';
+import { beltColors, selectionColor } from '../utils';
 import {
   RootStackParamList,
   MainTabParamList,
   FindStackParamList,
 } from './types';
-
-// Import your existing contexts
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
 import { FEATURES } from '../config/featureFlags';
 
 // Import screens
@@ -28,7 +23,6 @@ import MapViewScreen from '../screens/MapViewScreen';
 import SavedScreen from '../screens/SavedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileDetailsScreen from '../screens/ProfileDetailsScreen';
-
 
 // Create navigators
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -43,10 +37,10 @@ const FindStackNavigator = () => {
   return (
     <FindStack.Navigator
       initialRouteName="TimeSelection"
-              screenOptions={{
-          headerShown: false,
-          gestureEnabled: false, // Disable swipe back gesture
-        }}
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: false, // Disable swipe back gesture
+      }}
       screenListeners={{
         focus: () => {
           // Hide loading when any screen in the Find stack is focused
@@ -92,16 +86,20 @@ const FindStackNavigator = () => {
 
 // Main Tab Navigator (Home, Find, Favorites)
 const MainTabNavigator = () => {
-  const { userBelt } = useApp();
+  const { userBelt, favorites } = useApp();
   const { theme } = useTheme();
   const beltColor = beltColors[userBelt];
   const { showTransitionalLoading, hideLoading } = useLoading();
+
+  // Get favorites count for dynamic icon color
+  const favoritesCount = favorites.size;
 
   return (
     <MainTabs.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap;
+          let iconName: keyof typeof Ionicons.glyphMap = 'home'; // Default value
+          let iconColor = color;
 
           if (route.name === 'Home') {
             iconName = 'home';
@@ -109,12 +107,14 @@ const MainTabNavigator = () => {
             iconName = 'location';
           } else if (route.name === 'Favorites') {
             iconName = 'heart';
+            // Dynamic color based on favorites count
+            iconColor = favoritesCount > 0 ? '#EF4444' : '#6B7280';
           } else if (route.name === 'Profile') {
             iconName = 'person';
           }
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName} size={size} color={iconColor} />;
         },
-        tabBarActiveTintColor: beltColor.primary,
+        tabBarActiveTintColor: selectionColor,
         tabBarInactiveTintColor: theme.text.secondary,
         headerShown: false,
       })}
@@ -164,7 +164,101 @@ const MainTabNavigator = () => {
 // Root Navigator (Main Tabs with optional Login)
 const AppNavigator = () => {
   const { theme } = useTheme();
-  const { hideLoading } = useLoading();
+  const { hideLoading, showNavigationLoading, hideNavigationLoading } = useLoading();
+  const lastNavigationTime = useRef<number>(0);
+  const navigationTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Get appropriate loading message based on navigation
+  const getLoadingMessage = useCallback((fromRoute: string, toRoute: string): string => {
+    const now = Date.now();
+    
+    // Prevent rapid navigation spam
+    if (now - lastNavigationTime.current < 300) {
+      return "Loading...";
+    }
+    lastNavigationTime.current = now;
+
+    // Tab navigation messages
+    if (fromRoute === 'Home' && toRoute === 'Find') return "Finding open mats...";
+    if (fromRoute === 'Home' && toRoute === 'Favorites') return "Loading favorites...";
+    if (fromRoute === 'Home' && toRoute === 'Profile') return "Loading profile...";
+    if (fromRoute === 'Find' && toRoute === 'Home') return "Going home...";
+    if (fromRoute === 'Find' && toRoute === 'Favorites') return "Loading favorites...";
+    if (fromRoute === 'Find' && toRoute === 'Profile') return "Loading profile...";
+    if (fromRoute === 'Favorites' && toRoute === 'Home') return "Going home...";
+    if (fromRoute === 'Favorites' && toRoute === 'Find') return "Finding open mats...";
+    if (fromRoute === 'Favorites' && toRoute === 'Profile') return "Loading profile...";
+    if (fromRoute === 'Profile' && toRoute === 'Home') return "Going home...";
+    if (fromRoute === 'Profile' && toRoute === 'Find') return "Finding open mats...";
+    if (fromRoute === 'Profile' && toRoute === 'Favorites') return "Loading favorites...";
+
+    // Find stack navigation messages
+    if (toRoute === 'Location') return "Selecting location...";
+    if (toRoute === 'TimeSelection') return "Choosing time...";
+    if (toRoute === 'Results') return "Loading results...";
+    if (toRoute === 'MapView') return "Loading map...";
+
+    // Root stack navigation
+    if (toRoute === 'Login') return "Signing in...";
+    if (toRoute === 'ProfileDetails') return "Loading details...";
+
+    return "Loading...";
+  }, []);
+
+  // Define navigation transitions that should NOT show loading
+  const shouldSkipLoading = (fromRoute: string, toRoute: string): boolean => {
+    // Skip loading for city selection (Dashboard → TimeSelection)
+    if (fromRoute === 'Home' && toRoute === 'TimeSelection') return true;
+    
+    // Skip loading for tab navigation within the same stack
+    if (['Home', 'Find', 'Favorites', 'Profile'].includes(fromRoute) && 
+        ['Home', 'Find', 'Favorites', 'Profile'].includes(toRoute)) return true;
+    
+    // Skip loading for navigation within the Find stack (except to Results)
+    if (['Location', 'TimeSelection', 'MapView'].includes(fromRoute) && 
+        ['Location', 'TimeSelection', 'MapView'].includes(toRoute)) return true;
+    
+    // Skip loading for initial route navigation
+    if (fromRoute === 'Home' && toRoute === 'Find') return true;
+    
+    return false;
+  };
+
+  // Handle navigation state changes
+  const handleNavigationStateChange = useCallback((state: any) => {
+    if (!state || !state.routes || state.routes.length === 0) return;
+
+    const currentRoute = state.routes[state.index];
+    const currentRouteName = currentRoute?.name;
+    
+    // Get the previous route name from navigation state
+    const previousRouteName = state.routes[state.index - 1]?.name || 'Home';
+    
+    // Clear any existing timeout
+    if (navigationTimeout.current) {
+      clearTimeout(navigationTimeout.current);
+    }
+
+    // Only show loading for navigation transitions that need it
+    if (currentRouteName && currentRouteName !== previousRouteName) {
+      // Check if we should skip loading for this transition
+      if (shouldSkipLoading(previousRouteName, currentRouteName)) {
+        console.log(`🚀 Skipping loading for navigation: ${previousRouteName} → ${currentRouteName}`);
+        return;
+      }
+      
+      const message = getLoadingMessage(previousRouteName, currentRouteName);
+      console.log(`⏳ Showing loading for navigation: ${previousRouteName} → ${currentRouteName}`);
+      
+      // Show navigation loading for 600ms (short and snappy)
+      showNavigationLoading(message, 600);
+      
+      // Auto-hide after 600ms to prevent stuck loading states
+      navigationTimeout.current = setTimeout(() => {
+        hideNavigationLoading();
+      }, 600);
+    }
+  }, [showNavigationLoading, hideNavigationLoading, getLoadingMessage]);
 
   const navigationTheme = {
     dark: false,
@@ -181,6 +275,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer
       theme={navigationTheme}
+      onStateChange={handleNavigationStateChange}
     >
       <RootStack.Navigator
         initialRouteName="Main"
@@ -190,7 +285,6 @@ const AppNavigator = () => {
           headerLeft: () => null,
           gestureEnabled: false,
         }}
-
       >
         <RootStack.Screen 
           name="Login" 

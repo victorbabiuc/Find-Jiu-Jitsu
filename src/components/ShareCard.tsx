@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { OpenMat, OpenMatSession } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
@@ -35,17 +35,9 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
   };
 
   return (
-    <View ref={ref} style={[styles.container, { backgroundColor: '#FDF6E3' }]}>
-      <LinearGradient
-        colors={['#FDF6E3', '#F5E6D3']}
-        style={styles.gradient}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.appName, { color: '#2D3748' }]}>Find Jiu Jitsu</Text>
-          <Text style={[styles.tagline, { color: '#4A5568' }]}>Open Mat Sessions</Text>
-        </View>
-
+    <View ref={ref} style={styles.container}>
+      {/* Main Content Card */}
+      <View style={styles.contentCard}>
         {/* Gym Info */}
         <View style={styles.gymSection}>
           {/* Gym Logo */}
@@ -62,8 +54,20 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
               <Text style={styles.gymLogoText}>{String(gym.name || '').split(' ').map(word => word[0]).join('').toUpperCase()}</Text>
             </View>
           )}
-          <Text style={[styles.gymName, { color: '#2D3748' }]}>{String(gym.name || '')}</Text>
-          <Text style={[styles.gymAddress, { color: '#4A5568' }]}>{String(gym.address || '')}</Text>
+          
+          {/* Gym Name */}
+          <Text style={styles.gymName}>{String(gym.name || '')}</Text>
+          
+          {/* Address */}
+          <Text style={styles.gymAddress}>{String(gym.address || '')}</Text>
+          
+          {/* Website (if available) */}
+          {gym.website && (
+            <View style={styles.websiteContainer}>
+              <Ionicons name="globe-outline" size={16} color="#6B7280" style={styles.websiteIcon} />
+              <Text style={styles.websiteText}>{gym.website}</Text>
+            </View>
+          )}
         </View>
 
         {/* Divider */}
@@ -71,63 +75,46 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
 
         {/* Session Info */}
         <View style={styles.sessionSection}>
-          <Text style={[styles.openMatLabel, { color: '#2D3748' }]}>Open Mat</Text>
+          <Text style={styles.openMatLabel}>Open Mat</Text>
           <View style={styles.sessionHeader}>
-            <Text style={[styles.sessionType, { color: '#2D3748' }]}>
+            <Text style={styles.sessionType}>
               {getSessionTypeEmoji(String(session.type || ''))} {String(session.type || '')}
             </Text>
-            <Text style={[styles.sessionDay, { color: '#2D3748' }]}>
+            <Text style={styles.sessionDay}>
               {String(session.day || '')}
             </Text>
           </View>
           
-          <Text style={[styles.sessionTime, { color: '#2D3748' }]}>
+          <Text style={styles.sessionTime}>
             {formatTime(String(session.time || ''))}
           </Text>
         </View>
+      </View>
 
-        {/* Pricing Info */}
-        <View style={styles.pricingSection}>
-          {Boolean(gym.matFee) && gym.matFee !== 0 && (
-            <Text style={[styles.pricing, { color: '#4A5568' }]}>
-              Open Mat Fee: ${String(gym.matFee || 0)}
-            </Text>
-          )}
-          {Boolean(gym.dropInFee) && gym.dropInFee !== 0 && (
-            <Text style={[styles.pricing, { color: '#4A5568' }]}>
-              Drop-in Fee: ${String(gym.dropInFee || 0)}
-            </Text>
-          )}
-          {(!Boolean(gym.matFee) || gym.matFee === 0) && (
-            <Text style={[styles.pricing, { color: '#4A5568' }]}>
-              Open Mat - Free
-            </Text>
-          )}
-        </View>
+      {/* Personal CTA */}
+      <View style={styles.inviteSection}>
+        <Text style={styles.inviteText}>
+          {includeImGoing ? 'I\'m going, come train with me! 🔥' : 'Join me for training! 🔥'}
+        </Text>
+      </View>
 
-        {/* Invite Message */}
-        <View style={styles.inviteSection}>
-          <Text style={[styles.inviteText, { color: '#2D3748' }]}>
-            {includeImGoing ? '🏃 I\'m going, come train with me!' : '🏃 Join me for training!'}
+      {/* Footer Branding */}
+      <View style={styles.footer}>
+        <Image 
+          source={require('../../assets/icon.png')} 
+          style={styles.footerAppIcon}
+          resizeMode="contain"
+          onError={(error) => console.log('Footer app icon error:', error)}
+        />
+        <View style={styles.footerTextContainer}>
+          <Text style={styles.footerText}>
+            Find Jiu Jitsu
+          </Text>
+          <Text style={styles.footerSubtext}>
+            Find your next roll
           </Text>
         </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Image 
-            source={require('../../assets/icon.png')} 
-            style={styles.appIcon}
-            resizeMode="contain"
-            onError={(error) => console.log('Footer app icon error:', error)}
-          />
-          <Text style={[styles.footerText, { color: theme.text.secondary }]}>
-            Find Jiu Jitsu App
-          </Text>
-          <Text style={[styles.ctaText, { color: theme.text.secondary }]}>
-            Swipe up for app!
-          </Text>
-        </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 });
@@ -141,144 +128,156 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: -9999,
     top: -9999,
-  },
-  gradient: {
-    flex: 1,
-    padding: 80,
-    paddingTop: 100,
+    backgroundColor: '#F9FAFB',
+    padding: 20,
+    paddingTop: 20,
     justifyContent: 'space-between',
   },
-  header: {
-    alignItems: 'center',
+  contentCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 40,
     marginBottom: 40,
-    paddingTop: 20,
-  },
-
-  appName: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  tagline: {
-    fontSize: 24,
-    fontWeight: '500',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    overflow: 'hidden',
   },
   gymSection: {
-    marginBottom: 40,
+    marginBottom: 30,
     alignItems: 'center',
-    paddingVertical: 10,
   },
   gymLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 16,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 20,
   },
   gymLogoPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#E2E8F0',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   gymLogoText: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#4A5568',
+    color: '#6B7280',
   },
   gymName: {
-    fontSize: 42,
+    fontSize: 56,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 6,
     textAlign: 'center',
+    lineHeight: 62,
+    color: '#111827',
   },
   gymAddress: {
-    fontSize: 28,
+    fontSize: 32,
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: 40,
+    marginBottom: 8,
+    color: '#6B7280',
+  },
+  websiteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  websiteIcon: {
+    marginRight: 6,
+  },
+  websiteText: {
+    fontSize: 26,
+    textAlign: 'center',
+    color: '#6B7280',
   },
   divider: {
     height: 2,
-    backgroundColor: '#E2E8F0',
-    marginVertical: 10,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 20,
     borderRadius: 1,
   },
   sessionSection: {
     alignItems: 'center',
-    marginBottom: 40,
-    paddingVertical: 10,
+    marginBottom: 20,
   },
   openMatLabel: {
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 16,
     textAlign: 'center',
+    color: '#111827',
   },
   sessionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sessionType: {
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginRight: 20,
+    marginRight: 16,
+    color: '#111827',
   },
   sessionDay: {
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: 'bold',
+    color: '#111827',
   },
   sessionTime: {
-    fontSize: 48,
+    fontSize: 52,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  pricingSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-    paddingVertical: 10,
-  },
-  pricing: {
-    fontSize: 28,
-    marginBottom: 8,
-    textAlign: 'center',
+    color: '#111827',
   },
   inviteSection: {
     alignItems: 'center',
     marginBottom: 60,
-    paddingVertical: 20,
+    paddingVertical: 30,
   },
   inviteText: {
-    fontSize: 36,
-    fontWeight: 'bold',
+    fontSize: 48,
+    fontWeight: '700',
     textAlign: 'center',
+    lineHeight: 56,
+    color: '#111827',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  appIcon: {
-    width: 60,
-    height: 60,
-    marginRight: 15,
-    borderRadius: 30,
+  footerAppIcon: {
+    width: 100,
+    height: 100,
+    marginRight: 16,
+    borderRadius: 50,
     backgroundColor: 'transparent',
     resizeMode: 'contain',
   },
-  footerText: {
-    fontSize: 28,
-    textAlign: 'center',
-    marginRight: 15,
-    fontWeight: '600',
+  footerTextContainer: {
+    alignItems: 'flex-start',
   },
-  ctaText: {
-    fontSize: 24,
-    fontStyle: 'italic',
-    textAlign: 'center',
+  footerText: {
+    fontSize: 42,
+    textAlign: 'left',
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  footerSubtext: {
+    fontSize: 26,
+    textAlign: 'left',
     fontWeight: '500',
+    color: '#6B7280',
   },
 });
 

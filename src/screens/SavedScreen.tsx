@@ -37,7 +37,7 @@ const SavedScreen: React.FC = () => {
   
   // State for saved gyms data
   const [savedGyms, setSavedGyms] = useState<OpenMat[]>([]);
-  const [loading, setLoading] = useState(true);
+
   const [refreshing, setRefreshing] = useState(false);
   
   // Modal state
@@ -58,7 +58,6 @@ const SavedScreen: React.FC = () => {
       showTransitionalLoading("Loading your favorites...", 1500);
       
       try {
-        setLoading(true);
         // Get all gyms from API and filter by favorites
         const location = selectedLocation || 'Tampa';
         const allGyms = await apiService.getOpenMats(location); // We'll need to handle multiple locations
@@ -67,13 +66,11 @@ const SavedScreen: React.FC = () => {
       } catch (error) {
         console.error('Error fetching saved gyms:', error);
         setSavedGyms([]);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchSavedGyms();
-  }, [favorites, showTransitionalLoading, selectedLocation]);
+  }, [favorites, selectedLocation]);
 
   // Entrance animations
   useEffect(() => {
@@ -85,10 +82,8 @@ const SavedScreen: React.FC = () => {
       ).start();
     };
 
-    if (!loading) {
-      runEntranceAnimations();
-    }
-  }, [loading]);
+    runEntranceAnimations();
+  }, []);
 
   // Load gym logos when savedGyms data changes
   useEffect(() => {
@@ -177,10 +172,7 @@ const SavedScreen: React.FC = () => {
 
 
 
-  // Show loading state - removed in favor of transitional loading
-  if (loading) {
-    return null; // Let transitional loading handle this
-  }
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -338,15 +330,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
+
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',

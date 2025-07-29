@@ -38,11 +38,11 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   
   const { theme } = useTheme();
   const { selectedLocation, favorites, toggleFavorite } = useApp();
-  const { showTransitionalLoading } = useLoading();
+  const { showTransitionalLoading, hideTransitionalLoading } = useLoading();
   
   const [gyms, setGyms] = useState<OpenMat[]>([]);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
-  const [loading, setLoading] = useState(true);
+
   const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 27.9478, // Tampa default
     longitude: -82.4588,
@@ -92,7 +92,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     console.log('🔍 MapViewScreen: Loading gym data for:', selectedLocation);
     const fetchGymData = async () => {
       try {
-        setLoading(true);
+        // Show loading when fetch starts
+        showTransitionalLoading('Loading map data...', 2000);
         
         // Determine city from location string
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
@@ -131,10 +132,11 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           });
         }
         
-        setLoading(false);
       } catch (error) {
         console.error('🔍 MapViewScreen: Error fetching gym data:', error);
-        setLoading(false);
+      } finally {
+        // Hide loading when done
+        hideTransitionalLoading();
       }
     };
 
@@ -238,53 +240,29 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     toggleFavorite(gym.id);
   };
 
-  if (loading) {
-    console.log('🔍 MapViewScreen: Showing loading state');
-    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text.primary }]}>
-            Loading gyms...
-          </Text>
-        </View>
-      </View>
-    );
-  }
+
 
   console.log('🔍 MapViewScreen: Rendering main component with', filteredGyms.length, 'gyms');
 
-  // MINIMAL TEST IMPLEMENTATION WITH DIAGNOSTICS
   return (
     <View style={styles.container}>
-      <Text style={styles.debugText}>🔍 DEBUG: MapViewScreen is rendering</Text>
-      
-      {/* Simple MapView Test with Diagnostics */}
       <MapView
         ref={mapRef}
-        style={[styles.map, { backgroundColor: 'red' }]} // Red background to see if it's there
+        style={styles.map}
         initialRegion={mapRegion}
         showsUserLocation={true}
         showsMyLocationButton={true}
+        zoomEnabled={true}
+        scrollEnabled={true}
+        rotateEnabled={true}
+        pitchEnabled={true}
         onMapReady={() => {
           console.log('🔍 MapViewScreen: Map is ready!');
-        }}
-        onError={(e) => {
-          console.log('🔍 MapViewScreen: Map error:', e);
         }}
         onPress={(e) => {
           console.log('🔍 MapViewScreen: Map pressed at:', e.nativeEvent.coordinate);
         }}
       >
-        {/* Test with just one marker */}
-        <Marker
-          coordinate={{ latitude: 27.9478, longitude: -82.4588 }}
-          title="Test Gym"
-          description="Test Address"
-          onPress={() => {
-            console.log('🔍 MapViewScreen: Test marker pressed');
-          }}
-        />
-        
         {/* Add gym markers if coordinates exist */}
         {filteredGyms.map((gym) => {
           console.log('🔍 MapViewScreen: Checking gym', gym.name, 'coordinates:', gym.coordinates, 'type:', typeof gym.coordinates);
@@ -347,27 +325,7 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  debugText: {
-    position: 'absolute',
-    top: 100,
-    left: 20,
-    right: 20,
-    backgroundColor: 'yellow',
-    color: 'black',
-    padding: 10,
-    zIndex: 1000,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
+
   header: {
     position: 'absolute',
     top: 50,

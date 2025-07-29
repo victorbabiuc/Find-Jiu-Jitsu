@@ -1,4 +1,13 @@
-import React from 'react';
+// Disable console logs in production
+if (!__DEV__) {
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
+
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -10,14 +19,42 @@ if (Platform.OS === 'ios') {
 }
 
 // Import context providers
-import { AuthProvider } from './src/context/AuthContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AppProvider } from './src/context/AppContext';
 import { LoadingProvider, useLoading } from './src/context/LoadingContext';
 import TransitionalLoadingScreen from './src/screens/TransitionalLoadingScreen';
 
+// Import services
+import { githubDataService } from './src/services/github-data.service';
+
 // Import navigation
 import AppNavigator from './src/navigation/AppNavigator';
+
+// Pre-loading component that loads gym data after auth completes
+const GymDataPreloader: React.FC = () => {
+  const { loading: authLoading } = useAuth();
+  
+  useEffect(() => {
+    // Pre-load gym data for both cities after auth completes
+    if (!authLoading) {
+      console.log('🚀 Pre-loading gym data...');
+      
+      // Pre-load both cities in parallel
+      Promise.all([
+        githubDataService.getGymData('tampa'),
+        githubDataService.getGymData('austin')
+      ]).then(() => {
+        console.log('✅ Gym data pre-loaded and cached');
+      }).catch(error => {
+        console.error('❌ Failed to pre-load gym data:', error);
+        // Non-critical error, app continues
+      });
+    }
+  }, [authLoading]);
+  
+  return null; // This component doesn't render anything
+};
 
 // Global loading overlay component
 const GlobalLoadingOverlay: React.FC = () => {
@@ -42,6 +79,7 @@ export default function App() {
           <ThemeProvider>
             <AppProvider>
               <LoadingProvider>
+                <GymDataPreloader />
                 <AppNavigator />
                 <GlobalLoadingOverlay />
                 <StatusBar 

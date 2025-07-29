@@ -600,4 +600,47 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OpenMatCard; 
+export default React.memo(OpenMatCard, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render)
+  // Return false if props changed (re-render)
+  
+  // Check if gym data changed
+  if (prevProps.gym.id !== nextProps.gym.id) return false;
+  if (prevProps.gym.name !== nextProps.gym.name) return false;
+  if (prevProps.gym.address !== nextProps.gym.address) return false;
+  if (prevProps.gym.website !== nextProps.gym.website) return false;
+  if (prevProps.gym.matFee !== nextProps.gym.matFee) return false;
+  if (prevProps.gym.dropInFee !== nextProps.gym.dropInFee) return false;
+  if (prevProps.gym.coordinates !== nextProps.gym.coordinates) return false;
+  if (prevProps.gym.lastUpdated !== nextProps.gym.lastUpdated) return false;
+  
+  // Check if openMats sessions changed
+  if (prevProps.gym.openMats?.length !== nextProps.gym.openMats?.length) return false;
+  
+  // Deep compare openMats sessions
+  if (prevProps.gym.openMats && nextProps.gym.openMats) {
+    for (let i = 0; i < prevProps.gym.openMats.length; i++) {
+      const prevSession = prevProps.gym.openMats[i];
+      const nextSession = nextProps.gym.openMats[i];
+      if (prevSession.day !== nextSession.day || 
+          prevSession.time !== nextSession.time || 
+          prevSession.type !== nextSession.type) {
+        return false;
+      }
+    }
+  }
+  
+  // Check if favorite status changed
+  const prevIsFavorite = prevProps.favorites.has(prevProps.gym.id);
+  const nextIsFavorite = nextProps.favorites.has(nextProps.gym.id);
+  if (prevIsFavorite !== nextIsFavorite) return false;
+  
+  // Check if function references changed (these should be stable)
+  if (prevProps.onHeartPress !== nextProps.onHeartPress) return false;
+  if (prevProps.onPress !== nextProps.onPress) return false;
+  if (prevProps.openWebsite !== nextProps.openWebsite) return false;
+  if (prevProps.openDirections !== nextProps.openDirections) return false;
+  
+  // All props are equal, skip re-render
+  return true;
+}); 

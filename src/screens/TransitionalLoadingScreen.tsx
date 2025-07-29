@@ -114,6 +114,7 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
         {beltTypes.map((beltType, index) => {
           const beltColor = beltColors[beltType];
           const isActive = index <= currentBeltIndex;
+          const isCurrent = index === currentBeltIndex;
           
           return (
             <View
@@ -124,8 +125,15 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
                   backgroundColor: beltColor.primary,
                   opacity: isActive ? 1 : 0.3,
                   transform: [{
-                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
-                  }]
+                    scale: isActive && isCurrent ? 1.1 : 1
+                  }],
+                  borderWidth: 1,
+                  borderColor: isActive ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.1)',
+                  shadowColor: isActive ? '#000' : 'transparent',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: isActive ? 0.1 : 0,
+                  shadowRadius: 4,
+                  elevation: isActive ? 2 : 0,
                 }
               ]}
             />
@@ -160,10 +168,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   belt: {
-    width: 40,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 6,
+    width: 44,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 8,
   },
 });
 

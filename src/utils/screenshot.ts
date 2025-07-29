@@ -10,7 +10,7 @@ import { View } from 'react-native';
  * @param options - Optional configuration for the screenshot
  */
 export const captureAndShareCard = async (
-  cardRef: React.RefObject<View>,
+  cardRef: React.RefObject<View | null>,
   gymData: any,
   sessionData: any,
   options: {
@@ -61,7 +61,7 @@ export const captureAndShareCard = async (
  * @returns Promise<string> - URI of the captured image
  */
 export const captureCardAsImage = async (
-  cardRef: React.RefObject<View>,
+  cardRef: React.RefObject<View | null>,
   options: {
     format?: 'png' | 'jpg' | 'webm';
     quality?: number;
