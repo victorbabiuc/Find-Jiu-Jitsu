@@ -171,7 +171,17 @@ These features are partially implemented but not yet functional:
 
 ## Release Schedule
 
-### v1.4.0 (Q1 2025)
+### v1.5.0 (Q1 2025) - MAJOR REFACTORING RELEASE ✅
+- ✅ Major component architecture refactoring (1,927 lines → focused components)
+- ✅ Custom hooks implementation (4 reusable hooks for state management)
+- ✅ TypeScript safety improvements (50+ any types → proper interfaces)
+- ✅ Professional logging system (100+ console statements replaced)
+- ✅ Utility function consolidation (~270 lines eliminated)
+- ✅ Enhanced code maintainability and performance
+- ✅ Fixed search duplicate gym issues
+- ✅ Security improvements (removed exposed API key)
+
+### v1.6.0 (Q2 2025)
 - Fix map view compilation errors
 - Add 2-3 new cities
 - Performance improvements (building on v2.0 architecture)

@@ -29,8 +29,8 @@ class GitHubDataService {
   
   // GitHub raw URLs for CSV files
   private readonly CSV_URLS = {
-    'tampa': 'https://raw.githubusercontent.com/victorbabiuc/Find-Jiu-Jitsu/main/data/tampa-gyms.csv',
-    'austin': 'https://raw.githubusercontent.com/victorbabiuc/Find-Jiu-Jitsu/main/data/austin-gyms.csv'
+    'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
+    'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv'
   };
 
   /**

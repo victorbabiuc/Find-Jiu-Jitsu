@@ -15,7 +15,7 @@ const AboutScreen: React.FC = () => {
           <Text style={styles.sectionText}>Find open mat sessions in your area with real-time data from our GitHub integration.</Text>
           <Text style={styles.sectionText}>Currently serving Austin and Tampa with more cities coming soon.</Text>
           <Text style={styles.sectionText}>Help us improve by reporting any issues or suggesting new features.</Text>
-          <Text style={styles.sectionText}>Current version: <Text style={styles.version}>v1.0.0</Text></Text>
+          <Text style={styles.sectionText}>Current version: <Text style={styles.version}>v1.5.0</Text></Text>
         </View>
         <TouchableOpacity style={styles.reportButton} onPress={handleReportIssue}>
           <Text style={styles.reportButtonText}>Contact Support</Text>
