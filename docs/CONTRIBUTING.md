@@ -1,6 +1,6 @@
 # 🏢 Contributing Guide
 
-How to add new gyms, cities, and contribute to Find Jiu Jitsu.
+How to add new gyms, cities, and contribute to JiuJitsu Finder.
 
 [← Back to README](../README.md)
 
@@ -171,10 +171,13 @@ git push origin feature/add-miami-gyms
 ### Local Testing Checklist
 - [ ] New city appears in city selection
 - [ ] All gyms display correctly
-- [ ] Search functionality works
+- [ ] Search functionality works (including suggestions)
 - [ ] Filtering works (Gi/No-Gi/Free)
 - [ ] Gym details are complete
 - [ ] Coordinates are accurate (if map view is working)
+- [ ] Custom hooks work correctly
+- [ ] Professional logging shows appropriate messages
+- [ ] Component architecture follows new patterns
 
 ### Data Quality Standards
 - [ ] All required columns present
@@ -194,10 +197,13 @@ git push origin feature/add-miami-gyms
 - **Test with small sample**: run geocoding on a few addresses first
 
 ### Code Quality
-- **Follow existing patterns**: use same naming conventions
+- **Follow existing patterns**: use same naming conventions and custom hooks
+- **Use custom hooks**: leverage existing hooks for state management
+- **Create focused components**: follow the new component architecture
 - **Test thoroughly**: verify all functionality works
 - **Document changes**: include clear commit messages
 - **Backup data**: the script creates automatic backups
+- **Use professional logging**: replace console.log with logger utility
 
 ### Community Guidelines
 - **Be respectful**: constructive feedback only
@@ -219,15 +225,26 @@ git push origin feature/add-miami-gyms
 
 ### App Integration Issues
 - **Issue**: New city not appearing in app
-- **Solution**: Check that city is added to CITIES array in FindScreen.tsx
+- **Solution**: Check that city is added to CITIES array in LocationScreen.tsx
 - **Prevention**: Test locally before submitting PR
+
+### Custom Hook Integration
+- **Issue**: State management not working correctly
+- **Solution**: Use existing custom hooks (useGymActions, useGymSearch, etc.)
+- **Prevention**: Follow the established patterns in existing screens
+
+### Component Architecture
+- **Issue**: Components too large or unfocused
+- **Solution**: Create focused sub-components following the new structure
+- **Prevention**: Review existing component architecture in `/components/results/` and `/components/dashboard/`
 
 ## Getting Help
 
 ### Resources
-- [Development Guide](DEVELOPMENT.md) - Technical setup
+- [Development Guide](DEVELOPMENT.md) - Technical setup and new architecture
 - [Data Management](DATA.md) - Detailed CSV specifications
-- [Technical Details](TECHNICAL.md) - Architecture and APIs
+- [Technical Details](TECHNICAL.md) - Updated architecture, hooks, and APIs
+- [Custom Hooks Guide](../src/hooks/README.md) - How to use the custom hooks
 
 ### Contact
 - **Email**: glootieapp@gmail.com

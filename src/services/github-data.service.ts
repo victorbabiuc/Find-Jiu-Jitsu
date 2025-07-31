@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OpenMat, OpenMatSession } from '../types';
+import { logger } from '../utils';
 
 interface CachedData {
   data: OpenMat[];
@@ -52,7 +53,7 @@ class GitHubDataService {
       // Cache duration: 1 hour
       return age > (60 * 60 * 1000); // 1 hour
     } catch (error) {
-      console.error(`Error checking if data is stale for ${location}:`, error);
+      logger.error(`Error checking if data is stale for ${location}:`, error);
       return true; // Assume stale if error
     }
   }
@@ -90,7 +91,7 @@ class GitHubDataService {
       
       return parsedData;
     } catch (error) {
-      console.error(`❌ GitHubDataService: Error fetching data for ${safeLocation}:`, error);
+      logger.error(`GitHubDataService: Error fetching data for ${safeLocation}:`, error);
       
       // Fallback to cached data if available
       const cachedData = await this.getCachedData(safeLocation.toLowerCase());
@@ -99,7 +100,7 @@ class GitHubDataService {
       }
       
       // Return empty array if no cached data available
-      console.warn(`⚠️ GitHubDataService: No data available for ${safeLocation}`);
+      logger.warn(`GitHubDataService: No data available for ${safeLocation}`);
       return [];
     }
   }
@@ -121,10 +122,10 @@ class GitHubDataService {
       
       if (response.status === 429) {
         // Rate limited - try to use cached data
-        console.log('⚠️ GitHubDataService: Rate limited, falling back to cache');
+        logger.rateLimit('GitHubDataService: Rate limited, falling back to cache');
         const cachedData = await this.getCachedData(location);
         if (cachedData) {
-          console.log('✅ Using cached data due to rate limit');
+          logger.cache('Using cached data due to rate limit');
           return this.convertOpenMatsToCSV(cachedData);
         }
         throw new Error('Rate limited and no cached data available');
@@ -139,7 +140,7 @@ class GitHubDataService {
       // Always try cache on any error
       const cachedData = await this.getCachedData(location);
       if (cachedData) {
-        console.log('✅ Using cached data due to error:', error);
+        logger.cache('Using cached data due to error:', { error });
         return this.convertOpenMatsToCSV(cachedData);
       }
       throw error;
@@ -255,20 +256,22 @@ class GitHubDataService {
       return row;
     });
 
-    // Group by gym ID
+    // Group by gym name to consolidate multiple sessions per gym
     const gymMap = new Map<string, OpenMat>();
     
     csvRows.forEach(row => {
       if (!row.id || !row.name) {
-        console.warn('Skipping row with missing id or name:', row);
+        logger.warn('Skipping row with missing id or name:', { row });
         return;
       }
 
-      if (!gymMap.has(row.id)) {
-        // Create new gym entry
+      const gymName = row.name.trim();
+      
+      if (!gymMap.has(gymName)) {
+        // Create new gym entry using the first occurrence's data
         const gym = {
-          id: row.id,
-          name: row.name,
+          id: row.id, // Use the first ID as the primary ID
+          name: gymName,
           address: row.address,
           website: row.website && row.website.trim() !== '' ? row.website : undefined,
           distance: parseFloat(row.distance) || 0,
@@ -279,13 +282,11 @@ class GitHubDataService {
           openMats: []
         };
         
-
-        
-        gymMap.set(row.id, gym);
+        gymMap.set(gymName, gym);
       }
 
       // Add session to existing gym
-      const gym = gymMap.get(row.id)!;
+      const gym = gymMap.get(gymName)!;
       if (row.sessionDay && row.sessionTime && row.sessionDay.trim() !== '') {
         const session: OpenMatSession = {
           day: row.sessionDay.trim(),
@@ -302,8 +303,12 @@ class GitHubDataService {
       openMats: this.sortSessionsByDay(gym.openMats)
     }));
 
-    // Debug log for South Tampa Jiu Jitsu to verify sorting
-    // Session sorting completed silently
+    // Debug: Log the parsing results
+    logger.debug('CSV parsing completed:', { 
+      totalRows: csvRows.length,
+      uniqueGyms: sortedGyms.length,
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+    });
 
     return sortedGyms;
   }
@@ -379,10 +384,10 @@ class GitHubDataService {
     try {
       const date = new Date(lastUpdated);
       return date.toISOString();
-    } catch (e) {
-      console.warn(`Could not parse lastUpdated date: ${lastUpdated}`, e);
-      return undefined;
-    }
+          } catch (e) {
+        logger.warn(`Could not parse lastUpdated date: ${lastUpdated}`, { error: e });
+        return undefined;
+      }
   }
 
   /**
@@ -411,7 +416,7 @@ class GitHubDataService {
 
       return parsed.data;
     } catch (error) {
-      console.error('Error reading cached data:', error);
+      logger.error('Error reading cached data:', error);
       return null;
     }
   }
@@ -432,7 +437,7 @@ class GitHubDataService {
       
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cachedData));
     } catch (error) {
-      console.error(`Error caching data for ${location}:`, error);
+      logger.error(`Error caching data for ${location}:`, error);
     }
   }
 
@@ -456,7 +461,7 @@ class GitHubDataService {
 
       }
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      logger.error('Error clearing cache:', error);
     }
   }
 
@@ -476,7 +481,7 @@ class GitHubDataService {
    * @returns Promise<OpenMat[]> - Fresh Tampa data
    */
   async forceRefreshTampaData(): Promise<OpenMat[]> {
-    console.log('🔄 Force refreshing Tampa data for Gracie Tampa South website...');
+    logger.force('Force refreshing Tampa data for Gracie Tampa South website...');
     await this.clearCache('tampa');
     return this.getGymData('tampa', true);
   }
@@ -498,7 +503,7 @@ class GitHubDataService {
       const cached: CachedData = JSON.parse(cachedString);
       return cached.timestamp;
     } catch (error) {
-      console.error(`Error getting last update time for ${location}:`, error);
+      logger.error(`Error getting last update time for ${location}:`, error);
       return null;
     }
   }
@@ -522,7 +527,7 @@ class GitHubDataService {
       
       return { hasCache: true, age };
     } catch (error) {
-      console.error(`Error checking cache status for ${location}:`, error);
+      logger.error(`Error checking cache status for ${location}:`, error);
       return { hasCache: false, age: null };
     }
   }
@@ -535,7 +540,7 @@ class GitHubDataService {
     try {
       await this.clearCache();
     } catch (error) {
-      console.error('❌ GitHubDataService: Error clearing cache:', error);
+      logger.error('GitHubDataService: Error clearing cache:', error);
     }
   }
 

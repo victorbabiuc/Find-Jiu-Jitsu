@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { logger } from '../utils';
 
 interface SignOutButtonProps {
   onSuccess?: () => void;
@@ -31,8 +32,8 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({
             try {
               await signOut();
               onSuccess?.();
-            } catch (error) {
-              console.error('Sign out failed:', error);
+                } catch (error) {
+      logger.error('Sign out failed:', error);
               Alert.alert('Sign Out Failed', 'Unable to sign out. Please try again.');
               onError?.(error as Error);
             }

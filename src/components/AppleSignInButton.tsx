@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert, Platform } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { logger } from '../utils';
 
 interface AppleSignInButtonProps {
   onSuccess?: () => void;
@@ -18,7 +19,7 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
       await signInWithApple();
       onSuccess?.();
     } catch (error) {
-      console.error('Apple Sign-In failed:', error);
+      logger.error('Apple Sign-In failed:', error);
       
       // Handle specific Apple Sign-In errors
       if (error instanceof Error) {

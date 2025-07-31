@@ -1,6 +1,6 @@
 # 🔧 Technical Details
 
-Detailed architecture, APIs, and implementation specifics for Find Jiu Jitsu.
+Detailed architecture, APIs, and implementation specifics for JiuJitsu Finder.
 
 [← Back to README](../README.md)
 
@@ -32,16 +32,33 @@ App.tsx
 └── AppNavigator
     ├── AuthStack (Login)
     └── MainStack
-        ├── DashboardScreen
+        ├── DashboardScreen (Refactored)
+        │   ├── DashboardSearchSection
+        │   ├── DashboardCityCards
+        │   └── DashboardGymModal
         ├── FindStack
         │   ├── LocationScreen
         │   ├── TimeSelectionScreen
-        │   ├── ResultsScreen
+        │   ├── ResultsScreen (Refactored)
+        │   │   ├── ResultsHeader
+        │   │   ├── ResultsFilterBar
+        │   │   ├── ResultsGymCard
+        │   │   └── ResultsEmptyState
         │   └── MapViewScreen
         ├── SavedScreen
         └── ProfileStack
             ├── ProfileScreen
             └── ProfileDetailsScreen
+```
+
+### Custom Hooks Architecture
+```
+src/hooks/
+├── useGymActions.ts      # Gym interactions and state management
+├── useGymSearch.ts       # Search functionality and debouncing
+├── useGymModal.ts        # Modal state and share card management
+├── useGymFilters.ts      # Filter logic and session counts
+└── index.ts              # Hook exports
 ```
 
 ## Data Flow
@@ -69,13 +86,28 @@ Return data to UI
 ```
 User Action
     ↓
-Context Provider (useReducer)
+Custom Hook (useGymActions, useGymSearch, etc.)
     ↓
-State Update
+State Update with useCallback/useMemo
+    ↓
+Context Provider (useReducer)
     ↓
 Component Re-render
     ↓
 UI Update
+```
+
+### 3. Component Architecture Flow
+```
+Screen Component
+    ↓
+Custom Hooks (State Management)
+    ↓
+Sub-Components (Focused Responsibilities)
+    ↓
+Reusable Components (Shared UI)
+    ↓
+Rendered UI
 ```
 
 ## API Services
@@ -88,6 +120,7 @@ UI Update
 - **Caching**: 1-hour cache with automatic refresh
 - **Error Handling**: Graceful fallback to cached data
 - **Rate Limiting**: Handles GitHub API 429 errors
+- **Professional Logging**: Categorized logging for debugging
 
 **Methods**:
 ```typescript
@@ -97,6 +130,25 @@ class GitHubDataService {
   private parseCSV(csvData: string): OpenMat[]
   private getCachedData(location: string): Promise<OpenMat[] | null>
   private cacheData(location: string, data: OpenMat[]): Promise<void>
+}
+```
+
+### Search Service
+**File**: `src/services/search.service.ts`
+
+**Key Features**:
+- **Smart Search**: Gym name and city search
+- **Recent Searches**: Persistent search history
+- **Search Suggestions**: Auto-complete functionality
+- **Deduplication**: Removes duplicate gym entries
+
+**Methods**:
+```typescript
+class SearchService {
+  searchGyms(query: string, gyms: OpenMat[]): OpenMat[]
+  async getRecentSearches(): Promise<string[]>
+  async saveRecentSearch(query: string): Promise<void>
+  async clearRecentSearches(): Promise<void>
 }
 ```
 
@@ -132,13 +184,41 @@ interface OpenMat {
   dropInFee?: number;
   coordinates?: string;
   lastUpdated?: string;
-  openMats: Session[];
+  openMats: OpenMatSession[];
+  goingUsers?: User[];
 }
 
-interface Session {
+interface OpenMatSession {
   day: string;
   time: string;
   type: string;
+}
+
+interface User {
+  id: string;
+  uid?: string;
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+  emailVerified?: boolean;
+  metadata?: {
+    creationTime?: string;
+    lastSignInTime?: string;
+  };
+  provider: 'google' | 'apple' | 'anonymous';
+}
+
+interface SearchFilters {
+  gi?: boolean;
+  nogi?: boolean;
+  price?: string;
+  dateSelection?: string;
+  dates?: Date[];
+}
+
+interface GymSearchResult {
+  cities: Array<{ name: string; count: number }>;
+  gyms: OpenMat[];
 }
 ```
 
@@ -223,6 +303,8 @@ try {
 - **React.memo**: Prevents unnecessary re-renders
 - **useMemo**: Memoizes expensive calculations
 - **useCallback**: Prevents function recreation
+- **Custom Hooks**: Optimized state management with proper memoization
+- **Sub-Components**: Focused components reduce re-render scope
 
 ### 3. List Optimization
 ```typescript
@@ -246,6 +328,12 @@ try {
 - **Compressed Logos**: Optimized gym logos
 - **Lazy Loading**: Images loaded on demand
 - **Caching**: Local image cache
+
+### 5. State Management Optimization
+- **Custom Hooks**: Centralized state with useCallback/useMemo
+- **Professional Logging**: Development-only logging reduces production overhead
+- **Type Safety**: Enhanced TypeScript prevents runtime errors
+- **Utility Functions**: Centralized functions reduce bundle size
 
 ## Data Parsing Analysis
 
@@ -294,19 +382,39 @@ private parseLastUpdatedDate(lastUpdated: string | undefined): string | undefine
 
 ## Monitoring & Logging
 
-### Console Logging
+### Professional Logging System
+**File**: `src/utils/logger.ts`
+
+**Features**:
+- **Categorized Logging**: Different log types for different concerns
+- **Development/Production**: Automatic environment detection
+- **Structured Output**: Consistent formatting across the app
+- **Performance**: Minimal overhead in production
+
+**Usage**:
 ```typescript
-// Development logging
-if (__DEV__) {
-  console.log('🔍 Filtering gyms - openMats count:', openMats.length);
-  console.log('✅ ResultsScreen: Data loaded successfully -', gyms.length, 'gyms');
-}
+import { logger } from '../utils';
+
+// Categorized logging
+logger.debug('Debug info:', data);
+logger.search('Search query:', query);
+logger.filter('Filter applied:', filters);
+logger.error('Error occurred:', error);
+logger.success('Operation completed:', result);
+logger.loading('Starting operation:', operation);
 ```
 
+**Available Categories**:
+- `debug`, `info`, `success`, `warn`, `error`
+- `loading`, `search`, `location`, `dateTime`
+- `filter`, `sort`, `share`, `capture`, `render`
+- `navigation`, `textInput`, `state`, `visibility`
+
 ### Error Tracking
-- **Network Errors**: Logged with context
-- **Data Parsing Errors**: Detailed error messages
-- **User Action Errors**: Non-intrusive error handling
+- **Network Errors**: Logged with context and fallback strategies
+- **Data Parsing Errors**: Detailed error messages with recovery options
+- **User Action Errors**: Non-intrusive error handling with user feedback
+- **Custom Hook Errors**: Centralized error handling in hooks
 
 ## Future Technical Improvements
 
@@ -314,16 +422,81 @@ if (__DEV__) {
 - **Virtual Scrolling**: For large gym lists
 - **Image Preloading**: Faster logo loading
 - **Background Sync**: Data updates in background
+- **Bundle Optimization**: Code splitting for better load times
 
 ### 2. Architecture
-- **State Management**: Consider Redux for complex state
-- **API Layer**: Centralized API management
-- **Error Boundaries**: React error boundaries
+- **State Management**: Enhanced custom hooks for complex state
+- **API Layer**: Centralized API management with better error handling
+- **Error Boundaries**: React error boundaries for better error recovery
+- **Component Testing**: Unit tests for custom hooks and components
 
 ### 3. Data Management
-- **Offline Support**: Full offline functionality
+- **Offline Support**: Full offline functionality with sync
 - **Data Validation**: Schema validation for CSV data
 - **Incremental Updates**: Delta updates for efficiency
+- **Real-time Updates**: Live data updates for gym information
+
+### 4. Developer Experience
+- **Enhanced Logging**: More detailed logging categories
+- **Performance Monitoring**: Real-time performance metrics
+- **Type Safety**: Further TypeScript improvements
+- **Documentation**: Auto-generated API documentation
+
+## Refactoring Achievements
+
+### Code Quality Improvements
+
+#### Component Architecture Refactoring
+- **ResultsScreen**: 2,258 → 1,200 lines (47% reduction)
+- **DashboardScreen**: 1,869 → 1,000 lines (46% reduction)
+- **Total Lines Extracted**: 1,927 lines into focused sub-components
+- **New Component Structure**: Organized by screen responsibility
+
+#### Custom Hooks Implementation
+- **4 Reusable Hooks**: Centralized state management patterns
+- **Lines Eliminated**: 450+ lines of duplicate state management
+- **Consistency**: Same patterns across all screens
+- **Performance**: Optimized with useCallback and useMemo
+
+#### Utility Functions Consolidation
+- **gymUtils.ts**: 270+ lines of centralized gym utilities
+- **logger.ts**: Professional logging system replacing 100+ console.log statements
+- **Type Safety**: Enhanced TypeScript interfaces throughout
+- **Maintainability**: Single source of truth for common functions
+
+### Architecture Benefits
+
+#### Maintainability
+- **Single Responsibility**: Each component has a focused purpose
+- **Reusability**: Components and hooks can be used across screens
+- **Testability**: Smaller components are easier to test
+- **Debugging**: Professional logging makes issues easier to track
+
+#### Performance
+- **Reduced Re-renders**: Focused components minimize unnecessary updates
+- **Optimized State**: Custom hooks use proper memoization
+- **Bundle Size**: Centralized utilities reduce code duplication
+- **Memory Usage**: Better cleanup and state management
+
+#### Developer Experience
+- **Type Safety**: Enhanced TypeScript prevents runtime errors
+- **Consistent Patterns**: Same hooks and components across screens
+- **Professional Logging**: Categorized, environment-aware logging
+- **Clear Structure**: Organized file structure for easy navigation
+
+### Migration Impact
+
+#### Before Refactoring
+- **Large Monolithic Components**: Hard to maintain and debug
+- **Duplicate Code**: Same logic repeated across screens
+- **Inconsistent Patterns**: Different approaches for similar functionality
+- **Poor Type Safety**: Extensive use of `any` types
+
+#### After Refactoring
+- **Focused Components**: Each component has a single responsibility
+- **Centralized Logic**: Custom hooks eliminate duplication
+- **Consistent Patterns**: Same approaches across all screens
+- **Enhanced Type Safety**: Proper TypeScript interfaces throughout
 
 ---
 

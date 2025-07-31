@@ -1,40 +1,24 @@
-# 📱 Visual Assets
+# Documentation Images
 
-This directory contains visual assets for the Find Jiu Jitsu documentation.
+This directory contains visual assets for the JiuJitsu Finder documentation.
 
-## Required Images
+## Contents
 
-### Main README
-- `app-preview.png` - Main app screenshot showing gym list
-- `app-store-badge.svg` - App Store download badge
+- **Screenshots**: App screenshots for documentation
+- **Diagrams**: Architecture and flow diagrams
+- **Icons**: Documentation-specific icons and graphics
 
-### Documentation
-- `architecture-diagram.png` - System architecture diagram
-- `csv-format-example.png` - Visual CSV format example
-- `contribution-workflow.png` - Contribution process diagram
+## Usage
 
-## Image Guidelines
+These images are referenced in the documentation files to provide visual context and examples.
 
-### Screenshots
-- **Resolution**: 1170x2532 (iPhone 13 Pro size)
-- **Format**: PNG with transparency
-- **Quality**: High resolution, clear text
-- **Content**: Show key app features clearly
+## Guidelines
 
-### Diagrams
-- **Format**: PNG or SVG
-- **Style**: Clean, professional design
-- **Colors**: Use app color scheme
-- **Text**: Clear, readable fonts
-
-## Placeholder Instructions
-
-Until actual screenshots are added:
-1. Take screenshots of the app in action
-2. Focus on key features (gym browsing, filtering, sharing)
-3. Ensure good lighting and clear text
-4. Update documentation to reference these images
+- Keep images optimized for web viewing
+- Use descriptive filenames
+- Maintain consistent styling
+- Update images when app changes
 
 ---
 
-[← Back to Documentation](../README.md) 
+**Contact**: glootieapp@gmail.com 

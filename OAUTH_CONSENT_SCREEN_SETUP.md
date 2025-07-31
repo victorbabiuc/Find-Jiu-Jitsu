@@ -1,85 +1,74 @@
 # OAuth Consent Screen Setup Guide
 
-## 🚨 URGENT: Fix OAuth Consent Screen Error
+This guide will help you set up the OAuth consent screen for JiuJitsu Finder.
 
-The error "This app isn't verified" indicates that your OAuth consent screen is not properly configured.
+## Step 1: Google Cloud Console
 
-### Step 1: Access Google Cloud Console
+### 1.1 Access OAuth Consent Screen
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Select your project: **`find-jiu-jitsu`**
-3. Go to **APIs & Services** → **OAuth consent screen**
+2. Select your project
+3. Go to "APIs & Services" > "OAuth consent screen"
 
-### Step 2: Configure OAuth Consent Screen
+### 1.2 Configure App Information
+1. User Type: External
+2. App information:
+   - **App name**: `JiuJitsu Finder`
+   - **User support email**: Your email
+   - **App logo**: Upload your app logo (optional)
+   - **App domain**: Your domain (optional)
+   - **Developer contact information**: Your email
 
-#### 2.1 User Type
-- Choose **"External"** (for testing and development)
-- Click **"Create"**
+### 1.3 Add Scopes
+Add these OAuth scopes:
+- `email`
+- `profile`
+- `openid`
 
-#### 2.2 App Information
-Fill in the required fields:
-- **App name**: `Find Jiu Jitsu`
-- **User support email**: `your-email@domain.com`
-- **App logo**: (Optional) Upload your app icon
-- **App domain**: `find-jiu-jitsu.firebaseapp.com`
+### 1.4 Add Test Users
+1. Add your email as a test user
+2. Add any other test users as needed
 
-#### 2.3 Scopes
-- Click **"Add or remove scopes"**
-- Select these scopes:
-  - `.../auth/userinfo.email`
-  - `.../auth/userinfo.profile`
-- Click **"Update"**
+## Step 2: Verification
 
-#### 2.4 Test Users
-- Click **"Add users"**
-- Add your email address as a test user
-- This allows you to test the app while it's unverified
+### 2.1 Test OAuth Flow
+1. Go to "APIs & Services" > "Credentials"
+2. Create OAuth 2.0 Client ID
+3. Test the sign-in flow
 
-#### 2.5 Save and Continue
-- Click **"Save and Continue"** through all sections
-- Click **"Back to Dashboard"**
+### 2.2 Check Status
+- Status should show "Testing" or "In production"
+- All required fields should be filled
 
-### Step 3: Update App Status (Optional)
-If you want to make the app available to all users:
-1. Go to **OAuth consent screen**
-2. Click **"Publish App"**
-3. This removes the "unverified app" warning
+## Step 3: Production
 
-### Step 4: Test the Fix
-1. Restart your Expo app
-2. Try Google Sign-In again
-3. The "unverified app" error should be gone
+### 3.1 Publish App
+1. Go to "OAuth consent screen"
+2. Click "PUBLISH APP"
+3. Confirm the action
 
-## 🔧 Additional Troubleshooting
+### 3.2 Monitor Usage
+1. Check "OAuth consent screen" for usage metrics
+2. Monitor for any issues
 
-### If you still get errors:
+## Troubleshooting
 
-#### 1. Check Redirect URIs
-Make sure your Web Client has these redirect URIs:
-- `https://auth.expo.io/@your-expo-username/FindJiuJitsu`
-- `https://find-jiu-jitsu.firebaseapp.com/__/auth/handler`
+### Common Issues
+1. **"App not verified"**: Complete verification process
+2. **"Invalid scopes"**: Check scope configuration
+3. **"User not authorized"**: Add user to test users
 
-#### 2. Verify API Enablement
-Ensure these APIs are enabled:
-- Google Sign-In API
-- Google+ API (if available)
+### Debug Steps
+1. Check OAuth consent screen configuration
+2. Verify scopes are correctly added
+3. Test with different user accounts
 
-#### 3. Check Client IDs
-Verify your client IDs in `.env`:
-```env
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=713938761178-5pqukh04v3tcjqh7ignp5fsofcrpbesk.apps.googleusercontent.com
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=713938761178-9c5rfvvqfsgb01hinme07tsfo5naj31o.apps.googleusercontent.com
-```
+## Security Considerations
 
-## 🎯 Expected Result
-After completing these steps:
-- ✅ No more "unverified app" errors
-- ✅ Google Sign-In works properly
-- ✅ Users can authenticate successfully
-- ✅ App navigation works without crashes
+1. **Limit scopes** to minimum required
+2. **Monitor usage** for suspicious activity
+3. **Keep contact information** up to date
+4. **Regularly review** app permissions
 
-## 📞 Need Help?
-If you're still having issues:
-1. Check the Google Cloud Console error logs
-2. Verify all redirect URIs are correct
-3. Ensure your email is added as a test user
-4. Try publishing the app if you want to remove verification requirements 
+---
+
+**Need Help?** Create an issue in the repository or contact glootieapp@gmail.com 

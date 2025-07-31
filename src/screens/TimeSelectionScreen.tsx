@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, 
   Text, 
@@ -10,7 +11,7 @@ import {
 import { useApp } from '../context';
 import { useFindNavigation } from '../navigation/useNavigation';
 import { Ionicons } from '@expo/vector-icons';
-import { beltColors, selectionColor } from '../utils';
+import { beltColors, selectionColor, haptics } from '../utils';
 
 // Memoized DateCell component for calendar optimization
 interface DateCellProps {
@@ -26,7 +27,10 @@ const DateCell = React.memo(({ day, isSelected, isToday, onPress }: DateCellProp
   }
   
   return (
-    <TouchableWithoutFeedback onPress={() => onPress(day)}>
+    <TouchableWithoutFeedback onPress={() => {
+      haptics.light(); // Light haptic for date selection
+      onPress(day);
+    }}>
       <View style={{
         flex: 1,
         justifyContent: 'center',
@@ -66,11 +70,22 @@ const TimeSelectionScreen: React.FC = () => {
   // Simple state - no drag functionality
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Clear dates when component mounts (fresh start each time)
   useEffect(() => {
     setSelectedDates([]);
+    setHasSearched(false);
   }, []); // Empty dependency array = runs once on mount
+
+  // Clear dates when screen comes into focus (navigating back to screen)
+  useFocusEffect(
+    React.useCallback(() => {
+      // Clear all selections when screen is focused
+      setSelectedDates([]);
+      setHasSearched(false);
+    }, [])
+  );
 
   // Weekday labels
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -125,6 +140,7 @@ const TimeSelectionScreen: React.FC = () => {
   };
 
   const handleQuickSelect = (type: 'today' | 'tomorrow' | 'weekend') => {
+    haptics.medium(); // Medium haptic for quick date selection
     const today = new Date();
     let dates: Date[] = [];
 
@@ -172,14 +188,20 @@ const TimeSelectionScreen: React.FC = () => {
   };
 
   const clearAllSelections = () => {
+    haptics.light(); // Light haptic for clearing selections
     setSelectedDates([]);
+    setHasSearched(false);
   };
 
   const handleCalendarSearch = () => {
     if (selectedDates.length === 0) {
+      haptics.warning(); // Warning haptic for no dates selected
       // Show some feedback that dates need to be selected
       return;
     }
+    
+    haptics.success(); // Success haptic for search action
+    setHasSearched(true);
     
     // Navigate to results with selected dates
     navigation.navigate('Results', {
@@ -189,6 +211,17 @@ const TimeSelectionScreen: React.FC = () => {
         ? selectedDates.map(date => date.toISOString())
         : [new Date().toISOString()]
     });
+  };
+
+  const handleDynamicButtonPress = () => {
+    if (hasSearched) {
+      // Clear & Search Again state
+      clearAllSelections();
+    } else if (selectedDates.length > 0) {
+      // Search state
+      handleCalendarSearch();
+    }
+    // No dates selected state - button is disabled
   };
 
   const renderCalendarMonth = (monthDate: Date) => {
@@ -257,20 +290,9 @@ const TimeSelectionScreen: React.FC = () => {
             alignSelf: 'center',
             width: '100%'
           }}>
-            When do you want to train?
+            Select Dates
           </Text>
           
-          <Text style={{
-            fontSize: 16,
-            color: '#6B7280',
-            marginBottom: 8,
-            textAlign: 'center',
-            alignSelf: 'center',
-            width: '100%'
-          }}>
-            Select dates or use quick actions
-          </Text>
-
           <Text style={{
             fontSize: 16,
             color: '#6B7280',
@@ -279,75 +301,148 @@ const TimeSelectionScreen: React.FC = () => {
             alignSelf: 'center',
             width: '100%'
           }}>
-            📍 {selectedLocation}
+            {selectedLocation}
           </Text>
 
           {/* Header separator */}
           <View style={{
             height: 1,
             backgroundColor: '#E5E7EB',
-            marginBottom: 12
+            marginBottom: 6
           }} />
         </View>
 
-        {/* Quick Action Buttons */}
+        {/* Button Container - Wrapper for both rows */}
         <View style={{ 
-          flexDirection: 'row',
-          justifyContent: 'center',
+          flexDirection: 'column',
           paddingHorizontal: 20,
-          marginBottom: 8
+          marginBottom: 4
         }}>
-          <TouchableOpacity
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              backgroundColor: '#F3F4F6',
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#E0E0E0',
-              marginHorizontal: 4,
-            }}
-            onPress={() => handleQuickSelect('today')}
-          >
-            <Text style={{ fontSize: 15, color: '#374151', fontWeight: '500' }}>Today</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              backgroundColor: '#F3F4F6',
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#E0E0E0',
-              marginHorizontal: 4,
-            }}
-            onPress={() => handleQuickSelect('tomorrow')}
-          >
-            <Text style={{ fontSize: 15, color: '#374151', fontWeight: '500' }}>Tomorrow</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              backgroundColor: '#F3F4F6',
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#E0E0E0',
-              marginHorizontal: 4,
-            }}
-            onPress={() => handleQuickSelect('weekend')}
-          >
-            <Text style={{ fontSize: 15, color: '#374151', fontWeight: '500' }}>Weekend</Text>
-          </TouchableOpacity>
+          {/* Row 1: Today, Tomorrow, Weekend */}
+          <View style={{ 
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 12
+          }}>
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                backgroundColor: '#F3F4F6',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                flex: 1,
+                marginHorizontal: 3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 36,
+              }}
+              onPress={() => handleQuickSelect('today')}
+            >
+              <Text style={{ 
+                fontSize: 12, 
+                color: '#374151', 
+                fontWeight: '600', 
+                textAlign: 'center',
+                includeFontPadding: false,
+              }}>Today</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                backgroundColor: '#F3F4F6',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                flex: 1,
+                marginHorizontal: 3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 36,
+              }}
+              onPress={() => handleQuickSelect('tomorrow')}
+            >
+              <Text style={{ 
+                fontSize: 12, 
+                color: '#374151', 
+                fontWeight: '600', 
+                textAlign: 'center',
+                includeFontPadding: false,
+              }}>Tomorrow</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                backgroundColor: '#F3F4F6',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                flex: 1,
+                marginHorizontal: 3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 36,
+              }}
+              onPress={() => handleQuickSelect('weekend')}
+            >
+              <Text style={{ 
+                fontSize: 12, 
+                color: '#374151', 
+                fontWeight: '600', 
+                textAlign: 'center',
+                includeFontPadding: false,
+              }}>Weekend</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Row 2: Dynamic Button */}
+          <View style={{ 
+            flexDirection: 'row',
+            width: '100%'
+          }}>
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                backgroundColor: hasSearched ? '#F3F4F6' : 
+                               selectedDates.length > 0 ? '#4B5563' : '#E5E7EB',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: hasSearched ? '#E0E0E0' : 
+                            selectedDates.length > 0 ? '#4B5563' : '#E0E0E0',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+                minHeight: 36,
+              }}
+              onPress={handleDynamicButtonPress}
+              disabled={selectedDates.length === 0}
+            >
+              <Text style={{ 
+                fontSize: 13, 
+                color: hasSearched ? '#6B7280' : 
+                       selectedDates.length > 0 ? 'white' : '#9CA3AF', 
+                fontWeight: '600',
+                textAlign: 'center',
+                includeFontPadding: false,
+              }}>
+                {hasSearched ? 'Clear & Search Again' : 
+                 selectedDates.length > 0 ? 'Search' : 'Select dates'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Calendar separator */}
         <View style={{
           height: 1,
           backgroundColor: '#E5E7EB',
-          marginTop: 8,
+          marginTop: 4,
           marginBottom: 8,
           marginHorizontal: 20
         }} />
@@ -380,58 +475,7 @@ const TimeSelectionScreen: React.FC = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Bottom Action Buttons */}
-      <View style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-                 backgroundColor: '#FFFFFF',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#E5E7EB'
-      }}>
-        {selectedDates.length > 0 ? (
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                backgroundColor: '#F3F4F6',
-                borderRadius: 8,
-                alignItems: 'center'
-              }}
-              onPress={clearAllSelections}
-            >
-              <Text style={{ color: '#6B7280', fontWeight: '600' }}>Clear</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                backgroundColor: '#4B5563',
-                borderRadius: 8,
-                alignItems: 'center'
-              }}
-              onPress={handleCalendarSearch}
-            >
-              <Text style={{ color: 'white', fontWeight: '600' }}>Search</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={{ alignItems: 'center' }}>
-                         <Text style={{
-               fontSize: 16,
-               color: '#6B7280',
-               textAlign: 'center'
-             }}>
-              Select dates to search for open mats
-            </Text>
-          </View>
-        )}
-      </View>
+
     </SafeAreaView>
   );
 };

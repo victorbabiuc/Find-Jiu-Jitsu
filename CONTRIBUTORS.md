@@ -1,6 +1,6 @@
 # 🤝 Contributors
 
-Thank you to everyone who has contributed to Find Jiu Jitsu! This app wouldn't be possible without the Jiu Jitsu community.
+Thank you to everyone who has contributed to JiuJitsu Finder! This app wouldn't be possible without the Jiu Jitsu community.
 
 ## 🏆 Core Contributors
 

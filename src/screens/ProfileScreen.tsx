@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { UserProfile } from '../components/UserProfile';
-import { beltColors } from '../utils/constants';
+import { beltColors, haptics } from '../utils';
 
 const ProfileScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -56,7 +56,7 @@ const ProfileScreen = () => {
               style={styles.appIcon}
             />
             <Text style={[styles.welcomeTitle, { color: theme.text.primary }]}>
-              Welcome to Find Jiu Jitsu
+              Welcome to JiuJitsu Finder
             </Text>
             <Text style={[styles.welcomeSubtitle, { color: theme.text.secondary }]}>
               Discover and connect with Jiu Jitsu gyms in your area
@@ -104,7 +104,10 @@ const ProfileScreen = () => {
             
             <TouchableOpacity 
               style={[styles.signInButton, { backgroundColor: beltColor.primary }]}
-              onPress={() => navigation.navigate('Login')}
+              onPress={() => {
+                haptics.medium(); // Medium haptic for sign in action
+                navigation.navigate('Login');
+              }}
             >
               <Ionicons name="log-in" size={20} color="white" />
               <Text style={styles.signInButtonText}>Sign in with Google or Apple</Text>

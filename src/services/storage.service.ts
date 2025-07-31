@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logger } from '../utils';
 
 class StorageService {
   private prefix = 'jjmat_';
@@ -7,7 +8,7 @@ class StorageService {
     try {
       await AsyncStorage.setItem(this.prefix + key, JSON.stringify(value));
     } catch (error) {
-      console.error('Storage error:', error);
+      logger.error('Storage error:', error);
     }
   }
 
@@ -16,7 +17,7 @@ class StorageService {
       const item = await AsyncStorage.getItem(this.prefix + key);
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error('Storage error:', error);
+      logger.error('Storage error:', error);
       return null;
     }
   }
@@ -25,7 +26,7 @@ class StorageService {
     try {
       await AsyncStorage.removeItem(this.prefix + key);
     } catch (error) {
-      console.error('Storage error:', error);
+      logger.error('Storage error:', error);
     }
   }
 
@@ -35,7 +36,7 @@ class StorageService {
       const filteredKeys = keys.filter(key => key.startsWith(this.prefix));
       await AsyncStorage.multiRemove(filteredKeys);
     } catch (error) {
-      console.error('Storage error:', error);
+      logger.error('Storage error:', error);
     }
   }
 }

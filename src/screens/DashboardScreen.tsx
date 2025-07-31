@@ -10,21 +10,21 @@ import {
   Alert,
   Linking,
   Share,
-  FlatList,
-  Image, // <-- Add Image import
+  Image,
   TextInput,
   Modal,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth, useTheme, useApp, useLoading } from '../context';
 import { useMainTabNavigation } from '../navigation/useNavigation';
-import { beltColors, selectionColor } from '../utils';
+import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, formatDate, openWebsite, openDirections, handleCopyGym, logger } from '../utils';
 import { SafeAreaView as SafeAreaViewRN } from 'react-native-safe-area-context';
-import { OpenMat } from '../types';
-import { Toast } from '../components';
+import { OpenMat, OpenMatSession, SearchFilters } from '../types';
+import { Toast, ContactFooter, ShareCard, SkeletonCard, SearchSuggestions } from '../components';
 
 
 import appIcon from '../../assets/icon.png'; // <-- Import app icon
@@ -32,7 +32,8 @@ import stjjLogo from '../../assets/logos/STJJ.png';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { githubDataService } from '../services';
+import { githubDataService, SearchService } from '../services';
+import { captureCardAsImage } from '../utils/screenshot';
 import * as Haptics from 'expo-haptics';
 
 const { width } = Dimensions.get('window');
@@ -63,13 +64,33 @@ const DashboardScreen: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<OpenMat[]>([]);
-  const [selectedGym, setSelectedGym] = useState(null);
-  const [copiedGymId, setCopiedGymId] = useState<number | null>(null);
+  const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [copiedGymId, setCopiedGymId] = useState<string | null>(null);
   const [isSearchComplete, setIsSearchComplete] = useState(false);
   const { showTransitionalLoading } = useLoading();
   
+  // Smart search state
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allGyms, setAllGyms] = useState<OpenMat[]>([]);
+  
   // Search input ref for focus management
   const searchInputRef = useRef<TextInput>(null);
+  
+  // Share card ref and state for image generation
+  const shareCardRef = useRef<View | null>(null);
+  const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
+  const [shareCardSession, setShareCardSession] = useState<any>(null);
+  const [sharingGymId, setSharingGymId] = useState<string | null>(null);
+  
+  // Animation values
+  const screenFadeAnim = useRef(new Animated.Value(0)).current;
+  const contentSlideAnim = useRef(new Animated.Value(30)).current;
+  // Heart button animation values - temporarily disabled for debugging
+  // const heartScaleAnim = useRef(new Animated.Value(1)).current;
+  // const heartColorAnim = useRef(new Animated.Value(0)).current;
   
   // Gym count state
   const [tampaGymCount, setTampaGymCount] = useState(18);
@@ -81,12 +102,26 @@ const DashboardScreen: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   
-  // Email copy state
-  const [emailCopied, setEmailCopied] = useState(false);
+
   
+  // Screen entrance animation
+  useEffect(() => {
+    const runEntranceAnimation = () => {
+      Animated.parallel([
+        animations.fadeIn(screenFadeAnim, 400),
+        animations.slideUp(contentSlideAnim, 30, 400),
+      ]).start();
+    };
+
+    // Small delay to ensure smooth entrance
+    const timer = setTimeout(runEntranceAnimation, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Focus search input when search becomes active
   useEffect(() => {
     if (isSearching && searchInputRef.current) {
+      logger.searchInput('Search input focus useEffect triggered - focusing input');
       // Small delay to ensure visibility change is complete
       setTimeout(() => {
         searchInputRef.current?.focus();
@@ -96,25 +131,32 @@ const DashboardScreen: React.FC = () => {
 
   // Debug state changes
   useEffect(() => {
-    console.log('🔄 isSearching changed to:', isSearching);
+    logger.state('isSearching changed to:', { isSearching });
   }, [isSearching]);
 
   useEffect(() => {
-    console.log('🔄 searchResults changed to:', searchResults.length, 'items');
+    logger.state('searchResults changed to:', { count: searchResults.length });
   }, [searchResults]);
 
   useEffect(() => {
-    console.log('🔄 searchQuery changed to:', searchQuery);
+    logger.state('searchQuery changed to:', { searchQuery });
   }, [searchQuery]);
 
-  // Load gym counts on component mount
+  // Load gym counts and all gym data on component mount
   useEffect(() => {
-    const loadGymCounts = async () => {
+    const loadGymData = async () => {
       try {
         const [tampaGyms, austinGyms] = await Promise.all([
           githubDataService.getGymData('tampa'),
           githubDataService.getGymData('austin')
         ]);
+        
+        // Set all gyms for search suggestions
+        const allGymsData = [...tampaGyms, ...austinGyms];
+        
+
+        
+        setAllGyms(allGymsData);
         
         // Count unique gyms by name (same logic as ResultsScreen grouping)
         const tampaUnique = new Set(tampaGyms.map(gym => gym.name)).size;
@@ -123,20 +165,50 @@ const DashboardScreen: React.FC = () => {
         setTampaGymCount(tampaUnique);
         setAustinGymCount(austinUnique);
       } catch (error) {
-        console.error('Failed to load gym counts:', error);
+        logger.error('Failed to load gym data:', error);
         // Keep default values if loading fails
       } finally {
         setIsLoadingCounts(false);
       }
     };
     
-    loadGymCounts();
+    loadGymData();
   }, []);
+
+  // Load recent searches on component mount
+  useEffect(() => {
+    const loadRecentSearches = async () => {
+      try {
+        const recent = await SearchService.getRecentSearches();
+        setRecentSearches(recent);
+      } catch (error) {
+        logger.error('Error loading recent searches:', error);
+      }
+    };
+    
+    loadRecentSearches();
+  }, []);
+
+  // Generate search suggestions when query changes
+  useEffect(() => {
+    if (searchQuery.length >= 2 && allGyms.length > 0) {
+      const suggestions = SearchService.generateSuggestions(searchQuery, allGyms);
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(true);
+    } else if (searchQuery.length === 0) {
+      setSearchSuggestions([]);
+      setShowSuggestions(recentSearches.length > 0);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery, allGyms, recentSearches]);
 
   // Debug container visibility
   useEffect(() => {
     const shouldHide = !isSearching && searchResults.length === 0 && !searchQuery.trim();
-    console.log('🎯 Search container visibility:', shouldHide ? 'HIDDEN' : 'VISIBLE', {
+    logger.visibility('Search container visibility:', { 
+      visibility: shouldHide ? 'HIDDEN' : 'VISIBLE',
       isSearching,
       searchResultsLength: searchResults.length,
       searchQueryLength: searchQuery.length
@@ -146,11 +218,13 @@ const DashboardScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       // Reset search when screen comes into focus
+      logger.navigation('useFocusEffect triggered - calling closeSearch');
       closeSearch();
     }, [])
   );
 
   const handleQuickToday = () => {
+    haptics.medium(); // Medium haptic for navigation action
     navigation.navigate('Find', { screen: 'TimeSelection' });
   };
 
@@ -159,203 +233,154 @@ const DashboardScreen: React.FC = () => {
 
 
 
-  // Helper functions for gym card display
-  const formatTimeRange = (sessionTime: string) => {
-    // Check if the time already contains a range (has a dash/hyphen)
-    if (sessionTime.includes('-') || sessionTime.includes('–')) {
-      // It's already a time range, format it properly
-      const parts = sessionTime.split(/[-–]/).map(part => part.trim());
-      if (parts.length >= 2) {
-        const startTime = formatSingleTime(parts[0]);
-        const endTime = formatSingleTime(parts[1]);
-        return `${startTime} - ${endTime}`;
-      }
-    }
-    
-    // It's a single time, add 1 hour
-    const formattedStart = formatSingleTime(sessionTime);
-    const endTime = addOneHour(sessionTime);
-    return `${formattedStart} - ${endTime}`;
-  };
 
-  const formatSingleTime = (time: string) => {
-    // Handle various time formats and standardize them
-    const cleanTime = time.trim().toLowerCase();
+
+  const handleHeartPress = (gym: OpenMat) => {
+    const isFavorited = favorites.has(gym.id);
     
-    // Handle formats like "11am", "6pm", "5:00 PM", etc.
-    let hour, minute = '00', period;
-    
-    // Match patterns like "11am", "6pm"
-    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
-    if (simpleMatch) {
-      hour = parseInt(simpleMatch[1]);
-      period = simpleMatch[2].toUpperCase();
+    // Haptic feedback
+    if (isFavorited) {
+      haptics.light(); // Light haptic for unfavoriting
     } else {
-      // Match patterns like "5:00 PM", "11:30 AM"
-      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
-      if (detailedMatch) {
-        hour = parseInt(detailedMatch[1]);
-        minute = detailedMatch[2];
-        period = detailedMatch[3].toUpperCase();
-      } else {
-        // Fallback - return as is
-        return time;
-      }
+      haptics.success(); // Success haptic for favoriting
+      // Show loading and navigate to favorites tab when adding
+      showTransitionalLoading("Added to favorites!", 1500);
+      setTimeout(() => {
+        navigation.navigate('Favorites');
+      }, 500);
     }
     
-    // Format consistently
-    return `${hour}:${minute} ${period}`;
-  };
-
-  const addOneHour = (time: string) => {
-    // Parse the time and add 1 hour
-    const cleanTime = time.trim().toLowerCase();
+    // Heart button animation - temporarily disabled for debugging
+    // animations.sequence([
+    //   animations.scale(heartScaleAnim, 1.3, 150),
+    //   animations.scale(heartScaleAnim, 1, 200),
+    // ]).start();
     
-    let hour, minute = '00', period;
+    // Color transition animation - temporarily disabled for debugging
+    // const targetColor = isFavorited ? 0 : 1;
+    // Animated.timing(heartColorAnim, {
+    //   toValue: targetColor,
+    //   duration: 300,
+    //   useNativeDriver: false,
+    // }).start();
     
-    // Match patterns like "11am", "6pm"
-    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
-    if (simpleMatch) {
-      hour = parseInt(simpleMatch[1]);
-      period = simpleMatch[2].toUpperCase();
-    } else {
-      // Match patterns like "5:00 PM", "11:30 AM"
-      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
-      if (detailedMatch) {
-        hour = parseInt(detailedMatch[1]);
-        minute = detailedMatch[2];
-        period = detailedMatch[3].toUpperCase();
-      } else {
-        // Fallback - return as is
-        return time;
-      }
-    }
-    
-    // Add 1 hour
-    hour += 1;
-    
-    // Handle 12-hour format
-    if (hour === 13) hour = 1;
-    if (hour === 12) {
-      return `12:${minute} ${period === 'AM' ? 'PM' : 'AM'}`;
-    }
-    
-    return `${hour}:${minute} ${period}`;
-  };
-
-  const getSessionTypeWithIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'gi':
-        return 'Gi 🥋';
-      case 'nogi':
-        return 'No-Gi 👕';
-      case 'both':
-        return 'Gi & No-Gi 🥋👕';
-      case 'mma':
-      case 'mma sparring':
-        return 'MMA Sparring 🥊';
-      default:
-        // For any other custom session types, preserve the original name
-        return `${type} 🥋👕`;
-    }
-  };
-
-  const handleHeartPress = (gym: any) => {
+    // Call the original handler
     toggleFavorite(gym.id);
   };
 
   // Add openWebsite and openDirections helpers
-  const openWebsite = (url: string) => {
-    if (url) Linking.openURL(url);
-  };
-  const openDirections = (address: string) => {
-    if (!address || address === 'Tampa, FL' || address === 'Austin, TX') return;
-    const url = `https://maps.apple.com/?q=${encodeURIComponent(address)}`;
-    Linking.openURL(url);
-  };
-
-  const handleCopyGym = async (gym: any) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    const copyText = `I'm going to train at ${gym.name}!
-
-${gym.name}
-${gym.address}
-
-Who's training today?`;
-    
-    await Clipboard.setStringAsync(copyText);
-    
-    setCopiedGymId(gym.id);
-    // Reset icon after 2 seconds
-    setTimeout(() => {
-      setCopiedGymId(null);
-    }, 2000);
-  };
-
-  const handleShareGym = async (gym: any) => {
-    // Implementation for sharing gym info
-    console.log('Share gym:', gym.name);
-  };
-
-  // Format date for last updated timestamp
-  const formatDate = (dateString: string): string => {
+  // Helper to copy gym details with state management
+  const handleCopyGymWithState = async (gym: OpenMat) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+      await handleCopyGym(gym);
+      setCopiedGymId(gym.id);
+      // Reset icon after 2 seconds
+      setTimeout(() => {
+        setCopiedGymId(null);
+      }, 2000);
     } catch (error) {
-      return 'Unknown';
+      // Error already handled in handleCopyGym
     }
   };
 
+  const handleShareGym = async (gym: OpenMat) => {
+    if (sharingGymId === gym.id) return; // Prevent multiple clicks
+    
+    haptics.light(); // Light haptic for button press
+    setSharingGymId(gym.id);
+    try {
+      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+      
+      if (!firstSession) {
+        haptics.warning(); // Warning haptic for no sessions
+        Alert.alert('No Sessions', 'No sessions available to share.');
+        return;
+      }
+
+      logger.share('Setting ShareCard data:', { gym: gym.name, session: firstSession });
+      
+      // Set the gym and session for the ShareCard
+      setShareCardGym(gym);
+      setShareCardSession(firstSession);
+
+      // Wait for ShareCard to render before capturing and sharing
+      setTimeout(async () => {
+        try {
+          logger.capture('Capturing and sharing image...');
+          
+          // Capture the ShareCard as an image
+          const imageUri = await captureCardAsImage(shareCardRef);
+          
+          // Share using native iOS share sheet
+          await Share.share({
+            url: imageUri,
+                          message: `Check out this open mat session at ${gym.name}! 🥋\n\n${firstSession.day} at ${firstSession.time}\n\nFind more sessions with JiuJitsu Finder!`
+          });
+          
+          haptics.success(); // Success haptic for successful share
+                  } catch (error) {
+            logger.error('Error capturing and sharing:', error);
+          haptics.error(); // Error haptic for failed share
+          Alert.alert(
+            '❌ Sharing Error',
+            'Failed to capture and share the image. Please try again.',
+            [{ text: 'OK' }]
+          );
+        }
+      }, 200); // Delay to ensure ShareCard is rendered
+      
+      // Reset sharing state
+      setSharingGymId(null);
+    } catch (error) {
+      haptics.error(); // Error haptic for failed share
+      Alert.alert(
+        '❌ Sharing Error',
+        'Failed to prepare sharing. Please try again.',
+        [{ text: 'OK' }]
+      );
+      setSharingGymId(null);
+    }
+  };
+
+
+
   // Separate search execution function
   const performSearch = async (query: string) => {
-    console.log('🔍 performSearch called with:', query);
+    logger.search('performSearch called with:', { query });
     
     if (!query.trim()) {
-      console.log('❌ Empty query, clearing results');
+              logger.warn('Empty query, clearing results');
       setSearchResults([]);
       setIsSearchComplete(false);
       return;
     }
     
-    console.log('🚀 Starting search, setting isSearching to true');
+          logger.start('Starting search, setting isSearching to true');
     setIsSearching(true);
     setIsSearchComplete(false);
     try {
-      // Use the existing data service to get gyms
-      const tampaGyms = await githubDataService.getGymData('tampa');
-      const austinGyms = await githubDataService.getGymData('austin');
-      const allGyms = [...tampaGyms, ...austinGyms];
+            // Use smart search service
+      const results = SearchService.searchGyms(query, allGyms);
       
-      // Filter gyms that match the search query
-      const results = allGyms.filter(gym => 
-        gym.name.toLowerCase().includes(query.toLowerCase()) ||
-        gym.address.toLowerCase().includes(query.toLowerCase())
-      );
+
       
-      // Remove duplicates based on gym name and address
-      const uniqueResults = results.reduce((acc: OpenMat[], gym) => {
-        const exists = acc.find(g => g.name === gym.name && g.address === gym.address);
-        if (!exists) {
-          acc.push(gym);
-        }
-        return acc;
-      }, [] as OpenMat[]);
-      
-      console.log('✅ Setting search results:', uniqueResults.length);
-      setSearchResults(uniqueResults.slice(0, 10)); // Limit to 10 results
+      logger.success('Setting search results:', { count: results.length });
+      setSearchResults(results);
       setIsSearchComplete(true);
-    } catch (error) {
-      console.error('❌ Error searching gyms:', error);
+      
+      // Save to recent searches
+      await SearchService.saveRecentSearch(query);
+      
+      // Update recent searches state
+      const updatedRecent = await SearchService.getRecentSearches();
+      setRecentSearches(updatedRecent);
+          } catch (error) {
+        logger.error('Error searching gyms:', error);
+        logger.warn('Error case - clearing search results');
       setSearchResults([]);
       setIsSearchComplete(true);
-    } finally {
-      console.log('🏁 Search complete, setting isSearching to false');
+          } finally {
+        logger.finish('Search complete, setting isSearching to false');
       setIsSearching(false);
     }
   };
@@ -365,23 +390,53 @@ Who's training today?`;
 
   // Handle input change - immediate update for display, debounced for search
   const handleInputChange = (text: string) => {
+    logger.textInput('handleInputChange called with:', { text });
     setSearchQuery(text);
     debouncedSearch(text);
   };
 
-  const showGymDetails = (gym: any) => {
+  // Handle suggestion selection
+  const handleSelectSuggestion = (suggestion: string) => {
+    logger.searchInput('handleSelectSuggestion called with:', { suggestion });
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    performSearch(suggestion);
+  };
+
+  // Handle clear recent searches
+  const handleClearRecent = async () => {
+    logger.clear('handleClearRecent called');
+    try {
+      await SearchService.clearRecentSearches();
+      setRecentSearches([]);
+      setShowSuggestions(false);
+          } catch (error) {
+        logger.error('Error clearing recent searches:', error);
+    }
+  };
+
+  const showGymDetails = (gym: OpenMat) => {
+    logger.searchInput('showGymDetails called for gym:', { gymName: gym.name });
     setSelectedGym(gym);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedGym(null);
   };
 
   // Helper function to close search
   const closeSearch = () => {
+    logger.search('closeSearch called - clearing search state');
     setIsSearching(false);
     setSearchQuery('');
     setSearchResults([]);
     setIsSearchComplete(false);
+    setShowSuggestions(false);
   };
 
-  const GymSearchResult: React.FC<{ gym: any }> = ({ gym }) => (
+  const GymSearchResult: React.FC<{ gym: OpenMat }> = ({ gym }) => (
     <View style={styles.gymSearchResult}>
       <View style={styles.gymSearchResultContent}>
         <View style={styles.cardHeaderRow}>
@@ -405,7 +460,7 @@ Who's training today?`;
             </Text>
             {gym.openMats && gym.openMats.length > 0 && (
               <View style={styles.skillTagsRow}>
-                {gym.openMats.slice(0, 3).map((session: any, index: number) => (
+                {gym.openMats.slice(0, 3).map((session: OpenMatSession, index: number) => (
                   <View key={index} style={[styles.skillTag, { backgroundColor: '#F0F3F5' }]}>
                     <Text style={styles.skillTagText}>
                       {session.day} {session.time}
@@ -421,10 +476,106 @@ Who's training today?`;
     </View>
   );
 
-  const GymInfoCard: React.FC<{ gym: any; onClose: () => void }> = ({ gym, onClose }) => {
+  const SkeletonSearchResult: React.FC<{ index: number }> = ({ index }) => {
+    const shimmerAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      // Stagger entrance animation based on index
+      const entranceDelay = index * 100;
+      
+      // Start entrance animations
+      animations.parallel([
+        animations.fadeIn(fadeAnim, 400, entranceDelay),
+      ]).start();
+
+      // Start shimmer animation
+      const shimmerAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(shimmerAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: false,
+          }),
+          Animated.timing(shimmerAnim, {
+            toValue: 0,
+            duration: 1500,
+            useNativeDriver: false,
+          }),
+        ])
+      );
+      
+      shimmerAnimation.start();
+
+      return () => {
+        shimmerAnimation.stop();
+      };
+    }, [index]);
+
+    const shimmerOpacity = shimmerAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.7],
+    });
+
+    return (
+      <Animated.View 
+        style={[
+          styles.gymSearchResult,
+          { opacity: fadeAnim }
+        ]}
+      >
+        <View style={styles.gymSearchResultContent}>
+          <View style={styles.cardHeaderRow}>
+            <Animated.View 
+              style={[
+                styles.logoCircle,
+                { opacity: shimmerOpacity }
+              ]} 
+            />
+            <View style={styles.cardContent}>
+              <Animated.View 
+                style={[
+                  styles.skeletonSearchName,
+                  { opacity: shimmerOpacity }
+                ]} 
+              />
+              <Animated.View 
+                style={[
+                  styles.skeletonSearchAddress,
+                  { opacity: shimmerOpacity }
+                ]} 
+              />
+              <View style={styles.skillTagsRow}>
+                <Animated.View 
+                  style={[
+                    styles.skeletonSkillTag,
+                    { opacity: shimmerOpacity }
+                  ]} 
+                />
+                <Animated.View 
+                  style={[
+                    styles.skeletonSkillTag,
+                    { opacity: shimmerOpacity }
+                  ]} 
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+        <Animated.View 
+          style={[
+            styles.skeletonChevron,
+            { opacity: shimmerOpacity }
+          ]} 
+        />
+      </Animated.View>
+    );
+  };
+
+  const GymInfoCard: React.FC<{ gym: OpenMat; onClose: () => void; visible: boolean }> = ({ gym, onClose, visible }) => {
     return (
       <Modal
-        visible={true}
+        visible={visible}
         transparent={true}
         animationType="slide"
         onRequestClose={onClose}
@@ -440,7 +591,10 @@ Who's training today?`;
             style={styles.modalCard}
           >
             {/* Close button */}
-            <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => {
+              haptics.light(); // Light haptic for modal close
+              onClose();
+            }}>
               <Ionicons name="close" size={18} color="#111518" />
             </TouchableOpacity>
             
@@ -471,7 +625,7 @@ Who's training today?`;
             {gym.openMats && gym.openMats.length > 0 && (
               <View style={styles.sessionsSection}>
                 <Text style={styles.sessionsTitle}>Open Mat Sessions</Text>
-                {gym.openMats.map((session: any, index: number) => (
+                {gym.openMats.map((session: OpenMatSession, index: number) => (
                   <View key={index} style={styles.sessionBlock}>
                     <View style={styles.sessionHeader}>
                       <Text style={styles.sessionDay}>{session.day}</Text>
@@ -513,15 +667,19 @@ Who's training today?`;
             
             {/* Action buttons */}
             <View style={styles.unifiedButtonBar}>
-              <TouchableOpacity style={styles.iconButton} onPress={() => toggleFavorite(gym.id)}>
-                <Text style={[styles.iconText, styles.heartIcon]}>
+              <TouchableOpacity style={styles.iconButton} onPress={() => handleHeartPress(gym)}>
+                <Text style={[
+                  styles.iconText, 
+                  styles.heartIcon,
+                  { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' }
+                ]}>
                   {favorites.has(gym.id) ? '♥' : '♡'}
                 </Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={styles.iconButton} 
-                onPress={() => handleCopyGym(gym)}
+                onPress={() => handleCopyGymWithState(gym)}
                 disabled={copiedGymId === gym.id}
               >
                 {copiedGymId === gym.id ? (
@@ -533,7 +691,7 @@ Who's training today?`;
               
               <TouchableOpacity 
                 style={[styles.iconButton, (!gym.website || gym.website.trim() === '') && styles.disabledIconButton]}
-                onPress={() => openWebsite(gym.website)}
+                onPress={() => gym.website && openWebsite(gym.website)}
                 disabled={!gym.website || gym.website.trim() === ''}
               >
                 <Ionicons 
@@ -555,7 +713,10 @@ Who's training today?`;
                 />
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.iconButton} onPress={() => handleShareGym(gym)}>
+              <TouchableOpacity style={styles.iconButton} onPress={() => {
+                haptics.light(); // Light haptic for share button
+                handleShareGym(gym);
+              }}>
                 <Ionicons name="share-outline" size={22} color="#111518" />
               </TouchableOpacity>
             </View>
@@ -567,11 +728,16 @@ Who's training today?`;
 
   return (
     <>
-      <ScrollView 
-        style={[styles.container, { backgroundColor: '#FFFFFF' }]}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <Animated.View style={{ 
+        flex: 1, 
+        opacity: screenFadeAnim,
+        transform: [{ translateY: contentSlideAnim }]
+      }}>
+        <ScrollView 
+          style={[styles.container, { backgroundColor: '#FFFFFF' }]}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
       {/* Welcome Section */}
       <SafeAreaViewRN edges={['top']}>
         <View style={{ backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
@@ -585,7 +751,10 @@ Who's training today?`;
           <Text style={styles.welcomeText}>Welcome back!</Text>
           <Text style={styles.userEmail}>{user?.email}</Text>
           <View style={styles.userActions}>
-            <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
+            <TouchableOpacity onPress={() => {
+              haptics.medium(); // Medium haptic for sign out action
+              signOut();
+            }} style={styles.signOutButton}>
               <Text style={styles.signOutText}>Sign Out</Text>
             </TouchableOpacity>
             <View style={styles.syncStatus}>
@@ -606,8 +775,14 @@ Who's training today?`;
         
         {/* Search Backdrop - only when search is active */}
         {(isSearching || searchResults.length > 0) && (
-          <TouchableWithoutFeedback onPress={closeSearch}>
-            <View style={styles.searchBackdrop} />
+          <TouchableWithoutFeedback onPress={() => {
+            console.log('🔍 Search backdrop clicked - calling closeSearch');
+            closeSearch();
+          }}>
+            <View 
+              style={styles.searchBackdrop} 
+              pointerEvents={(searchResults.length > 0 || modalVisible) ? "box-none" : "auto"}
+            />
           </TouchableWithoutFeedback>
         )}
         
@@ -625,57 +800,109 @@ Who's training today?`;
                 zIndex: -1 
               }
             ]}
-            onPress={() => setIsSearching(true)}
+            onPress={() => {
+              haptics.light(); // Light haptic for search button tap
+              console.log('🔍 Search button clicked - setting isSearching to true');
+              setIsSearching(true);
+            }}
           >
             <View style={styles.cityCardContent}>
               <Ionicons name="search" size={24} color={theme.text.secondary} />
               <View style={styles.cityCardText}>
                 <Text style={[styles.cityCardTitle, { color: theme.text.primary }]}>
-                  Search for a city or gym
-                </Text>
-                <Text style={[styles.cityCardSubtitle, { color: theme.text.secondary }]}>
-                  Add your city to find local gyms
+                  Search gyms
                 </Text>
               </View>
-              <Ionicons name="add-circle-outline" size={24} color={theme.text.secondary} />
+              <Ionicons name="chevron-forward" size={24} color={theme.text.secondary} />
             </View>
           </TouchableOpacity>
           
           {/* Search Input - Always rendered, hidden when not searching */}
-          <View style={[
-            styles.searchContainer, 
-            { backgroundColor: theme.surface },
-            !isSearching && searchResults.length === 0 && !searchQuery.trim() && { 
-              opacity: 0, 
-              pointerEvents: 'none', 
-              position: 'absolute',
-              zIndex: -1 
-            }
-          ]}>
-            <View style={styles.searchInputContainer}>
+          <View 
+            style={[
+              styles.searchContainer, 
+              { backgroundColor: theme.surface },
+              !isSearching && searchResults.length === 0 && !searchQuery.trim() && { 
+                opacity: 0, 
+                pointerEvents: 'none', 
+                position: 'absolute',
+                zIndex: -1 
+              }
+            ]}
+            onTouchStart={() => {
+              console.log('🔍 searchContainer onTouchStart');
+            }}
+            onTouchEnd={() => {
+              console.log('🔍 searchContainer onTouchEnd');
+            }}
+          >
+            <View 
+              style={styles.searchInputContainer}
+              onTouchStart={() => {
+                console.log('🔍 searchInputContainer onTouchStart');
+              }}
+              onTouchEnd={() => {
+                console.log('🔍 searchInputContainer onTouchEnd');
+              }}
+            >
               <Ionicons name="search" size={20} color={theme.text.secondary} style={styles.searchIcon} />
               <TextInput
                 ref={searchInputRef}
                 style={[styles.searchInput, { color: theme.text.primary }]}
-                placeholder="Search for a gym"
+                placeholder="Search gym names or cities"
                 placeholderTextColor={theme.text.secondary}
                 value={searchQuery}
                 onChangeText={handleInputChange}
+                onFocus={() => {
+                  console.log('🎯 TextInput onFocus - input focused');
+                  if (searchQuery.length === 0 && recentSearches.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  console.log('🎯 TextInput onBlur - input lost focus');
+                  // Don't hide suggestions immediately to allow for taps
+                  setTimeout(() => {
+                    if (!searchQuery.trim()) {
+                      setShowSuggestions(false);
+                    }
+                  }, 200);
+                }}
                 onSubmitEditing={() => {
                   if (searchResults.length > 0) {
                     showGymDetails(searchResults[0]);
                   }
                 }}
                 returnKeyType="search"
-                autoFocus
               />
               <TouchableOpacity 
                 style={styles.closeSearchButton}
-                onPress={closeSearch}
+                onPress={() => {
+                  haptics.light(); // Light haptic for close search button
+                  console.log('❌ Close search button clicked - calling closeSearch');
+                  closeSearch();
+                }}
+                onPressIn={() => {
+                  console.log('👆 X button onPressIn - touch started');
+                }}
+                onPressOut={() => {
+                  console.log('👆 X button onPressOut - touch ended');
+                }}
               >
                 <Ionicons name="close" size={20} color={theme.text.secondary} />
               </TouchableOpacity>
             </View>
+            
+            {/* Search suggestions */}
+            <SearchSuggestions
+              query={searchQuery}
+              suggestions={searchSuggestions}
+              recentSearches={recentSearches}
+              isLoading={isSearching}
+              onSelectSuggestion={handleSelectSuggestion}
+              onClearRecent={handleClearRecent}
+              visible={showSuggestions && !searchResults.length}
+            />
             
             {/* Search results list */}
             {searchResults.length > 0 && (
@@ -683,7 +910,11 @@ Who's training today?`;
                 {searchResults.map((gym, index) => (
                   <TouchableOpacity 
                     key={`gym-${index}`}
-                    onPress={() => showGymDetails(gym)}
+                    onPress={() => {
+                      haptics.light(); // Light haptic for gym card selection
+                      console.log('👆 Gym card clicked for:', gym.name);
+                      showGymDetails(gym);
+                    }}
                   >
                     <GymSearchResult gym={gym} />
                   </TouchableOpacity>
@@ -691,13 +922,12 @@ Who's training today?`;
               </View>
             )}
             
-            {/* Loading indicator for search */}
+            {/* Skeleton loading for search */}
             {isSearching && searchQuery.trim() && searchResults.length === 0 && (
-              <View style={styles.searchLoadingContainer}>
-                <ActivityIndicator size="small" color={theme.text.secondary} />
-                <Text style={[styles.searchLoadingText, { color: theme.text.secondary }]}>
-                  Searching gyms...
-                </Text>
+              <View style={styles.searchResultsContainer}>
+                {Array.from({ length: 3 }, (_, i) => (
+                  <SkeletonSearchResult key={`skeleton-${i}`} index={i} />
+                ))}
               </View>
             )}
           </View>
@@ -712,6 +942,7 @@ Who's training today?`;
               selectedLocation === 'Tampa' && { backgroundColor: selectionColor }
             ]}
             onPress={() => {
+              haptics.medium(); // Medium haptic for city selection
               setSelectedLocation('Tampa');
               navigation.navigate('Find', { screen: 'TimeSelection' });
             }}
@@ -747,6 +978,7 @@ Who's training today?`;
               selectedLocation === 'Austin' && { backgroundColor: selectionColor }
             ]}
             onPress={() => {
+              haptics.medium(); // Medium haptic for city selection
               setSelectedLocation('Austin');
               navigation.navigate('Find', { screen: 'TimeSelection' });
             }}
@@ -778,52 +1010,19 @@ Who's training today?`;
       </View>
 
       {/* More Cities Coming Soon */}
-      <View style={styles.moreCitiesSection}>
-        <TouchableOpacity
-          style={styles.moreCitiesContent}
-          activeOpacity={0.7}
-          onPress={async () => {
-            try {
-              await Clipboard.setStringAsync('glootieapp@gmail.com');
-              setEmailCopied(true);
-              // Reset the checkmark after 2 seconds
-              setTimeout(() => {
-                setEmailCopied(false);
-              }, 2000);
-            } catch (error) {
-              setToastMessage('Failed to copy email');
-              setToastType('error');
-              setShowToast(true);
-            }
-          }}
-        >
-          <View style={styles.moreCitiesTextContainer}>
-            <Text style={[styles.moreCitiesText, { color: theme.text.secondary }]}>
-              More cities coming soon!
-            </Text>
-            <View style={styles.emailRow}>
-              <Text style={[styles.moreCitiesText, { color: "#6C757D" }]}>
-                Suggestions? Email glootieapp@gmail.com
-              </Text>
-              <Ionicons 
-                name={emailCopied ? "checkmark" : "copy-outline"} 
-                size={18} 
-                color={emailCopied ? "#10B981" : "#6C757D"} 
-              />
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
+
 
       {/* Bottom Spacing */}
       <View style={styles.bottomSpacing} />
     </ScrollView>
+        </Animated.View>
     
     {/* Gym Info Modal */}
     {selectedGym && (
       <GymInfoCard 
         gym={selectedGym} 
-        onClose={() => setSelectedGym(null)} 
+        onClose={handleCloseModal}
+        visible={modalVisible}
       />
     )}
     
@@ -834,6 +1033,27 @@ Who's training today?`;
       type={toastType}
       onHide={() => setShowToast(false)}
     />
+
+    {/* Hidden ShareCard for image generation */}
+    {(() => {
+      if (shareCardGym && shareCardSession) {
+        console.log('Rendering ShareCard with ref:', shareCardRef.current ? 'exists' : 'null');
+        return (
+          <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+            <ShareCard 
+              ref={shareCardRef}
+              gym={shareCardGym}
+              session={shareCardSession}
+              includeImGoing={true}
+            />
+          </View>
+        );
+      }
+      return null;
+    })()}
+
+    {/* Contact Footer */}
+    <ContactFooter />
     </>
   );
 };
@@ -947,7 +1167,6 @@ const styles = StyleSheet.create({
   },
   heartIcon: {
     fontSize: 24,
-    color: '#FF6B6B',
   },
   sessionSubtitle: {
     fontSize: 14,
@@ -1201,34 +1420,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
   },
-  moreCitiesSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 'auto',
-  },
-  moreCitiesContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  moreCitiesTextContainer: {
-    alignItems: 'center',
-  },
-  moreCitiesText: {
-    fontSize: 14,
-    fontWeight: '400',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  emailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 4,
-  },
+
   // Search styles
   searchSection: {
     position: 'relative',
@@ -1265,15 +1457,19 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 55,
+    height: 24,
     paddingHorizontal: 16,
     paddingLeft: 40,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
   },
   closeSearchButton: {
-    padding: 12,
+    padding: 16,
     marginLeft: 8,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchResultsContainer: {
     marginTop: 12,
@@ -1327,7 +1523,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9FAFB',
   },
   modalCloseButton: {
     position: 'absolute',
@@ -1335,9 +1531,9 @@ const styles = StyleSheet.create({
     right: 18,
     zIndex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 16,
-    width: 28,
-    height: 28,
+    borderRadius: 22,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1411,8 +1607,10 @@ const styles = StyleSheet.create({
   iconButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     minHeight: 44,
+    minWidth: 44,
     width: 60,
   },
   iconText: {
@@ -1518,7 +1716,34 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
-    zIndex: 1,
+    zIndex: 3,
+  },
+  // Skeleton styles for search results
+  skeletonSearchName: {
+    height: 18,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    marginBottom: 4,
+    width: '80%',
+  },
+  skeletonSearchAddress: {
+    height: 14,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    marginBottom: 8,
+    width: '60%',
+  },
+  skeletonSkillTag: {
+    height: 24,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 6,
+    width: 80,
+  },
+  skeletonChevron: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 10,
   },
 
 });

@@ -33,7 +33,7 @@ export interface User {
     dropInFee?: number; // Optional field for drop-in class fees
     website?: string; // Optional website URL
     instructor?: string; // Optional instructor name
-    goingUsers?: any[]; // Optional array of users attending
+    goingUsers?: User[]; // Optional array of users attending
     coordinates?: string; // Optional coordinates in "latitude,longitude" format
     lastUpdated?: string; // Optional ISO date string for when data was last updated
   }
@@ -81,3 +81,32 @@ export interface User {
     | 'results' 
     | 'saved' 
     | 'profile';
+
+  // Additional type definitions for better type safety
+  export interface SearchFilters {
+    gi?: boolean;
+    nogi?: boolean;
+    price?: string;
+    dateSelection?: string;
+    dates?: Date[];
+  }
+
+  export interface GymSearchResult {
+    cities: Array<{ name: string; count: number }>;
+    gyms: OpenMat[];
+  }
+
+  export interface AnimationValue {
+    current: { progress: { interpolate: (config: { inputRange: number[]; outputRange: number[] }) => any } };
+    layouts: { screen: { width: number; height: number } };
+  }
+
+  export interface NavigationState {
+    key: string;
+    index: number;
+    routeNames: string[];
+    history?: unknown[];
+    routes: Array<{ name: string; key: string; params?: any }>;
+    type: string;
+    stale: false;
+  }

@@ -25,13 +25,13 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation, useMainTabNavigation } from '../navigation/useNavigation';
-import { beltColors, selectionColor, haptics, animations } from '../utils';
-import { OpenMat } from '../types';
-import { GymDetailsModal, ShareCard, Toast, CustomShareModal } from '../components';
+import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger } from '../utils';
+import { OpenMat, OpenMatSession, SearchFilters } from '../types';
+import { GymDetailsModal, ShareCard, Toast, ContactFooter, SkeletonCard } from '../components';
 import { apiService, gymLogoService } from '../services';
 import { githubDataService } from '../services/github-data.service';
 import { FindStackRouteProp } from '../navigation/types';
-import { captureAndShareCard } from '../utils/screenshot';
+import { captureCardAsImage } from '../utils/screenshot';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import appIcon from '../../assets/icon.png';
@@ -139,6 +139,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // State for API data
   const [openMats, setOpenMats] = useState<OpenMat[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [refreshing, setRefreshing] = useState(false);
   
@@ -157,28 +158,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const shareCardRef = useRef<View | null>(null);
   const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
   const [shareCardSession, setShareCardSession] = useState<any>(null);
-  
-  // Custom share modal state
-  const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [selectedGymForShare, setSelectedGymForShare] = useState<OpenMat | null>(null);
-
-  // Ensure ShareCard data is set when modal opens
-  useEffect(() => {
-    if (shareModalVisible && selectedGymForShare && !shareCardGym) {
-      console.log('Modal opened, setting ShareCard data from selectedGymForShare');
-      setShareCardGym(selectedGymForShare);
-      setShareCardSession(selectedGymForShare.openMats?.[0] || null);
-    }
-  }, [shareModalVisible, selectedGymForShare, shareCardGym]);
-
-  // Clean up ShareCard data when modal closes
-  useEffect(() => {
-    if (!shareModalVisible) {
-      console.log('Modal closed, clearing ShareCard data');
-      setShareCardGym(null);
-      setShareCardSession(null);
-    }
-  }, [shareModalVisible]);
   
   // Loading states for user actions
   const [copyingGymId, setCopyingGymId] = useState<string | null>(null);
@@ -202,6 +181,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   
   // Scale animation values for button press feedback
   const heartScaleAnim = useRef(new Animated.Value(1)).current;
+  // const heartColorAnim = useRef(new Animated.Value(0)).current; // Temporarily disabled
   const copyScaleAnim = useRef(new Animated.Value(1)).current;
   const websiteScaleAnim = useRef(new Animated.Value(1)).current;
   const directionsScaleAnim = useRef(new Animated.Value(1)).current;
@@ -314,12 +294,13 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Load data once on mount
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔄 ResultsScreen: Starting data fetch');
-      console.log('📍 Location:', location);
-      console.log('📅 DateSelection:', dateSelection);
-      console.log('📅 Dates:', dates);
-      console.log('🔑 ParamsKey:', paramsKey);
+          logger.loading('ResultsScreen: Starting data fetch');
+    logger.location('Location:', { location });
+    logger.dateTime('DateSelection:', { dateSelection });
+    logger.dateTime('Dates:', { dates });
+    logger.key('ParamsKey:', { paramsKey });
       
+      setIsLoading(true);
       showTransitionalLoading("Discovering open mat sessions...", 2000);
       try {
         
@@ -337,7 +318,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         // Check last update time silently
         const lastUpdate = await githubDataService.getLastUpdateTime(city);
         
-        const filters: any = {};
+        const filters: SearchFilters = {};
         if (dateSelection) {
           filters.dateSelection = dateSelection;
         }
@@ -345,31 +326,63 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           filters.dates = dates;
         }
         
-        console.log('🔍 Filters being sent to API:', filters);
+        logger.search('Filters being sent to API:', filters);
         const data = await apiService.getOpenMats(location, filters, true);
-        console.log('✅ ResultsScreen: Data loaded successfully -', data.length, 'gyms');
-        console.log('📊 First gym data:', data[0]);
+        logger.success('ResultsScreen: Data loaded successfully -', { count: data.length, firstGym: data[0] });
         
         setOpenMats(data);
       } catch (error) {
-        console.error('❌ ResultsScreen: Error fetching gyms:', error);
+        logger.error('ResultsScreen: Error fetching gyms:', error);
         setOpenMats([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, [location, dateSelection, paramsKey]);
 
   const handleGymPress = (gym: OpenMat) => {
+    haptics.light(); // Light haptic for gym card selection
     setSelectedGym(gym);
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
+    haptics.light(); // Light haptic for modal close
     setModalVisible(false);
     setSelectedGym(null);
   };
 
   const handleHeartPress = (gym: OpenMat) => {
+    const isFavorited = favorites.has(gym.id);
+    
+    // Haptic feedback
+    if (isFavorited) {
+      haptics.light(); // Light haptic for unfavoriting
+    } else {
+      haptics.success(); // Success haptic for favoriting
+      // Show loading and navigate to favorites tab when adding
+      showTransitionalLoading("Added to favorites!", 1500);
+      setTimeout(() => {
+        navigation.navigate('Favorites');
+      }, 500);
+    }
+    
+    // Heart button animation
+    animations.sequence([
+      animations.scale(heartScaleAnim, 1.3, 150),
+      animations.scale(heartScaleAnim, 1, 200),
+    ]).start();
+    
+    // Color transition animation - temporarily disabled
+    // const targetColor = isFavorited ? 0 : 1;
+    // Animated.timing(heartColorAnim, {
+    //   toValue: targetColor,
+    //   duration: 300,
+    //   useNativeDriver: false,
+    // }).start();
+    
+    // Call the original handler
     toggleFavorite(gym.id);
   };
 
@@ -391,7 +404,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       // Check last update time silently
       const lastUpdate = await githubDataService.getLastUpdateTime(city);
       
-      const filters: any = {};
+      const filters: SearchFilters = {};
       if (dateSelection) {
         filters.dateSelection = dateSelection;
       }
@@ -402,10 +415,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       setOpenMats(data);
       
       haptics.success(); // Success haptic for successful refresh
-      // Show success toast
-      setToastMessage('Data refreshed successfully!');
-      setToastType('success');
-      setShowToast(true);
     } catch (error) {
       haptics.error(); // Error haptic for failed refresh
       // Show error toast
@@ -446,202 +455,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
 
 
-  const formatOpenMats = (openMats: any[]) => {
-    return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
-  };
 
-  const formatSessionsList = (openMats: any[]) => {
-    return openMats.map(mat => {
-      const day = mat.day;
-      const time = mat.time;
-      const type = mat.type === 'gi' ? 'Gi' : mat.type === 'nogi' ? 'No-Gi' : 'Mixed';
-      return `${day} ${time} - ${type}`;
-    });
-  };
 
-  const formatTimeRange = (sessionTime: string) => {
-    // Check if the time already contains a range (has a dash/hyphen)
-    // Handle both formats: "12pm-2pm" and "6:30 PM - 7:30 PM"
-    if (sessionTime.includes('-') || sessionTime.includes('–')) {
-      // It's already a time range, format it properly
-      // Split on dash/hyphen and clean up any extra spaces
-      const parts = sessionTime.split(/[-–]/).map(part => part.trim());
-      if (parts.length >= 2) {
-        // Handle special case like "12-2pm" where first part is missing period
-        let startTime = parts[0];
-        let endTime = parts[1];
-        
-        // If start time doesn't have AM/PM but end time does, infer from end time
-        if (!startTime.match(/(am|pm)$/i) && endTime.match(/(am|pm)$/i)) {
-          const endPeriodMatch = endTime.match(/(am|pm)$/i);
-          if (endPeriodMatch) {
-            const endPeriod = endPeriodMatch[1].toUpperCase();
-            startTime = startTime + endPeriod;
-          }
-        }
-        
-        return formatTimeRangeSmart(startTime, endTime);
-      }
-    }
-    
-    // It's a single time, add 1 hour
-    const formattedStart = formatSingleTime(sessionTime);
-    const endTime = addOneHour(sessionTime);
-    
-    return formatTimeRangeSmart(formattedStart, endTime);
-  };
 
-  const formatTimeRangeSmart = (startTime: string, endTime: string) => {
-    // Parse both times to extract hour, minute, and period
-    const startParsed = parseTime(startTime);
-    const endParsed = parseTime(endTime);
-    
-    if (!startParsed || !endParsed) {
-      // Fallback to original formatting
-      return `${startTime} - ${endTime}`;
-    }
-    
-    const { hour: startHour, minute: startMinute, period: startPeriod } = startParsed;
-    const { hour: endHour, minute: endMinute, period: endPeriod } = endParsed;
-    
-    // Check if both times have the same period (AM/PM)
-    if (startPeriod === endPeriod) {
-      // Same period - use compact format
-      const startFormatted = formatHourMinute(startHour, startMinute);
-      const endFormatted = formatHourMinute(endHour, endMinute);
-      return `${startFormatted}-${endFormatted} ${startPeriod}`;
-    } else {
-      // Different periods - show both periods
-      const startFormatted = formatHourMinute(startHour, startMinute);
-      const endFormatted = formatHourMinute(endHour, endMinute);
-      return `${startFormatted} ${startPeriod} - ${endFormatted} ${endPeriod}`;
-    }
-  };
-
-  const parseTime = (time: string) => {
-    const cleanTime = time.trim();
-    
-    // Match patterns like "11am", "6pm", "11AM", "6PM" (case insensitive)
-    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/i);
-    if (simpleMatch) {
-      return {
-        hour: parseInt(simpleMatch[1]),
-        minute: 0,
-        period: simpleMatch[2].toUpperCase()
-      };
-    }
-    
-    // Match patterns like "5:00 PM", "11:30 AM", "6:30pm", "12:00pm" (case insensitive)
-    const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/i);
-    if (detailedMatch) {
-      return {
-        hour: parseInt(detailedMatch[1]),
-        minute: parseInt(detailedMatch[2]),
-        period: detailedMatch[3].toUpperCase()
-      };
-    }
-    
-    return null;
-  };
-
-  const formatHourMinute = (hour: number, minute: number) => {
-    // Remove unnecessary zeros - show just the hour if minute is 0
-    if (minute === 0) {
-      return hour.toString();
-    }
-    return `${hour}:${minute.toString().padStart(2, '0')}`;
-  };
-
-  const formatSingleTime = (time: string) => {
-    // Handle various time formats and standardize them
-    const cleanTime = time.trim().toLowerCase();
-    
-    // Handle formats like "11am", "6pm", "5:00 PM", etc.
-    let hour, minute = '00', period;
-    
-    // Match patterns like "11am", "6pm"
-    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
-    if (simpleMatch) {
-      hour = parseInt(simpleMatch[1]);
-      period = simpleMatch[2].toUpperCase();
-    } else {
-      // Match patterns like "5:00 PM", "11:30 AM"
-      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
-      if (detailedMatch) {
-        hour = parseInt(detailedMatch[1]);
-        minute = detailedMatch[2];
-        period = detailedMatch[3].toUpperCase();
-      } else {
-        // Fallback - return as is
-        return time;
-      }
-    }
-    
-    // Format consistently
-    return `${hour}:${minute} ${period}`;
-  };
-
-  const addOneHour = (time: string) => {
-    // Parse the time and add 1 hour
-    const cleanTime = time.trim().toLowerCase();
-    
-    let hour, minute = '00', period;
-    
-    // Match patterns like "11am", "6pm"
-    const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
-    if (simpleMatch) {
-      hour = parseInt(simpleMatch[1]);
-      period = simpleMatch[2].toUpperCase();
-    } else {
-      // Match patterns like "5:00 PM", "11:30 AM"
-      const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/);
-      if (detailedMatch) {
-        hour = parseInt(detailedMatch[1]);
-        minute = detailedMatch[2];
-        period = detailedMatch[3].toUpperCase();
-      } else {
-        // Fallback - return as is
-        return time;
-      }
-    }
-    
-    // Add 1 hour
-    hour += 1;
-    
-    // Handle 12-hour format
-    if (hour === 13) hour = 1;
-    if (hour === 12) {
-      return `12:${minute} ${period === 'AM' ? 'PM' : 'AM'}`;
-    }
-    
-    return `${hour}:${minute} ${period}`;
-  };
-
-  const getSessionTypeWithIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'gi':
-        return 'Gi 🥋';
-      case 'nogi':
-        return 'No-Gi 👕';
-      case 'both':
-        return 'Gi & No-Gi 🥋👕';
-      case 'mma':
-      case 'mma sparring':
-        return 'MMA Sparring 🥊';
-      default:
-        // For any other custom session types, preserve the original name
-        return `${type} 🥋👕`;
-    }
-  };
-
-  const getMatTypeDisplay = (openMats: any[]) => {
-    const types = openMats.map(mat => mat.type);
-    if (types.includes('both')) return 'Gi & No-Gi';
-    if (types.includes('gi') && types.includes('nogi')) return 'Gi & No-Gi';
-    if (types.includes('gi')) return 'Gi Only';
-    if (types.includes('nogi')) return 'No-Gi Only';
-    return 'Mixed';
-  };
 
   const getDateSelectionDisplay = (dateSelection: string): string => {
     switch (dateSelection) {
@@ -676,19 +492,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     );
   };
 
-  // Format date for last updated timestamp
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Unknown';
-    }
-  };
+
 
 
 
@@ -731,11 +535,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Group gyms by name to combine multiple sessions per gym
   const groupGymsByLocation = (gyms: OpenMat[]): OpenMat[] => {
-    console.log('🔍 Grouping gyms - input count:', gyms.length);
+    logger.group('Grouping gyms - input count:', { count: gyms.length });
     
     const grouped = gyms.reduce((acc, gym) => {
       if (!gym.name) {
-        console.warn('⚠️ Gym without name found:', gym.id);
+        logger.warn('Gym without name found:', { id: gym.id });
         return acc;
       }
       
@@ -745,12 +549,12 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       
       if (existing) {
         // Combine sessions from this gym with existing sessions
-        console.log(`🔄 Combining sessions for ${gym.name} (${gym.openMats?.length || 0} new sessions)`);
+                  logger.group(`Combining sessions for ${gym.name}`, { newSessions: gym.openMats?.length || 0 });
         // Create new array instead of mutating existing one
         existing.openMats = [...existing.openMats, ...(gym.openMats || [])];
       } else {
         // First time seeing this gym, add it to the map
-        console.log(`➕ Adding new gym: ${gym.name} (${gym.openMats?.length || 0} sessions)`);
+                  logger.add(`Adding new gym: ${gym.name}`, { sessions: gym.openMats?.length || 0 });
         // Create a new object with a new array to avoid mutations
         acc.set(key, { ...gym, openMats: [...(gym.openMats || [])] });
       }
@@ -805,41 +609,36 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       })
     }));
     
-    console.log('✅ Grouping complete - output count:', result.length);
-    result.forEach(gym => {
-      console.log(`  📍 ${gym.name}: ${gym.openMats.length} sessions`);
-      if (gym.openMats.length > 1) {
-        gym.openMats.forEach((session, index) => {
-          console.log(`    ${index + 1}. ${session.day} ${session.time} (${session.type})`);
-        });
-      }
-    });
+    logger.success('Grouping complete - output count:', { count: result.length });
+    logger.debug('Gym details:', result.map(gym => ({
+      name: gym.name,
+      sessions: gym.openMats.length,
+      sessionDetails: gym.openMats.map(session => `${session.day} ${session.time} (${session.type})`)
+    })));
     
     return result;
   };
 
   // Memoize grouped gyms - only recalculates when openMats changes
   const groupedGyms = useMemo(() => {
-    console.log('🔍 Grouping gyms - input count:', openMats.length);
+    logger.group('Grouping gyms - input count:', { count: openMats.length });
     const grouped = groupGymsByLocation(openMats);
-    console.log('✅ Grouping complete - output count:', grouped.length);
+    logger.success('Grouping complete - output count:', { count: grouped.length });
     return grouped;
   }, [openMats]);
 
   // Memoize sorted gyms - only recalculates when groupedGyms changes
   const sortedGyms = useMemo(() => {
-    console.log('📅 Sorting gyms by next session');
+    logger.sort('Sorting gyms by next session');
     const sorted = sortByNextSession(groupedGyms);
     
     // Log the sorted order for debugging
-    console.log('📅 Sorted gyms by next session:');
-    sorted.slice(0, 3).forEach((gym, index) => {
-      const nextSession = gym.openMats[0];
-      console.log(`  ${index + 1}. ${gym.name} - ${gym.openMats.length} sessions`);
-      gym.openMats.forEach((session, sessionIndex) => {
-        console.log(`     ${sessionIndex + 1}. ${session.day} ${session.time} (${session.type})`);
-      });
-    });
+    logger.sort('Sorted gyms by next session:', sorted.slice(0, 3).map((gym, index) => ({
+      rank: index + 1,
+      name: gym.name,
+      sessions: gym.openMats.length,
+      sessionDetails: gym.openMats.map(session => `${session.day} ${session.time} (${session.type})`)
+    })));
     
     return sorted;
   }, [groupedGyms]);
@@ -869,12 +668,12 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Filter gyms based on active filters (uses pre-sorted gyms)
   const filteredGyms = useMemo(() => {
-    console.log('🔍 Filtering gyms - openMats count:', openMats.length);
-    console.log('🔍 Active filters:', activeFilters);
+    logger.filter('Filtering gyms - openMats count:', { count: openMats.length });
+    logger.filter('Active filters:', activeFilters);
     
     // Start with pre-sorted gyms
     let filtered = sortedGyms;
-    console.log('🔍 After grouping - unique gyms count:', filtered.length);
+    logger.filter('After grouping - unique gyms count:', { count: filtered.length });
     
     // Apply Gi/No-Gi filters with smart logic
     if (activeFilters.gi || activeFilters.nogi) {
@@ -927,7 +726,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       filtered = filtered.filter(gym => gym.matFee === 0);
     }
     
-    console.log('✅ Filtered gyms count:', filtered.length);
+    logger.success('Filtered gyms count:', { count: filtered.length });
     return filtered;
   }, [sortedGyms, activeFilters]);
 
@@ -936,50 +735,20 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
 
   // Helper to open website
-  const openWebsite = (url: string) => {
-    if (url) Linking.openURL(url);
-  };
-
-  // Helper to open directions
-  const openDirections = (address: string) => {
-    if (!address || address === 'Tampa, FL' || address === 'Austin, TX') return;
-    const url = `https://maps.apple.com/?q=${encodeURIComponent(address)}`;
-    Linking.openURL(url);
-  };
-
-  // Helper to copy gym details
-  const handleCopyGym = async (gym: OpenMat) => {
+  // Helper to copy gym details with state management
+  const handleCopyGymWithState = async (gym: OpenMat) => {
     if (copyingGymId === gym.id) return; // Prevent multiple clicks
     
-    haptics.light(); // Light haptic for button press
     setCopyingGymId(gym.id);
     try {
-      const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
-      
-      const copyText = `I'm going to this open mat.
-Come train with me! 🥋
-
-📍 ${gym.name}
-${gym.address}
-
-📅 ${firstSession ? `${firstSession.day}, ${firstSession.time}` : ''}
-🥋 ${firstSession ? (firstSession.type === 'nogi' ? 'No-Gi' : firstSession.type === 'gi' ? 'Gi' : 'Gi/NoGi') : ''}
-${gym.matFee === 0 ? '✅ Free Open Mat' : gym.matFee ? `💵 Drop-in: $${gym.matFee}` : 'Contact gym for pricing'}
-
-Find more open mats 👇
-https://bit.ly/40DjTlM`;
-
-      await Clipboard.setStringAsync(copyText);
-      
-      haptics.success(); // Success haptic for successful copy
+      await handleCopyGym(gym);
       setCopiedGymId(gym.id);
       // Reset icon after 2 seconds
       setTimeout(() => {
         setCopiedGymId(null);
       }, 2000);
     } catch (error) {
-      haptics.error();
-      console.error('Failed to copy:', error);
+      // Error already handled in handleCopyGym
     } finally {
       setCopyingGymId(null);
     }
@@ -987,44 +756,70 @@ https://bit.ly/40DjTlM`;
 
   // Copy function that closes the modal
   const handleCopyAndCloseModal = async (gym: OpenMat) => {
-    await handleCopyGym(gym);
+    await handleCopyGymWithState(gym);
   };
 
-  // Direct image sharing function
+  // Optimized image sharing function with immediate feedback
   const handleShareImage = async (gym: OpenMat) => {
     if (sharingGymId === gym.id) return; // Prevent multiple clicks
     
     haptics.light(); // Light haptic for button press
-    setSharingGymId(gym.id);
+    setSharingGymId(gym.id); // Immediate loading state
+    
     try {
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
       
       if (!firstSession) {
         haptics.warning(); // Warning haptic for no sessions
         Alert.alert('No Sessions', 'No sessions available to share.');
+        setSharingGymId(null);
         return;
       }
 
-      console.log('Setting ShareCard data:', { gym: gym.name, session: firstSession });
+      logger.share('Setting ShareCard data:', { gym: gym.name, session: firstSession });
       
       // Set the gym and session for the ShareCard
       setShareCardGym(gym);
       setShareCardSession(firstSession);
 
-      // Wait for ShareCard to render before opening modal
-      setTimeout(() => {
-        console.log('Opening share modal after delay');
-        setSelectedGymForShare(gym);
-        setShareModalVisible(true);
-      }, 200); // Increased delay to ensure ShareCard is rendered
+      // Use requestAnimationFrame for better timing
+      requestAnimationFrame(async () => {
+        try {
+          logger.capture('Capturing and sharing image...');
+          
+          // Capture the ShareCard as an image with optimized settings
+          const imageUri = await captureCardAsImage(shareCardRef, {
+            format: 'png',
+            quality: 0.9, // Slightly reduced quality for faster processing
+            width: 1080,
+            height: 1920
+          });
+          
+          // Share using native iOS share sheet
+          await Share.share({
+            url: imageUri,
+                          message: `Check out this open mat session at ${gym.name}! 🥋\n\n${firstSession.day} at ${firstSession.time}\n\nFind more sessions with JiuJitsu Finder!`
+          });
+          
+          haptics.success(); // Success haptic for successful share
+                  } catch (error) {
+            logger.error('Error capturing and sharing:', error);
+          haptics.error(); // Error haptic for failed share
+          Alert.alert(
+            '❌ Sharing Error',
+            'Failed to capture and share the image. Please try again.',
+            [{ text: 'OK' }]
+          );
+        } finally {
+          setSharingGymId(null); // Always reset sharing state
+        }
+      });
       
-      // Reset sharing state
-      setSharingGymId(null);
     } catch (error) {
       haptics.error(); // Error haptic for failed share
       Alert.alert(
         '❌ Sharing Error',
-        'Failed to open share modal. Please try again.',
+        'Failed to prepare sharing. Please try again.',
         [{ text: 'OK' }]
       );
       setSharingGymId(null);
@@ -1032,7 +827,23 @@ https://bit.ly/40DjTlM`;
   };
 
   // Memoized GymCard component to prevent unnecessary re-renders
-  const GymCard = memo(({ gym, favorites, toggleFavorite, copyingGymId, handleCopyGym, copiedGymId, openWebsite, openDirections, sharingGymId, handleShareImage, gymLogos, handleHeartPress, animateScale, heartScaleAnim, copyScaleAnim, websiteScaleAnim, directionsScaleAnim, shareScaleAnim, formatTimeRange, getSessionTypeWithIcon }: any) => {
+  const GymCard = memo(({ gym, favorites, toggleFavorite, copyingGymId, copiedGymId, sharingGymId, handleShareImage, gymLogos, handleHeartPress, animateScale, heartScaleAnim, copyScaleAnim, websiteScaleAnim, directionsScaleAnim, shareScaleAnim }: {
+    gym: OpenMat;
+    favorites: Set<string>;
+    toggleFavorite: (id: string) => void;
+    copyingGymId: string | null;
+    copiedGymId: string | null;
+    sharingGymId: string | null;
+    handleShareImage: (gym: OpenMat) => void;
+    gymLogos: Record<string, any>;
+    handleHeartPress: (gym: OpenMat) => void;
+    animateScale: (animValue: Animated.Value, scale: number) => void;
+    heartScaleAnim: Animated.Value;
+    copyScaleAnim: Animated.Value;
+    websiteScaleAnim: Animated.Value;
+    directionsScaleAnim: Animated.Value;
+    shareScaleAnim: Animated.Value;
+  }) => {
     return (
       <View key={gym.id} style={styles.card}>
         {/* Header: Gym Name + Logo */}
@@ -1065,7 +876,7 @@ https://bit.ly/40DjTlM`;
 
         {/* Sessions Section */}
         <View style={styles.sessionsSection}>
-          {gym.openMats.map((session: any, index: number) => (
+                        {gym.openMats.map((session: OpenMatSession, index: number) => (
             <View key={index} style={styles.sessionBlock}>
               <Text style={styles.dayHeader}>
                 {session.day.toUpperCase()}
@@ -1111,7 +922,6 @@ https://bit.ly/40DjTlM`;
               style={[styles.iconButton, (!gym.website || gym.website.trim() === '') && styles.disabledIconButton]}
               onPress={() => {
                 if (gym.website && gym.website.trim() !== '') {
-                  haptics.light();
                   openWebsite(gym.website);
                 }
               }}
@@ -1133,7 +943,6 @@ https://bit.ly/40DjTlM`;
               style={[styles.iconButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledIconButton]}
               onPress={() => {
                 if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
-                  haptics.light();
                   openDirections(gym.address);
                 }
               }}
@@ -1160,7 +969,11 @@ https://bit.ly/40DjTlM`;
               onPressIn={() => animateScale(heartScaleAnim, 0.95)}
               onPressOut={() => animateScale(heartScaleAnim, 1.0)}
             >
-              <Text style={[styles.iconText, styles.heartIcon]}>
+              <Text style={[
+                styles.iconText, 
+                styles.heartIcon,
+                { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' }
+              ]}>
                 {favorites.has(gym.id) ? '♥' : '♡'}
               </Text>
             </TouchableOpacity>
@@ -1170,7 +983,7 @@ https://bit.ly/40DjTlM`;
           <Animated.View style={{ transform: [{ scale: copyScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.iconButton, copyingGymId === gym.id && styles.disabledIconButton]}
-              onPress={() => handleCopyGym(gym)}
+              onPress={() => handleCopyGymWithState(gym)}
               disabled={copyingGymId === gym.id || copiedGymId === gym.id}
               onPressIn={() => animateScale(copyScaleAnim, 0.95)}
               onPressOut={() => animateScale(copyScaleAnim, 1.0)}
@@ -1226,7 +1039,7 @@ https://bit.ly/40DjTlM`;
           <Image source={appIcon} style={styles.headerLogo} />
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
-          <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Find Jiu Jitsu</Text>
+                         <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
           <Text style={styles.locationContext}>{getGymCountText(filteredGyms.length, location)}</Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
             {dateSelection && `${getDateSelectionDisplay(dateSelection)}`}
@@ -1261,7 +1074,7 @@ https://bit.ly/40DjTlM`;
                 backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
                 borderWidth: activeFilters.gi ? 0 : 1,
                 borderColor: activeFilters.gi ? 'transparent' : '#E0E0E0',
-                marginRight: 4,
+                marginRight: 8,
                 shadowColor: activeFilters.gi ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: activeFilters.gi ? 0.3 : 0,
@@ -1294,7 +1107,7 @@ https://bit.ly/40DjTlM`;
                 backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
                 borderWidth: activeFilters.nogi ? 0 : 1,
                 borderColor: activeFilters.nogi ? 'transparent' : '#E0E0E0',
-                marginRight: 4,
+                marginRight: 8,
                 shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: activeFilters.nogi ? 0.3 : 0,
@@ -1327,7 +1140,7 @@ https://bit.ly/40DjTlM`;
                 backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
                 borderWidth: activeFilters.price === 'free' ? 0 : 1,
                 borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
-                marginRight: 4,
+                marginRight: 8,
                 shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
@@ -1376,48 +1189,7 @@ https://bit.ly/40DjTlM`;
             </View>
           </TouchableOpacity>
 
-          {/* Envelope Button */}
-          <TouchableOpacity 
-                          style={[
-                styles.filterPill,
-                {
-                  backgroundColor: '#F0F3F5',
-                  borderWidth: 1,
-                  borderColor: '#E0E0E0',
-                  shadowColor: 'transparent',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0,
-                  shadowRadius: 4,
-                  elevation: 0,
-                }
-              ]}
-            onPress={async () => {
-              try {
-                await Clipboard.setStringAsync('glootieapp@gmail.com');
-                setEmailCopied(true);
-                // Reset the checkmark after 2 seconds
-                setTimeout(() => {
-                  setEmailCopied(false);
-                }, 2000);
-              } catch (error) {
-                setToastMessage('Failed to copy email');
-                setToastType('error');
-                setShowToast(true);
-              }
-            }}
-            activeOpacity={0.7}
-          >
-            <View style={styles.suggestButtonContent}>
-              {emailCopied && (
-                <Ionicons 
-                  name="checkmark" 
-                  size={16} 
-                  color="#10B981" 
-                />
-              )}
-              <Text style={styles.suggestText}>Email us</Text>
-            </View>
-          </TouchableOpacity>
+
 
         </ScrollView>
 
@@ -1501,6 +1273,18 @@ https://bit.ly/40DjTlM`;
             Try checking different days or clearing your filters
           </Text>
         </View>
+      ) : isLoading ? (
+        // Skeleton Loading State
+        <FlatList
+          data={Array.from({ length: 5 }, (_, i) => ({ id: i }))}
+          keyExtractor={(item) => `skeleton-${item.id}`}
+          renderItem={({ item, index }) => (
+            <SkeletonCard index={index} />
+          )}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+        />
       ) : (
         // Gym List (Original Card View)
         <FlatList
@@ -1512,10 +1296,7 @@ https://bit.ly/40DjTlM`;
               favorites={favorites}
               toggleFavorite={toggleFavorite}
               copyingGymId={copyingGymId}
-              handleCopyGym={handleCopyGym}
               copiedGymId={copiedGymId}
-              openWebsite={openWebsite}
-              openDirections={openDirections}
               sharingGymId={sharingGymId}
               handleShareImage={handleShareImage}
               gymLogos={gymLogos}
@@ -1526,8 +1307,6 @@ https://bit.ly/40DjTlM`;
               websiteScaleAnim={websiteScaleAnim}
               directionsScaleAnim={directionsScaleAnim}
               shareScaleAnim={shareScaleAnim}
-              formatTimeRange={formatTimeRange}
-              getSessionTypeWithIcon={getSessionTypeWithIcon}
             />
           )}
           contentContainerStyle={styles.scrollContent}
@@ -1565,17 +1344,14 @@ https://bit.ly/40DjTlM`;
 
       {/* Hidden ShareCard for image generation */}
       {(() => {
-        const gymToRender = shareCardGym || selectedGymForShare;
-        const sessionToRender = shareCardSession || selectedGymForShare?.openMats?.[0];
-        
-        if (gymToRender && sessionToRender) {
-          console.log('Rendering ShareCard with ref:', shareCardRef.current ? 'exists' : 'null', 'shareModalVisible:', shareModalVisible);
+        if (shareCardGym && shareCardSession) {
+          logger.render('Rendering ShareCard with ref:', { exists: shareCardRef.current ? 'exists' : 'null' });
           return (
             <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
               <ShareCard 
                 ref={shareCardRef}
-                gym={gymToRender}
-                session={sessionToRender}
+                gym={shareCardGym}
+                session={shareCardSession}
                 includeImGoing={true}
               />
             </View>
@@ -1601,19 +1377,10 @@ https://bit.ly/40DjTlM`;
         onHide={() => setShowToast(false)}
       />
 
-      {/* Custom Share Modal */}
-      {selectedGymForShare && (
-        <CustomShareModal
-          visible={shareModalVisible}
-          onClose={() => {
-            setShareModalVisible(false);
-            setSelectedGymForShare(null);
-          }}
-          gym={selectedGymForShare}
-          session={selectedGymForShare.openMats?.[0] || null}
-          shareCardRef={shareCardRef as React.RefObject<View>}
-        />
-      )}
+
+
+      {/* Contact Footer */}
+      <ContactFooter />
 
     </SafeAreaView>
   );
@@ -1946,12 +1713,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: '#F0F3F5',
-    marginRight: 3,
+    marginRight: 4,
     minWidth: 60,
+    minHeight: 44,
     flexShrink: 0,
   },
   filterPillText: {
@@ -2188,8 +1956,10 @@ const styles = StyleSheet.create({
   iconButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     minHeight: 44, // Accessibility minimum
+    minWidth: 44, // Accessibility minimum
     width: 60,  // Fixed width instead of flex: 1
   },
 

@@ -9,7 +9,7 @@ const AboutScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>About Find Jiu Jitsu</Text>
+        <Text style={styles.title}>About JiuJitsu Finder</Text>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your BJJ Training Companion</Text>
           <Text style={styles.sectionText}>Find open mat sessions in your area with real-time data from our GitHub integration.</Text>
@@ -68,9 +68,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     borderRadius: 8,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: 'center',
     marginTop: 8,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   reportButtonText: {
     color: 'white',

@@ -1,190 +1,185 @@
 # Firebase Google Sign-In Setup Guide
 
-## 🔥 Firebase Console Configuration
+This guide will help you set up Google Sign-In for the JiuJitsu Finder app using Firebase.
 
-### Step 1: Access Firebase Console
+## Prerequisites
+
+- Firebase project created
+- Google Cloud Console access
+- Expo development environment
+
+## Step 1: Firebase Project Configuration
+
+### 1.1 Create Firebase Project
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **`find-jiu-jitsu`**
-3. Verify you're in the correct project (check the project name in the top-left)
+2. Click "Add project"
+3. Enter project details:
+   - **Project name**: `JiuJitsu Finder`
+   - **Project public-facing name**: `JiuJitsu Finder`
+   - **Google Analytics**: Enable (recommended)
 
-### Step 2: Enable Google Sign-In Provider
+### 1.2 Enable Authentication
+1. In Firebase Console, go to "Authentication"
+2. Click "Get started"
+3. Go to "Sign-in method" tab
+4. Enable "Google" provider
+5. Configure OAuth consent screen
 
-#### 2.1 Navigate to Authentication
-1. In the left sidebar, click **"Authentication"**
-2. Click on the **"Sign-in method"** tab
-3. You should see a list of sign-in providers
+## Step 2: OAuth Consent Screen Setup
 
-#### 2.2 Enable Google Provider
-1. Find **"Google"** in the list of providers
-2. Click on **"Google"** to open its configuration
-3. Click the **"Enable"** toggle switch to turn it ON
-4. Fill in the required fields:
-   - **Project support email**: `your-email@domain.com` (use your email)
-   - **Project public-facing name**: `Find Jiu Jitsu`
-5. Click **"Save"**
-
-#### 2.3 Verify Google Provider Status
-- Status should show: **"Enabled"**
-- You should see a green checkmark
-- The provider should be listed as active
-
-### Step 3: Configure OAuth Consent Screen (if needed)
-
-#### 3.1 Check OAuth Consent Screen
-1. In Firebase Console, go to **"Authentication"** → **"Settings"** tab
-2. Look for **"OAuth consent screen"** section
-3. If it shows "Not configured", click **"Configure"**
-
-#### 3.2 Configure OAuth Consent Screen
-1. **App name**: `Find Jiu Jitsu`
-2. **User support email**: `your-email@domain.com`
-3. **App logo**: (optional) Upload your app icon
-4. **App domain**: `find-jiu-jitsu.firebaseapp.com`
-5. **Authorized domains**: 
-   - `find-jiu-jitsu.firebaseapp.com`
-   - `localhost`
-   - `auth.expo.io`
-6. Click **"Save"**
-
-### Step 4: Verify JavaScript SDK Configuration
-
-#### 4.1 Check Current Firebase Config
-Your `src/config/firebase.ts` is correctly configured:
-
-```typescript
-const firebaseConfig = {
-  apiKey: "AIzaSyDZNXEoRE-Rnee7mf20WR2b4dd3OQY21ks",
-  authDomain: "find-jiu-jitsu.firebaseapp.com",
-  projectId: "find-jiu-jitsu",
-  storageBucket: "find-jiu-jitsu.firebasestorage.app",
-  messagingSenderId: "713938761178",
-  appId: "1:713938761178:ios:e6e6b80194abed20267ce3"
-};
-```
-
-#### 4.2 Verify Auth Initialization
-The auth is properly initialized:
-```typescript
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-```
-
-### Step 5: Test Firebase Connection
-
-#### 5.1 Check Console Logs
-When you run the app, you should see:
-```
-🔐 AuthContext: Initializing Firebase auth listener
-🔐 AuthContext: Auth state changed No user
-```
-
-#### 5.2 Verify No Firebase Errors
-- No "Firebase not initialized" errors
-- No "Auth domain not found" errors
-- No "Project not found" errors
-
-### Step 6: Enable Required APIs
-
-#### 6.1 Google Cloud Console APIs
+### 2.1 Google Cloud Console
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Select project: **`find-jiu-jitsu`**
-3. Go to **"APIs & Services"** → **"Library"**
-4. Search for and enable these APIs:
-   - **Google+ API** (if not already enabled)
-   - **Google Sign-In API** (if not already enabled)
-   - **Identity and Access Management (IAM) API**
+2. Select your Firebase project
+3. Go to "APIs & Services" > "OAuth consent screen"
+4. Configure app information:
+   - **App name**: `JiuJitsu Finder`
+   - **User support email**: Your email
+   - **Developer contact information**: Your email
 
-### Step 7: Verify App Configuration
+### 2.2 Add Scopes
+Add these OAuth scopes:
+- `email`
+- `profile`
+- `openid`
 
-#### 7.1 Check app.json Configuration
-Your app.json is correctly configured:
+## Step 3: OAuth 2.0 Client IDs
+
+### 3.1 Web Client
+1. Go to "APIs & Services" > "Credentials"
+2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+3. Name: `JiuJitsu Finder - Web Client`
+4. Application type: Web application
+5. Add authorized origins:
+   - `https://auth.expo.io`
+   - `https://your-expo-username.github.io`
+
+### 3.2 iOS Client
+1. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+2. Name: `JiuJitsu Finder - iOS Client`
+3. Application type: iOS
+4. Bundle ID: `com.anonymous.OpenMatFinder`
+
+### 3.3 Android Client
+1. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+2. Name: `JiuJitsu Finder - Android Client`
+3. Application type: Android
+4. Package name: `com.anonymous.OpenMatFinder`
+5. SHA-1 certificate fingerprint: Get from your keystore
+
+## Step 4: Expo Configuration
+
+### 4.1 Install Dependencies
+```bash
+npx expo install @react-native-google-signin/google-signin
+```
+
+### 4.2 Configure app.json
 ```json
 {
   "expo": {
     "scheme": "findjiujitsu",
     "ios": {
-      "bundleIdentifier": "com.anonymous.OpenMatFinder",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.anonymous.OpenMatFinder"
     },
     "android": {
-      "package": "com.anonymous.OpenMatFinder",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.anonymous.OpenMatFinder"
     }
   }
 }
 ```
 
-#### 7.2 Verify GoogleService-Info.plist
-Your `GoogleService-Info.plist` contains:
-- Correct `BUNDLE_ID`: `com.anonymous.OpenMatFinder`
-- Correct `PROJECT_ID`: `find-jiu-jitsu`
-- Valid `API_KEY` and other credentials
+### 4.3 Configure Google Sign-In
+```typescript
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-## 🧪 Testing the Setup
+GoogleSignin.configure({
+  webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+  iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  offlineAccess: true,
+});
+```
 
-### Test 1: Firebase Connection
+## Step 5: Firebase Configuration
+
+### 5.1 Download Config Files
+1. In Firebase Console, go to Project Settings
+2. Download `google-services.json` (Android)
+3. Download `GoogleService-Info.plist` (iOS)
+
+### 5.2 Add to Project
+- Place `google-services.json` in `android/app/`
+- Place `GoogleService-Info.plist` in `ios/FindJiuJitsu/`
+
+## Step 6: Environment Variables
+
+### 6.1 Create .env file
+```env
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+```
+
+### 6.2 Configure Expo
+```json
+{
+  "expo": {
+    "extra": {
+      "firebaseApiKey": process.env.FIREBASE_API_KEY,
+      "firebaseAuthDomain": process.env.FIREBASE_AUTH_DOMAIN,
+      "firebaseProjectId": process.env.FIREBASE_PROJECT_ID,
+      "firebaseStorageBucket": process.env.FIREBASE_STORAGE_BUCKET,
+      "firebaseMessagingSenderId": process.env.FIREBASE_MESSAGING_SENDER_ID,
+      "firebaseAppId": process.env.FIREBASE_APP_ID
+    }
+  }
+}
+```
+
+## Step 7: Testing
+
+### 7.1 Test Configuration
 ```bash
-npx expo start --clear
-```
-Expected console output:
-```
-🔐 AuthContext: Initializing Firebase auth listener
-🔐 AuthContext: Auth state changed No user
+npx expo start
 ```
 
-### Test 2: Google Sign-In Button
-1. Navigate to LoginScreen
+### 7.2 Test Sign-In
+1. Open app on device/simulator
 2. Tap "Sign in with Google"
-3. Expected behavior:
-   - If client IDs not set: Error message about missing configuration
-   - If client IDs set: Google sign-in flow should start
+3. Complete OAuth flow
+4. Verify user data in Firebase Console
 
-### Test 3: Error Handling
-Current error messages you should see if client IDs are missing:
-```
-Google Web Client ID not configured. Please set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID in your .env file.
-Google iOS Client ID not configured. Please set EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID in your .env file.
-```
+## Troubleshooting
 
-## ✅ Checklist
+### Common Issues
+1. **"Sign in failed"**: Check client IDs and bundle identifiers
+2. **"Network error"**: Verify internet connection and API keys
+3. **"Invalid client"**: Ensure OAuth consent screen is configured
 
-- [ ] Firebase project selected: `find-jiu-jitsu`
-- [ ] Google Sign-In provider enabled in Firebase Console
-- [ ] OAuth consent screen configured
-- [ ] Firebase config matches project settings
-- [ ] Auth properly initialized in JavaScript
-- [ ] Required APIs enabled in Google Cloud Console
-- [ ] app.json configured with correct scheme and bundle IDs
-- [ ] GoogleService-Info.plist contains correct project info
-- [ ] Console logs show Firebase auth listener working
-- [ ] No Firebase initialization errors
+### Debug Steps
+1. Check Firebase Console for authentication logs
+2. Verify client IDs match your configuration
+3. Test with different devices/simulators
+4. Check network requests in developer tools
 
-## 🚨 Troubleshooting
+## Security Considerations
 
-### Common Issues:
+1. **Never commit API keys** to version control
+2. **Use environment variables** for sensitive data
+3. **Restrict OAuth scopes** to minimum required
+4. **Monitor authentication logs** for suspicious activity
+5. **Regularly rotate** client secrets
 
-**"Firebase not initialized"**
-- Check firebase config in `src/config/firebase.ts`
-- Verify project ID matches Firebase Console
+## Next Steps
 
-**"Google Sign-In not enabled"**
-- Go to Firebase Console → Authentication → Sign-in method
-- Enable Google provider
+After successful setup:
+1. Implement user profile management
+2. Add cloud sync for favorites
+3. Set up push notifications
+4. Configure analytics tracking
 
-**"OAuth consent screen not configured"**
-- Configure OAuth consent screen in Firebase Console
-- Add authorized domains
+---
 
-**"Invalid client" errors**
-- This will be resolved once you add client IDs to .env file
-- Client IDs come from Google Cloud Console (next step)
-
-## 🎯 Next Steps
-
-Once Firebase Console setup is complete:
-1. Get OAuth 2.0 Client IDs from Google Cloud Console
-2. Add client IDs to `.env` file
-3. Test Google Sign-In functionality
-4. Verify user authentication flow
-
-The Firebase setup is the foundation - once this is working, adding the client IDs will make Google Sign-In fully functional! 🚀 
+**Need Help?** Create an issue in the repository or contact glootieapp@gmail.com 

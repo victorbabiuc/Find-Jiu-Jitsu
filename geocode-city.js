@@ -6,7 +6,7 @@ const path = require('path');
 
 // Configuration
 const DELAY_BETWEEN_REQUESTS = 1500; // 1.5 seconds
-const USER_AGENT = 'FindJiuJitsu/1.0';
+const USER_AGENT = 'JiuJitsuFinder/1.0';
 const NOMINATIM_BASE_URL = 'nominatim.openstreetmap.org';
 
 class Geocoder {

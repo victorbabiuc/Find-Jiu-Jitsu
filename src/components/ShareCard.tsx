@@ -34,26 +34,50 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
     return String(time || '').replace(/\s+/g, ' ').trim();
   };
 
+  const formatSessionType = (type: string) => {
+    const typeStr = String(type || '').toLowerCase();
+    switch (typeStr) {
+      case 'gi':
+        return 'Gi';
+      case 'nogi':
+        return 'No-Gi';
+      case 'both':
+        return 'Gi/No-Gi';
+      case 'mma':
+      case 'mma sparring':
+        return 'MMA';
+      default:
+        return type || 'Training';
+    }
+  };
+
   return (
     <View ref={ref} style={styles.container}>
       {/* Main Content Card */}
       <View style={styles.contentCard}>
         {/* Gym Info */}
         <View style={styles.gymSection}>
-          {/* Gym Logo */}
-          {(String(gym.id || '').includes('10th-planet')) ? (
-            <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.gymLogo} />
-          ) : (String(gym.id || '').includes('stjj')) ? (
-            <Image source={require('../../assets/logos/STJJ.png')} style={styles.gymLogo} />
-          ) : (String(gym.id || '').includes('gracie-tampa-south')) ? (
-            <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.gymLogo} />
-          ) : (String(gym.id || '').includes('tmt')) ? (
-            <Image source={require('../../assets/logos/TMT.png')} style={styles.gymLogo} />
-          ) : (
-            <View style={styles.gymLogoPlaceholder}>
-              <Text style={styles.gymLogoText}>{String(gym.name || '').split(' ').map(word => word[0]).join('').toUpperCase()}</Text>
-            </View>
-          )}
+          {/* Gym Logo - Optimized for performance */}
+          {(() => {
+            const gymId = String(gym.id || '');
+            if (gymId.includes('10th-planet')) {
+              return <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.gymLogo} />;
+            } else if (gymId.includes('stjj')) {
+              return <Image source={require('../../assets/logos/STJJ.png')} style={styles.gymLogo} />;
+            } else if (gymId.includes('gracie-tampa-south')) {
+              return <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.gymLogo} />;
+            } else if (gymId.includes('tmt')) {
+              return <Image source={require('../../assets/logos/TMT.png')} style={styles.gymLogo} />;
+            } else {
+              return (
+                <View style={styles.gymLogoPlaceholder}>
+                  <Text style={styles.gymLogoText}>
+                    {String(gym.name || '').split(' ').map(word => word[0]).join('').toUpperCase()}
+                  </Text>
+                </View>
+              );
+            }
+          })()}
           
           {/* Gym Name */}
           <Text style={styles.gymName}>{String(gym.name || '')}</Text>
@@ -78,7 +102,7 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
           <Text style={styles.openMatLabel}>Open Mat</Text>
           <View style={styles.sessionHeader}>
             <Text style={styles.sessionType}>
-              {getSessionTypeEmoji(String(session.type || ''))} {String(session.type || '')}
+              {getSessionTypeEmoji(String(session.type || ''))} {formatSessionType(session.type)}
             </Text>
             <Text style={styles.sessionDay}>
               {String(session.day || '')}
@@ -108,7 +132,7 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
         />
         <View style={styles.footerTextContainer}>
           <Text style={styles.footerText}>
-            Find Jiu Jitsu
+            JiuJitsu Finder
           </Text>
           <Text style={styles.footerSubtext}>
             Find your next roll
@@ -129,61 +153,62 @@ const styles = StyleSheet.create({
     left: -9999,
     top: -9999,
     backgroundColor: '#F9FAFB',
-    padding: 20,
-    paddingTop: 20,
+    padding: 40,
+    paddingTop: 80,
     justifyContent: 'space-between',
   },
   contentCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 40,
-    marginBottom: 40,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    padding: 60,
+    marginBottom: 60,
+    // Simplified shadows for better performance
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
     overflow: 'hidden',
   },
   gymSection: {
-    marginBottom: 30,
+    marginBottom: 50,
     alignItems: 'center',
   },
   gymLogo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginBottom: 30,
   },
   gymLogoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   gymLogoText: {
-    fontSize: 32,
+    fontSize: 56,
     fontWeight: 'bold',
     color: '#6B7280',
   },
   gymName: {
-    fontSize: 56,
+    fontSize: 72,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 12,
     textAlign: 'center',
-    lineHeight: 62,
+    lineHeight: 78,
     color: '#111827',
   },
   gymAddress: {
-    fontSize: 32,
+    fontSize: 44,
     textAlign: 'center',
-    lineHeight: 40,
-    marginBottom: 8,
+    lineHeight: 52,
+    marginBottom: 12,
     color: '#6B7280',
   },
   websiteContainer: {
@@ -195,59 +220,59 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   websiteText: {
-    fontSize: 26,
+    fontSize: 36,
     textAlign: 'center',
     color: '#6B7280',
   },
   divider: {
-    height: 2,
+    height: 3,
     backgroundColor: '#E5E7EB',
-    marginVertical: 20,
-    borderRadius: 1,
+    marginVertical: 30,
+    borderRadius: 2,
   },
   sessionSection: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   openMatLabel: {
-    fontSize: 36,
+    fontSize: 48,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 20,
     textAlign: 'center',
     color: '#111827',
   },
   sessionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sessionType: {
-    fontSize: 32,
+    fontSize: 44,
     fontWeight: 'bold',
-    marginRight: 16,
+    marginRight: 20,
     color: '#111827',
   },
   sessionDay: {
-    fontSize: 36,
+    fontSize: 48,
     fontWeight: 'bold',
     color: '#111827',
   },
   sessionTime: {
-    fontSize: 52,
+    fontSize: 68,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#111827',
   },
   inviteSection: {
     alignItems: 'center',
-    marginBottom: 60,
-    paddingVertical: 30,
+    marginBottom: 80,
+    paddingVertical: 40,
   },
   inviteText: {
-    fontSize: 48,
+    fontSize: 60,
     fontWeight: '700',
     textAlign: 'center',
-    lineHeight: 56,
+    lineHeight: 68,
     color: '#111827',
   },
   footer: {
@@ -256,10 +281,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerAppIcon: {
-    width: 100,
-    height: 100,
-    marginRight: 16,
-    borderRadius: 50,
+    width: 140,
+    height: 140,
+    marginRight: 20,
+    borderRadius: 70,
     backgroundColor: 'transparent',
     resizeMode: 'contain',
   },
@@ -267,14 +292,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   footerText: {
-    fontSize: 42,
+    fontSize: 56,
     textAlign: 'left',
     fontWeight: '800',
     color: '#111827',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   footerSubtext: {
-    fontSize: 26,
+    fontSize: 36,
     textAlign: 'left',
     fontWeight: '500',
     color: '#6B7280',

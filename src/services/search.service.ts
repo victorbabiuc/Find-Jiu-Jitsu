@@ -1,135 +1,164 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OpenMat } from '../types';
-import { githubDataService } from './github-data.service';
+import { logger } from '../utils';
 
-export interface SearchResult {
-  cities: Array<{
-    name: string;
-    count: number;
-  }>;
-  gyms: OpenMat[];
-}
+const RECENT_SEARCHES_KEY = 'recent_searches';
+const MAX_RECENT_SEARCHES = 5;
 
-export interface SearchService {
-  searchAll: (query: string) => Promise<SearchResult>;
-  searchCities: (query: string) => Promise<Array<{ name: string; count: number }>>;
-  searchGyms: (query: string) => Promise<OpenMat[]>;
-}
-
-class SearchServiceImpl implements SearchService {
-  private cachedTampaGyms: OpenMat[] = [];
-  private cachedAustinGyms: OpenMat[] = [];
-  private cacheTimestamp: number = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-  private async ensureDataLoaded(): Promise<void> {
-    const now = Date.now();
-    if (now - this.cacheTimestamp > this.CACHE_DURATION) {
-      try {
-        // Load both cities' data in parallel
-        const [tampaGyms, austinGyms] = await Promise.all([
-          githubDataService.getGymData('tampa'),
-          githubDataService.getGymData('austin')
-        ]);
-        
-        this.cachedTampaGyms = tampaGyms;
-        this.cachedAustinGyms = austinGyms;
-        this.cacheTimestamp = now;
-      } catch (error) {
-        console.error('Error loading gym data for search:', error);
-      }
+export class SearchService {
+  /**
+   * Get recent searches from AsyncStorage
+   */
+  static async getRecentSearches(): Promise<string[]> {
+    try {
+      const recentSearches = await AsyncStorage.getItem(RECENT_SEARCHES_KEY);
+      return recentSearches ? JSON.parse(recentSearches) : [];
+    } catch (error) {
+      logger.error('Error getting recent searches:', error);
+      return [];
     }
   }
 
-  async searchAll(query: string): Promise<SearchResult> {
-    await this.ensureDataLoaded();
-    
-    const results: SearchResult = {
-      cities: [],
-      gyms: []
-    };
-    
-    // Search cities
-    results.cities = await this.searchCities(query);
-    
-    // Search all gyms
-    results.gyms = await this.searchGyms(query);
-    
-    return results;
+  /**
+   * Save a search query to recent searches
+   */
+  static async saveRecentSearch(query: string): Promise<void> {
+    try {
+      const recentSearches = await this.getRecentSearches();
+      
+      // Remove the query if it already exists
+      const filteredSearches = recentSearches.filter(search => search.toLowerCase() !== query.toLowerCase());
+      
+      // Add the new query to the beginning
+      const updatedSearches = [query, ...filteredSearches].slice(0, MAX_RECENT_SEARCHES);
+      
+      await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updatedSearches));
+    } catch (error) {
+      logger.error('Error saving recent search:', error);
+    }
   }
 
-  async searchCities(query: string): Promise<Array<{ name: string; count: number }>> {
-    await this.ensureDataLoaded();
-    
-    const normalizedQuery = query.toLowerCase().trim();
-    const results: Array<{ name: string; count: number }> = [];
-    
-    // Search for Tampa
-    if (normalizedQuery.includes('tampa') || normalizedQuery.includes('fl') || normalizedQuery.includes('florida')) {
-      results.push({ name: 'Tampa, FL', count: this.cachedTampaGyms.length });
+  /**
+   * Clear all recent searches
+   */
+  static async clearRecentSearches(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(RECENT_SEARCHES_KEY);
+    } catch (error) {
+      logger.error('Error clearing recent searches:', error);
     }
-    
-    // Search for Austin
-    if (normalizedQuery.includes('austin') || normalizedQuery.includes('tx') || normalizedQuery.includes('texas')) {
-      results.push({ name: 'Austin, TX', count: this.cachedAustinGyms.length });
-    }
-    
-    return results;
   }
 
-  async searchGyms(query: string): Promise<OpenMat[]> {
-    await this.ensureDataLoaded();
-    
-    const normalizedQuery = query.toLowerCase().trim();
-    const allGyms = [...this.cachedTampaGyms, ...this.cachedAustinGyms];
-    
-    return allGyms.filter(gym => {
-      // Search in gym name
-      if (gym.name.toLowerCase().includes(normalizedQuery)) {
-        return true;
+  /**
+   * Generate search suggestions based on gym data
+   */
+  static generateSuggestions(query: string, gyms: OpenMat[]): string[] {
+    if (!query || query.length < 2) return [];
+
+    const lowerQuery = query.toLowerCase();
+    const suggestions: string[] = [];
+
+    // Search by gym name
+    gyms.forEach(gym => {
+      if (gym.name.toLowerCase().includes(lowerQuery)) {
+        suggestions.push(gym.name);
       }
-      
-      // Search in address
-      if (gym.address.toLowerCase().includes(normalizedQuery)) {
-        return true;
-      }
-      
-      // Search in session types
-      if (gym.openMats.some(session => 
-        session.type.toLowerCase().includes(normalizedQuery)
-      )) {
-        return true;
-      }
-      
-      return false;
     });
+
+    // Search by city/address
+    gyms.forEach(gym => {
+      if (gym.address.toLowerCase().includes(lowerQuery)) {
+        const cityMatch = gym.address.match(/([^,]+),?\s*([A-Z]{2})?/);
+        if (cityMatch && cityMatch[1]) {
+          const city = cityMatch[1].trim();
+          if (!suggestions.includes(city)) {
+            suggestions.push(city);
+          }
+        }
+      }
+    });
+
+    // Remove duplicates and limit results
+    const uniqueSuggestions = Array.from(new Set(suggestions));
+    return uniqueSuggestions.slice(0, 8); // Limit to 8 suggestions
   }
 
-  // Helper method to get gym count by city
-  async getGymCountByCity(city: string): Promise<number> {
-    await this.ensureDataLoaded();
-    
-    switch (city.toLowerCase()) {
-      case 'tampa':
-      case 'tampa, fl':
-        return this.cachedTampaGyms.length;
-      case 'austin':
-      case 'austin, tx':
-        return this.cachedAustinGyms.length;
-      default:
-        return 0;
-    }
+  /**
+   * Search gyms with enhanced matching
+   */
+  static searchGyms(query: string, gyms: OpenMat[]): OpenMat[] {
+    if (!query || query.length < 2) return [];
+
+    const lowerQuery = query.toLowerCase();
+    const results: OpenMat[] = [];
+
+    gyms.forEach(gym => {
+      // Check gym name
+      if (gym.name.toLowerCase().includes(lowerQuery)) {
+        results.push(gym);
+        return;
+      }
+
+      // Check address
+      if (gym.address.toLowerCase().includes(lowerQuery)) {
+        results.push(gym);
+        return;
+      }
+
+      // Check session types
+      if (gym.openMats.some(session => 
+        session.type.toLowerCase().includes(lowerQuery) ||
+        session.day.toLowerCase().includes(lowerQuery)
+      )) {
+        results.push(gym);
+        return;
+      }
+    });
+
+    // Remove duplicates based on gym ID (shouldn't be needed now, but keeping for safety)
+    const uniqueResults = results.reduce((acc: OpenMat[], gym) => {
+      const exists = acc.find(g => g.id === gym.id);
+      if (!exists) {
+        acc.push(gym);
+      }
+      return acc;
+    }, []);
+
+    return uniqueResults.slice(0, 10); // Limit to 10 results
   }
 
-  // Helper method to get all available cities
-  async getAvailableCities(): Promise<Array<{ name: string; count: number }>> {
-    await this.ensureDataLoaded();
-    
-    return [
-      { name: 'Tampa, FL', count: this.cachedTampaGyms.length },
-      { name: 'Austin, TX', count: this.cachedAustinGyms.length }
+  /**
+   * Get popular gym names for suggestions
+   */
+  static getPopularGyms(gyms: OpenMat[]): string[] {
+    // Return a list of popular gym names for initial suggestions
+    const popularGyms = [
+      'Gracie',
+      '10th Planet',
+      'South Tampa Jiu Jitsu',
+      'Robson Moura',
+      'Kaizen',
+      'YCJJC',
+      'Tactics Jiu-Jitsu',
+      'North River BJJ',
+      'Tampa Muay Thai',
+      'Gracie Trinity',
+      'Gracie Clermont',
+      'St Pete BJJ',
+      'Inside Control Academy',
+      'Tampa Jiu Jitsu',
+      'Gracie Tampa South',
+      'Collective MMA Tampa',
+      'Wesley Chapel Gym',
+      'Gracie Jiu Jitsu Largo'
     ];
-  }
-}
 
-// Export singleton instance
-export const searchService = new SearchServiceImpl(); 
+    // Filter to only include gyms that exist in the data
+    const existingGymNames = gyms.map(gym => gym.name);
+    return popularGyms.filter(name => 
+      existingGymNames.some(gymName => 
+        gymName.toLowerCase().includes(name.toLowerCase())
+      )
+    ).slice(0, 6);
+  }
+} 

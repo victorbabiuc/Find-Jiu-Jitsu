@@ -15,14 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Share, Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { captureCardAsImage } from '../utils/screenshot';
-import { OpenMat } from '../types';
+import { OpenMat, OpenMatSession } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
 interface CustomShareModalProps {
   visible: boolean;
   onClose: () => void;
   gym: OpenMat;
-  session: any;
+  session: OpenMatSession;
   shareCardRef: React.RefObject<View>;
   imageUri?: string;
 }
@@ -416,9 +416,9 @@ const styles = StyleSheet.create({
     top: 20,
     right: 20,
     zIndex: 1,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -538,6 +538,8 @@ const styles = StyleSheet.create({
     width: 65,
     alignItems: 'center',
     marginBottom: 20,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   disabledShareOption: {
     opacity: 0.5,

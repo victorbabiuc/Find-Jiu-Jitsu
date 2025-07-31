@@ -4,4 +4,25 @@
 export { beltColors, selectionColor, loadingMessages, quickDateOptions, timeOfDayOptions } from './constants';
 export { captureAndShareCard, captureCardAsImage } from './screenshot';
 export { haptics } from './haptics';
-export { animations, animationConfigs } from './animations'; 
+export { animations, animationConfigs } from './animations';
+
+// Gym utilities
+export {
+  formatTimeRange,
+  formatTimeRangeSmart,
+  parseTime,
+  formatHourMinute,
+  formatSingleTime,
+  addOneHour,
+  getSessionTypeWithIcon,
+  getMatTypeDisplay,
+  formatDate,
+  openWebsite,
+  openDirections,
+  handleCopyGym,
+  formatOpenMats,
+  formatSessionsList,
+} from './gymUtils';
+
+// Logging utilities
+export { logger } from './logger'; 

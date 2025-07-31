@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { logger } from '../utils';
 
 interface GoogleSignInButtonProps {
   onSuccess?: () => void;
@@ -18,7 +19,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       await signInWithGoogle();
       onSuccess?.();
     } catch (error) {
-      console.error('Google Sign-In failed:', error);
+      logger.error('Google Sign-In failed:', error);
       Alert.alert('Sign-In Failed', 'Unable to sign in with Google. Please try again.');
       onError?.(error as Error);
     }

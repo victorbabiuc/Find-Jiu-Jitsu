@@ -1,12 +1,12 @@
-# Privacy Policy for Find Jiu Jitsu
+# Privacy Policy for JiuJitsu Finder
 
 **Effective Date:** June 27, 2025
 
-Thank you for using Find Jiu Jitsu ("the app"). Your privacy is important to us. This policy explains what information we collect, how we use it, and your rights regarding your data.
+Thank you for using JiuJitsu Finder ("the app"). Your privacy is important to us. This policy explains what information we collect, how we use it, and your rights regarding your data.
 
 ## Information Collection
 - **No Personal Information Collected:**
-  - Find Jiu Jitsu does **not** collect, store, or transmit any personal information.
+  - JiuJitsu Finder does **not** collect, store, or transmit any personal information.
   - There are **no user accounts** or authentication features.
   - The app does **not** use analytics or tracking tools.
 
@@ -23,7 +23,7 @@ Thank you for using Find Jiu Jitsu ("the app"). Your privacy is important to us.
 - We are not responsible for the privacy practices or content of these external sites. Please review their privacy policies if you visit them.
 
 ## Children's Privacy
-- Find Jiu Jitsu is intended for general audiences and does **not** knowingly collect information from children under 13.
+- JiuJitsu Finder is intended for general audiences and does **not** knowingly collect information from children under 13.
 
 ## Changes to This Policy
 - We may update this privacy policy from time to time. Changes will be posted in the app repository and will be effective immediately upon posting.

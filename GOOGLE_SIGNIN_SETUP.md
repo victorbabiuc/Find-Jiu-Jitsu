@@ -1,160 +1,174 @@
-# Google Sign-In Setup Guide for Find Jiu Jitsu
+# Google Sign-In Setup Guide for JiuJitsu Finder
 
-## 🚀 Complete Setup Instructions
+This guide will help you set up Google Sign-In for the JiuJitsu Finder app.
 
-### Prerequisites
-1. Firebase project configured (`find-jiu-jitsu`)
-2. Google Cloud Console access
-3. Expo development environment
+## Prerequisites
 
-### Step 1: Enable Google Sign-In in Firebase Console
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project (`find-jiu-jitsu`)
-3. Go to **Authentication** > **Sign-in method**
-4. Enable **Google** provider
-5. Configure the OAuth consent screen if needed
-6. Add your support email
+- Google Cloud Console access
+- Expo development environment
+- Firebase project (optional, for backend)
 
-### Step 2: Get Client IDs from Google Cloud Console
+## Step 1: Google Cloud Console Setup
 
-#### 2.1 Access Google Cloud Console
+### 1.1 Create OAuth 2.0 Client IDs
+
+#### Web Client
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Select your Firebase project (`find-jiu-jitsu`)
-3. Go to **APIs & Services** > **Credentials**
-
-#### 2.2 Create OAuth 2.0 Client IDs
-
-**For Web Application (Expo Development):**
-1. Click **"Create Credentials"** > **"OAuth 2.0 Client IDs"**
-2. Choose **"Web application"**
-3. Name: `Find Jiu Jitsu - Web Client`
-4. Authorized JavaScript origins:
+2. Select your project
+3. Go to "APIs & Services" > "Credentials"
+4. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+5. Name: `JiuJitsu Finder - Web Client`
+6. Application type: Web application
+7. Add authorized origins:
    - `https://auth.expo.io`
-   - `https://localhost:8081`
-   - `https://localhost:19006`
-5. Authorized redirect URIs:
-   - `https://auth.expo.io/@your-expo-username/FindJiuJitsu`
-   - `https://localhost:8081`
-6. Click **"Create"**
-7. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+   - `https://your-expo-username.github.io`
 
-**For iOS Application:**
-1. Click **"Create Credentials"** > **"OAuth 2.0 Client IDs"**
-2. Choose **"iOS"**
-3. Name: `Find Jiu Jitsu - iOS Client`
+#### iOS Client
+1. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+2. Name: `JiuJitsu Finder - iOS Client`
+3. Application type: iOS
 4. Bundle ID: `com.anonymous.OpenMatFinder`
-5. Click **"Create"**
-6. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 
-**For Android Application:**
-1. Click **"Create Credentials"** > **"OAuth 2.0 Client IDs"**
-2. Choose **"Android"**
-3. Name: `Find Jiu Jitsu - Android Client`
+#### Android Client
+1. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+2. Name: `JiuJitsu Finder - Android Client`
+3. Application type: Android
 4. Package name: `com.anonymous.OpenMatFinder`
-5. SHA-1 certificate fingerprint: (get this from your Android keystore)
-6. Click **"Create"**
-7. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+5. SHA-1 certificate fingerprint: Get from your keystore
 
-### Step 3: Configure Environment Variables
+### 1.2 Configure OAuth Consent Screen
+1. Go to "APIs & Services" > "OAuth consent screen"
+2. Configure app information:
+   - App name: `JiuJitsu Finder`
+   - User support email: Your email
+   - Developer contact information: Your email
+3. Add scopes: `email`, `profile`, `openid`
 
-Create a `.env` file in your project root with:
+## Step 2: Expo Configuration
 
-```env
-# Google Sign-In Configuration
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your-web-client-id-here
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your-ios-client-id-here
-EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=your-android-client-id-here
-
-# Firebase Configuration (already configured)
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSyDZNXEoRE-Rnee7mf20WR2b4dd3OQY21ks
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=find-jiu-jitsu.firebaseapp.com
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=find-jiu-jitsu
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=find-jiu-jitsu.firebasestorage.app
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=713938761178
-EXPO_PUBLIC_FIREBASE_APP_ID=1:713938761178:ios:e6e6b80194abed20267ce3
-```
-
-### Step 4: Update Configuration Files
-
-#### 4.1 app.json (Already Updated)
-The app.json has been updated with:
-- Scheme: `findjiujitsu`
-- iOS Google Services file path
-- Android Google Services file path
-
-#### 4.2 AuthContext.tsx (Already Updated)
-The Google auth request configuration has been updated to use:
-- `webClientId` instead of `clientId`
-- Proper environment variable names
-- Better error handling
-
-### Step 5: Test Google Sign-In
-
-#### 5.1 Development Testing
-1. Create the `.env` file with your client IDs
-2. Run `npx expo start --clear`
-3. Test Google Sign-In on iOS simulator or device
-4. Check console logs for authentication flow
-
-#### 5.2 Expected Console Output
-```
-🔐 AuthContext: Starting Google sign-in
-🔐 AuthContext: Google sign-in initiated successfully
-🔐 AuthContext: Received ID token from Google, signing in to Firebase
-🔐 AuthContext: Google sign-in successful user@example.com
-```
-
-### Step 6: Troubleshooting
-
-#### Common Issues:
-
-**"Google authentication not configured"**
-- Check that all client IDs are set in `.env`
-- Verify environment variables are loaded correctly
-
-**"Invalid client" error**
-- Ensure client IDs match exactly from Google Cloud Console
-- Check that bundle ID matches in iOS client configuration
-
-**"Redirect URI mismatch"**
-- Verify authorized redirect URIs in Google Cloud Console
-- Check that your Expo username is correct in the redirect URI
-
-**"Network error"**
-- Check internet connectivity
-- Verify Firebase project is active
-- Ensure Google Sign-In API is enabled
-
-### Step 7: Production Deployment
-
-For production builds:
-1. Update OAuth consent screen with app privacy policy
-2. Add production redirect URIs
-3. Configure proper SHA-1 fingerprints for Android
-4. Test on real devices before release
-
-## 🎯 Quick Start Checklist
-
-- [ ] Firebase project created (`find-jiu-jitsu`)
-- [ ] Google Sign-In enabled in Firebase Console
-- [ ] OAuth 2.0 Client IDs created in Google Cloud Console
-- [ ] `.env` file created with client IDs
-- [ ] app.json updated with scheme and Google services paths
-- [ ] AuthContext.tsx updated with proper configuration
-- [ ] Tested on iOS simulator/device
-- [ ] Console logs show successful authentication flow
-
-## 📱 Testing Commands
-
+### 2.1 Install Dependencies
 ```bash
-# Start with clean cache
-npx expo start --clear
-
-# Test on iOS
-npx expo start --ios
-
-# Test on Android
-npx expo start --android
+npx expo install @react-native-google-signin/google-signin expo-auth-session expo-crypto
 ```
 
-Once you complete these steps, Google Sign-In will be fully functional! 🚀 
+### 2.2 Configure app.json
+```json
+{
+  "expo": {
+    "scheme": "findjiujitsu",
+    "ios": {
+      "bundleIdentifier": "com.anonymous.OpenMatFinder"
+    },
+    "android": {
+      "package": "com.anonymous.OpenMatFinder"
+    }
+  }
+}
+```
+
+### 2.3 Configure Google Sign-In
+```typescript
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+  iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  offlineAccess: true,
+});
+```
+
+## Step 3: Authentication Flow
+
+### 3.1 Sign-In Function
+```typescript
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+const signIn = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    console.log('User info:', userInfo);
+  } catch (error) {
+    console.error('Sign-in error:', error);
+  }
+};
+```
+
+### 3.2 Sign-Out Function
+```typescript
+const signOut = async () => {
+  try {
+    await GoogleSignin.signOut();
+    console.log('User signed out');
+  } catch (error) {
+    console.error('Sign-out error:', error);
+  }
+};
+```
+
+## Step 4: Environment Variables
+
+### 4.1 Create .env file
+```env
+GOOGLE_WEB_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=your_ios_client_id.apps.googleusercontent.com
+GOOGLE_ANDROID_CLIENT_ID=your_android_client_id.apps.googleusercontent.com
+```
+
+### 4.2 Configure Expo
+```json
+{
+  "expo": {
+    "extra": {
+      "googleWebClientId": process.env.GOOGLE_WEB_CLIENT_ID,
+      "googleIosClientId": process.env.GOOGLE_IOS_CLIENT_ID,
+      "googleAndroidClientId": process.env.GOOGLE_ANDROID_CLIENT_ID
+    }
+  }
+}
+```
+
+## Step 5: Testing
+
+### 5.1 Test Configuration
+```bash
+npx expo start
+```
+
+### 5.2 Test Sign-In
+1. Open app on device/simulator
+2. Tap "Sign in with Google"
+3. Complete OAuth flow
+4. Verify user data
+
+## Troubleshooting
+
+### Common Issues
+1. **"Sign in failed"**: Check client IDs and bundle identifiers
+2. **"Network error"**: Verify internet connection
+3. **"Invalid client"**: Ensure OAuth consent screen is configured
+
+### Debug Steps
+1. Check Google Cloud Console for OAuth logs
+2. Verify client IDs match your configuration
+3. Test with different devices/simulators
+4. Check network requests in developer tools
+
+## Security Considerations
+
+1. **Never commit client IDs** to version control
+2. **Use environment variables** for sensitive data
+3. **Restrict OAuth scopes** to minimum required
+4. **Monitor authentication logs** for suspicious activity
+
+## Next Steps
+
+After successful setup:
+1. Implement user profile management
+2. Add cloud sync for favorites
+3. Set up push notifications
+4. Configure analytics tracking
+
+---
+
+**Need Help?** Create an issue in the repository or contact glootieapp@gmail.com 

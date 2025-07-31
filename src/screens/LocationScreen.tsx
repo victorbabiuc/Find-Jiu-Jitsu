@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,12 @@ import * as Location from 'expo-location';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useFindNavigation } from '../navigation/useNavigation';
-import { beltColors } from '../utils/constants';
+import { beltColors, haptics } from '../utils';
 import { useLoading } from '../context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { searchService } from '../services';
+import { SearchService, githubDataService } from '../services';
+import { OpenMat, OpenMatSession, GymSearchResult } from '../types';
 
 const LocationScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -26,11 +27,29 @@ const LocationScreen: React.FC = () => {
   const navigation = useFindNavigation();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ cities: Array<{ name: string; count: number }>; gyms: any[] }>({ cities: [], gyms: [] });
+  const [searchResults, setSearchResults] = useState<GymSearchResult>({ cities: [], gyms: [] });
+  const [allGyms, setAllGyms] = useState<OpenMat[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const { showLoading, hideLoading } = useLoading();
   
   const beltColor = beltColors[userBelt];
+
+  // Load gym data on component mount
+  useEffect(() => {
+    const loadGymData = async () => {
+      try {
+        const [tampaGyms, austinGyms] = await Promise.all([
+          githubDataService.getGymData('tampa'),
+          githubDataService.getGymData('austin')
+        ]);
+        setAllGyms([...tampaGyms, ...austinGyms]);
+      } catch (error) {
+        console.error('Error loading gym data:', error);
+      }
+    };
+    
+    loadGymData();
+  }, []);
 
   const requestLocationPermission = async (): Promise<boolean> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -70,6 +89,7 @@ const LocationScreen: React.FC = () => {
   };
 
   const handleNearMe = async () => {
+    haptics.medium(); // Medium haptic for location action
     setIsLoadingLocation(true);
     showLoading();
     try {
@@ -121,6 +141,7 @@ const LocationScreen: React.FC = () => {
   };
 
   const handleLocationSelect = (location: string) => {
+    haptics.medium(); // Medium haptic for location selection
     setSelectedLocation(location);
     showLoading();
     // Navigate immediately - loading will be hidden by navigation state listener
@@ -144,10 +165,11 @@ const LocationScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const GymQuickCard: React.FC<{ gym: any }> = ({ gym }) => (
+  const GymQuickCard: React.FC<{ gym: OpenMat }> = ({ gym }) => (
     <TouchableOpacity
       style={[styles.gymCard, { backgroundColor: theme.surface }]}
       onPress={() => {
+        haptics.light(); // Light haptic for gym selection
         // Navigate to results with this gym pre-selected
         setSelectedLocation(gym.address.includes('Tampa') ? 'Tampa, FL' : 'Austin, TX');
         showLoading();
@@ -179,9 +201,24 @@ const LocationScreen: React.FC = () => {
     
     setIsSearching(true);
     try {
-      const results = await searchService.searchAll(text);
-      setSearchResults(results);
-      console.log('Search results:', results);
+      const lowerText = text.toLowerCase();
+      
+      // Search for cities
+      const cities: Array<{ name: string; count: number }> = [];
+      if (lowerText.includes('tampa') || lowerText.includes('fl') || lowerText.includes('florida')) {
+        const tampaGyms = allGyms.filter(gym => gym.address.toLowerCase().includes('tampa'));
+        cities.push({ name: 'Tampa, FL', count: tampaGyms.length });
+      }
+      if (lowerText.includes('austin') || lowerText.includes('tx') || lowerText.includes('texas')) {
+        const austinGyms = allGyms.filter(gym => gym.address.toLowerCase().includes('austin'));
+        cities.push({ name: 'Austin, TX', count: austinGyms.length });
+      }
+      
+      // Search for gyms
+      const gyms = SearchService.searchGyms(text, allGyms);
+      
+      setSearchResults({ cities, gyms });
+      console.log('Search results:', { cities, gyms });
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults({ cities: [], gyms: [] });

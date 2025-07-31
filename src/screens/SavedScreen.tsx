@@ -14,14 +14,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
+
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors, haptics, animations } from '../utils';
-import { OpenMat } from '../types';
-import { GymDetailsModal } from '../components';
+import { OpenMat, OpenMatSession } from '../types';
+import { GymDetailsModal, ContactFooter } from '../components';
 import { apiService, gymLogoService } from '../services';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
@@ -50,13 +50,12 @@ const SavedScreen: React.FC = () => {
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
   const listAnim = useRef(new Animated.Value(0)).current;
+  const heartScaleAnim = useRef(new Animated.Value(1)).current;
+  // const heartColorAnim = useRef(new Animated.Value(1)).current; // Temporarily disabled
 
   // Fetch saved gyms data
   useEffect(() => {
     const fetchSavedGyms = async () => {
-      // Show transitional loading for data fetching
-      showTransitionalLoading("Loading your favorites...", 1500);
-      
       try {
         // Get all gyms from API and filter by favorites
         const location = selectedLocation || 'Tampa';
@@ -115,17 +114,42 @@ const SavedScreen: React.FC = () => {
   }, [savedGyms]);
 
   const handleGymPress = (gym: OpenMat) => {
+    haptics.light(); // Light haptic for gym card selection
     setSelectedGym(gym);
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
+    haptics.light(); // Light haptic for modal close
     setModalVisible(false);
     setSelectedGym(null);
   };
 
   const handleHeartPress = (gym: OpenMat) => {
-    haptics.light(); // Light haptic for heart button
+    const isFavorited = favorites.has(gym.id);
+    
+    // Haptic feedback
+    if (isFavorited) {
+      haptics.light(); // Light haptic for unfavoriting
+    } else {
+      haptics.success(); // Success haptic for favoriting
+    }
+    
+    // Heart button animation
+    animations.sequence([
+      animations.scale(heartScaleAnim, 1.3, 150),
+      animations.scale(heartScaleAnim, 1, 200),
+    ]).start();
+    
+    // Color transition animation - temporarily disabled
+    // const targetColor = isFavorited ? 0 : 1;
+    // Animated.timing(heartColorAnim, {
+    //   toValue: targetColor,
+    //   duration: 300,
+    //   useNativeDriver: false,
+    // }).start();
+    
+    // Call the original handler
     toggleFavorite(gym.id);
   };
 
@@ -166,7 +190,7 @@ const SavedScreen: React.FC = () => {
 
 
 
-  const formatOpenMats = (openMats: any[]) => {
+  const formatOpenMats = (openMats: OpenMatSession[]) => {
     return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
   };
 
@@ -179,24 +203,6 @@ const SavedScreen: React.FC = () => {
       {/* Header */}
       <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }, { opacity: headerAnim }]}>
         <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Saved Gyms</Text>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              'Send us your suggestions!',
-              'glootieapp@gmail.com\n\nTap Copy to copy the email address and send us your feedback!',
-              [
-                {
-                  text: 'Copy',
-                  onPress: () => Clipboard.setStringAsync('glootieapp@gmail.com'),
-                },
-                { text: 'Cancel', style: 'cancel' },
-              ]
-            );
-          }}
-          accessibilityLabel="Send Suggestions"
-        >
-          <Ionicons name="mail-outline" size={26} color={theme.text.secondary} />
-        </TouchableOpacity>
       </Animated.View>
 
       {/* Content */}
@@ -272,20 +278,19 @@ const SavedScreen: React.FC = () => {
                 <Text style={[styles.timeText, { color: theme.text.secondary }]} numberOfLines={1}>{formatOpenMats(gym.openMats)}</Text>
                 <View style={styles.cardFooter}>
                   {getPriceDisplay(gym.matFee)}
-                  <TouchableOpacity
-                    style={styles.heartButton}
-                    onPress={() => {
-                      haptics.light(); // Light haptic for heart button
-                      handleHeartPress(gym);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons 
-                      name="heart" 
-                      size={20} 
-                      color="#EF4444" 
-                    />
-                  </TouchableOpacity>
+                  <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
+                    <TouchableOpacity
+                      style={styles.heartButton}
+                      onPress={() => handleHeartPress(gym)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons 
+                        name="heart" 
+                        size={20} 
+                        color="#EF4444"
+                      />
+                    </TouchableOpacity>
+                  </Animated.View>
                 </View>
               </View>
             </TouchableOpacity>
@@ -304,6 +309,10 @@ const SavedScreen: React.FC = () => {
           isFavorited={favorites.has(selectedGym.id)}
         />
       )}
+
+      {/* Contact Footer */}
+      <ContactFooter />
+
     </SafeAreaView>
   );
 };
@@ -434,7 +443,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   heartButton: {
-    padding: 4,
+    padding: 12,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

@@ -22,7 +22,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 interface AppContextProviderProps {
-  children: any;
+  children: React.ReactNode;
 }
 
 export const AppProvider = ({ children }: AppContextProviderProps) => {

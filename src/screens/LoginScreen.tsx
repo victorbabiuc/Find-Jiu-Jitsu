@@ -16,7 +16,7 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useRootNavigation } from '../navigation/useNavigation';
 import { useLoading } from '../context';
-import { beltColors } from '../utils/constants';
+import { beltColors, haptics } from '../utils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -53,6 +53,7 @@ const LoginScreen = () => {
   }, [currentBeltIndex]);
 
   const handleGetStarted = () => {
+    haptics.medium(); // Medium haptic for get started action
     showLoading();
     // Use navigation.reset() to safely navigate to Main
     navigation.reset({
@@ -63,6 +64,7 @@ const LoginScreen = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      haptics.medium(); // Medium haptic for sign in action
       showLoading();
       await signInWithGoogle();
       // Only navigate if sign-in was successful (no error thrown)
@@ -79,6 +81,7 @@ const LoginScreen = () => {
 
   const handleAppleSignIn = async () => {
     try {
+      haptics.medium(); // Medium haptic for sign in action
       showLoading();
       await signInWithApple();
       navigation.reset({
@@ -104,7 +107,7 @@ const LoginScreen = () => {
           
           {/* Title */}
           <Text style={[styles.title, { color: theme.text.primary }]}>
-            FIND JIU JITSU
+            JIUJITSU FINDER
           </Text>
           <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
             Your Training Companion

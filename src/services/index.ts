@@ -7,4 +7,4 @@ export { validationRules } from './validation.service';
 export { githubDataService } from './github-data.service';
 export { syncFavorites, getFavorites } from './favorites.service';
 export { gymLogoService } from './gym-logo.service';
-export { searchService } from './search.service'; 
+export { SearchService } from './search.service'; 

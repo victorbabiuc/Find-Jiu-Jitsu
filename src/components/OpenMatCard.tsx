@@ -8,12 +8,13 @@ import { ShareCard, Toast } from './index';
 import { captureAndShareCard } from '../utils/screenshot';
 import { haptics, animations } from '../utils';
 import { useTheme } from '../context/ThemeContext';
+import { OpenMat, OpenMatSession } from '../types';
 
 interface OpenMatCardProps {
-  gym: any;
+  gym: OpenMat;
   favorites: Set<string>;
-  onHeartPress: (gym: any) => void;
-  onPress?: (gym: any) => void;
+  onHeartPress: (gym: OpenMat) => void;
+  onPress?: (gym: OpenMat) => void;
   openWebsite: (url: string) => void;
   openDirections: (address: string) => void;
 }
@@ -49,6 +50,9 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const buttonScaleAnim = useRef(new Animated.Value(1)).current;
+  const heartScaleAnim = useRef(new Animated.Value(1)).current;
+  const cardPressAnim = useRef(new Animated.Value(1)).current;
+  // const heartColorAnim = useRef(new Animated.Value(0)).current; // Temporarily disabled
 
   // State tracking removed for production
 
@@ -121,6 +125,34 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
     setShowShareOptions(true);
   };
 
+  const handleHeartPress = () => {
+    const isFavorited = favorites.has(gym.id);
+    
+    // Haptic feedback
+    if (isFavorited) {
+      haptics.light(); // Light haptic for unfavoriting
+    } else {
+      haptics.success(); // Success haptic for favoriting
+    }
+    
+    // Heart button animation
+    animations.sequence([
+      animations.scale(heartScaleAnim, 1.3, 150),
+      animations.scale(heartScaleAnim, 1, 200),
+    ]).start();
+    
+    // Color transition animation - temporarily disabled
+    // const targetColor = isFavorited ? 0 : 1;
+    // Animated.timing(heartColorAnim, {
+    //   toValue: targetColor,
+    //   duration: 300,
+    //   useNativeDriver: false,
+    // }).start();
+    
+    // Call the original handler
+    onHeartPress(gym);
+  };
+
   const handleCopy = async () => {
     if (isCopying) return; // Prevent multiple clicks
     
@@ -178,7 +210,38 @@ ${sessionInfo}
         />
       )}
       
-      <TouchableOpacity onPress={onPress ? () => onPress(gym) : undefined} activeOpacity={onPress ? 0.9 : 1} style={styles.card}>
+      <View 
+        style={[
+          styles.card,
+          {
+            transform: [{ scale: cardPressAnim }]
+          }
+        ]}
+        onTouchStart={() => {
+          if (onPress) {
+            Animated.spring(cardPressAnim, {
+              toValue: 0.98,
+              tension: 100,
+              friction: 8,
+              useNativeDriver: true,
+            }).start();
+          }
+        }}
+        onTouchEnd={() => {
+          if (onPress) {
+            Animated.spring(cardPressAnim, {
+              toValue: 1,
+              tension: 100,
+              friction: 8,
+              useNativeDriver: true,
+            }).start();
+            // Small delay to ensure animation completes before navigation
+            setTimeout(() => {
+              onPress(gym);
+            }, 100);
+          }
+        }}
+      >
       {/* Header: Logo/Avatar + Gym Name + Heart */}
       <View style={styles.cardHeader}>
         {gym.id.includes('10th-planet') ? (
@@ -192,17 +255,19 @@ ${sessionInfo}
         )}
         <Text style={styles.gymName}>{gym.name}</Text>
         <View style={styles.logoHeartContainer}>
-          <TouchableOpacity 
-            style={styles.heartButton}
-            onPress={() => {
-              haptics.light(); // Light haptic for heart button
-              onHeartPress(gym);
-            }}
-          >
-            <Text style={styles.heartIcon}>
-              {favorites.has(gym.id) ? '♥' : '♡'}
-            </Text>
-          </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
+            <TouchableOpacity 
+              style={styles.heartButton}
+              onPress={handleHeartPress}
+            >
+              <Text style={[
+                styles.heartIcon,
+                { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' }
+              ]}>
+                {favorites.has(gym.id) ? '♥' : '♡'}
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
           <Animated.View style={{ transform: [{ scale: buttonScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.copyButton, isCopying && styles.disabledButton]}
@@ -224,7 +289,7 @@ ${sessionInfo}
 
       {/* Sessions Section */}
       <View style={styles.sessionsSection}>
-        {gym.openMats.map((session: any, index: number) => (
+                    {gym.openMats.map((session: OpenMatSession, index: number) => (
           <View key={index} style={styles.sessionBlock}>
             <Text style={styles.dayHeader}>
               {session.day.toUpperCase()}
@@ -301,7 +366,7 @@ ${sessionInfo}
           )}
         </TouchableOpacity>
       </View>
-      </TouchableOpacity>
+      </View>
 
       {/* Share Options Modal - Moved outside TouchableOpacity */}
       <Modal
@@ -494,16 +559,23 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   copyButton: {
-    padding: 4,
+    padding: 12,
     marginLeft: 4,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heartButton: {
-    padding: 4,
+    padding: 12,
     marginRight: 4,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heartIcon: {
     fontSize: 24,
-    color: '#FF6B6B',
   },
   sessionSubtitle: {
     fontSize: 14,
@@ -575,14 +647,14 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     backgroundColor: '#F8F9FA',
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    minHeight: 36,
+    minHeight: 44,
   },
   buttonText: {
     fontSize: 11,

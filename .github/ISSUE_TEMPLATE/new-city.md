@@ -1,74 +1,43 @@
 ---
 name: Add New City
-about: Add a new city to the Find Jiu Jitsu app
-title: 'Add City: [City Name]'
-labels: ['enhancement', 'data', 'city']
+about: Add a new city to the JiuJitsu Finder app
+title: 'Add [City Name] to JiuJitsu Finder'
+labels: ['enhancement', 'data', 'new-city']
 assignees: ''
 ---
 
 ## City Information
 
-**City Name**: 
-**State/Province**: 
-**Country**: 
-**Estimated Number of Gyms**: 
+**City Name**: [e.g., Miami, FL]
+**State/Province**: [e.g., Florida]
+**Country**: [e.g., USA]
 
 ## Gym Data
 
-Please provide information for at least 3-5 gyms in this city. Use the format below:
+**Number of Gyms**: [e.g., 5-10 gyms]
+**Data Source**: [e.g., Personal knowledge, gym websites, community input]
 
-### Gym 1: [Gym Name]
-- **Address**: 
-- **Website**: 
-- **Open Mat Sessions**:
-  - Day: Time (Type) - Fee
-  - Day: Time (Type) - Fee
-- **Drop-in Fee**: 
+## Implementation Plan
 
-### Gym 2: [Gym Name]
-- **Address**: 
-- **Website**: 
-- **Open Mat Sessions**:
-  - Day: Time (Type) - Fee
-- **Drop-in Fee**: 
+- [ ] Create CSV file: `data/[city]-gyms.csv`
+- [ ] Add gym data with proper formatting
+- [ ] Run geocoding script: `node geocode-city.js [city]`
+- [ ] Update app code to include new city
+- [ ] Test locally with `npx expo start`
+- [ ] Submit pull request
 
-### Gym 3: [Gym Name]
-- **Address**: 
-- **Website**: 
-- **Open Mat Sessions**:
-  - Day: Time (Type) - Fee
-- **Drop-in Fee**: 
+## Additional Notes
 
-## Data Quality
+[Any additional information about the city, gyms, or special considerations]
 
-- [ ] I have verified information with multiple gyms
-- [ ] I can provide at least 3 gyms with open mat sessions
-- [ ] I have accurate addresses for geocoding
-- [ ] I am willing to help create the CSV file
-- [ ] I can test the implementation locally
+## Checklist
 
-## Community Impact
-
-**Why this city should be added**:
-- [ ] Large Jiu Jitsu community
-- [ ] Many gyms with open mats
-- [ ] High demand from users
-- [ ] Strategic location for expansion
-
-## Additional Information
-
-- **Local Jiu Jitsu Scene**: (brief description)
-- **Major Tournaments**: (if any)
-- **Notable Gyms**: (famous or large gyms)
-- **Contact Person**: (if you can help coordinate)
-
-## Implementation Help
-
-- [ ] I can help create the CSV file
-- [ ] I can help with geocoding
-- [ ] I can test the implementation
-- [ ] I can provide ongoing data updates
+- [ ] I have verified the gym information is accurate
+- [ ] I have followed the CSV format requirements
+- [ ] I have tested the geocoding process
+- [ ] I have tested the app locally
+- [ ] I have included all required gym information
 
 ---
 
-**Note**: Adding a new city requires significant data collection and verification. Please ensure you can provide quality data for multiple gyms. 
+**Contact**: glootieapp@gmail.com 

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { AnimationValue, NavigationState } from '../types';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import { Platform, Easing } from 'react-native';
 import { useApp, useLoading, useTheme, useAuth } from '../context';
 import { beltColors, selectionColor } from '../utils';
 import {
@@ -39,7 +40,47 @@ const FindStackNavigator = () => {
       initialRouteName="TimeSelection"
       screenOptions={{
         headerShown: false,
-        gestureEnabled: false, // Disable swipe back gesture
+        gestureEnabled: true, // Enable swipe back gesture for smooth UX
+        cardStyleInterpolator: ({ current, layouts }: any) => {
+          return {
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
+                },
+              ],
+              opacity: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.5],
+              }),
+            },
+          };
+        },
+        transitionSpec: {
+          open: {
+            animation: 'timing',
+            config: {
+              duration: 300,
+              easing: Easing.out(Easing.cubic),
+            },
+          },
+          close: {
+            animation: 'timing',
+            config: {
+              duration: 250,
+              easing: Easing.in(Easing.cubic),
+            },
+          },
+        },
       }}
       screenListeners={{
         focus: () => {
@@ -53,7 +94,6 @@ const FindStackNavigator = () => {
         component={LocationScreen}
         options={{ 
           headerShown: false,
-          gestureEnabled: false
         }}
       />
       <FindStack.Screen 
@@ -61,7 +101,6 @@ const FindStackNavigator = () => {
         component={TimeSelectionScreen}
         options={{ 
           headerShown: false,
-          gestureEnabled: false
         }}
       />
       <FindStack.Screen 
@@ -69,7 +108,6 @@ const FindStackNavigator = () => {
         component={ResultsScreen}
         options={{ 
           headerShown: false,
-          gestureEnabled: false
         }}
       />
       <FindStack.Screen 
@@ -77,7 +115,6 @@ const FindStackNavigator = () => {
         component={MapViewScreen}
         options={{ 
           headerShown: false,
-          gestureEnabled: false
         }}
       />
     </FindStack.Navigator>
@@ -117,6 +154,48 @@ const MainTabNavigator = () => {
         tabBarActiveTintColor: selectionColor,
         tabBarInactiveTintColor: theme.text.secondary,
         headerShown: false,
+        // Smooth tab transitions
+        tabBarStyle: {
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        // Add fade transition for tab screens
+        cardStyleInterpolator: ({ current, layouts }: AnimationValue) => {
+          return {
+            cardStyle: {
+              opacity: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 1],
+              }),
+              transform: [
+                {
+                  translateY: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                },
+              ],
+            },
+          };
+        },
+        transitionSpec: {
+          open: {
+            animation: 'timing',
+            config: {
+              duration: 250,
+              easing: Easing.out(Easing.cubic),
+            },
+          },
+          close: {
+            animation: 'timing',
+            config: {
+              duration: 200,
+              easing: Easing.in(Easing.cubic),
+            },
+          },
+        },
       })}
       screenListeners={{
         focus: () => {
@@ -225,7 +304,7 @@ const AppNavigator = () => {
   };
 
   // Handle navigation state changes
-  const handleNavigationStateChange = useCallback((state: any) => {
+  const handleNavigationStateChange = useCallback((state: NavigationState | undefined) => {
     if (!state || !state.routes || state.routes.length === 0) return;
 
     const currentRoute = state.routes[state.index];
@@ -283,7 +362,48 @@ const AppNavigator = () => {
           headerShown: false,
           headerBackTitleVisible: false,
           headerLeft: () => null,
-          gestureEnabled: false,
+          gestureEnabled: true,
+                  // Smooth stack transitions
+        cardStyleInterpolator: ({ current, layouts }: AnimationValue) => {
+            return {
+              cardStyle: {
+                transform: [
+                  {
+                    translateX: current.progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [layouts.screen.width, 0],
+                    }),
+                  },
+                ],
+                opacity: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.3, 1],
+                }),
+              },
+              overlayStyle: {
+                opacity: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.5],
+                }),
+              },
+            };
+          },
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 300,
+                easing: Easing.out(Easing.cubic),
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 250,
+                easing: Easing.in(Easing.cubic),
+              },
+            },
+          },
         }}
       >
         <RootStack.Screen 

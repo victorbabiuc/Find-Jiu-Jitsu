@@ -1,6 +1,7 @@
 import { captureRef } from 'react-native-view-shot';
 import { Share, Alert } from 'react-native';
 import { View } from 'react-native';
+import { OpenMat, OpenMatSession } from '../types';
 
 /**
  * Capture a component as an image and share it
@@ -11,8 +12,8 @@ import { View } from 'react-native';
  */
 export const captureAndShareCard = async (
   cardRef: React.RefObject<View | null>,
-  gymData: any,
-  sessionData: any,
+  gymData: OpenMat,
+  sessionData: OpenMatSession,
   options: {
     format?: 'png' | 'jpg' | 'webm';
     quality?: number;
@@ -40,7 +41,7 @@ export const captureAndShareCard = async (
     // Share the image
     await Share.share({
       url: uri,
-      message: `Check out this open mat session at ${gymData.name}! 🥋\n\n${sessionData.day} at ${sessionData.time}\n\nFind more sessions with Find Jiu Jitsu!`
+      message: `Check out this open mat session at ${gymData.name}! 🥋\n\n${sessionData.day} at ${sessionData.time}\n\nFind more sessions with JiuJitsu Finder!`
     });
 
     // Screenshot captured and shared successfully
@@ -70,20 +71,26 @@ export const captureCardAsImage = async (
   } = {}
 ): Promise<string> => {
   try {
-    // Default options for Instagram story size
+    // Default options for Instagram story size with optimized settings
     const {
       format = 'png',
-      quality = 1,
+      quality = 0.9, // Slightly reduced quality for better performance
       width = 1080,
       height = 1920
     } = options;
 
-    // Capture the component as an image
+    // Ensure ref exists before capturing
+    if (!cardRef.current) {
+      throw new Error('ShareCard ref is not available');
+    }
+
+    // Capture the component as an image with optimized settings
     const uri = await captureRef(cardRef, {
       format,
       quality,
       width,
-      height
+      height,
+      result: 'tmpfile', // Use temporary file for better performance
     });
 
     // Screenshot captured successfully
