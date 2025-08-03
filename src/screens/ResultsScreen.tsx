@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   FlatList,
   Dimensions,
@@ -17,15 +18,19 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
+  TextInput,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import * as Location from 'expo-location';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useFindNavigation, useMainTabNavigation } from '../navigation/useNavigation';
 import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger } from '../utils';
+import { calculateGymDistance, formatDistance } from '../utils/distance';
+import { GeocodingService } from '../utils/geocoding';
 import { OpenMat, OpenMatSession, SearchFilters } from '../types';
 import { GymDetailsModal, ShareCard, Toast, ContactFooter, SkeletonCard } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -34,7 +39,7 @@ import { FindStackRouteProp } from '../navigation/types';
 import { captureCardAsImage } from '../utils/screenshot';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
-import appIcon from '../../assets/icon.png';
+
 
 const { width } = Dimensions.get('window');
 
@@ -154,6 +159,37 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     price: null, // null or 'free'
   });
 
+  // Radius filter state
+  const [selectedRadius, setSelectedRadius] = useState<number | null>(null); // null = "All" (default)
+
+  // Location picker state
+  const [locationPickerVisible, setLocationPickerVisible] = useState(false);
+  const [selectedLocationType, setSelectedLocationType] = useState<'tampa-downtown' | 'current-location' | 'search-address'>('tampa-downtown');
+  const [displayLocationText, setDisplayLocationText] = useState(() => {
+    // Set initial location text based on selected city
+    if (location.toLowerCase().includes('miami')) return 'Miami Downtown';
+    if (location.toLowerCase().includes('austin')) return 'Austin Downtown';
+    return 'Tampa Downtown';
+  });
+  
+  // Search modal state
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  
+  // User location state
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number }>(() => {
+    // Set initial coordinates based on selected city
+    if (location.toLowerCase().includes('miami')) {
+      return { latitude: 25.7617, longitude: -80.1918 }; // Miami downtown
+    } else if (location.toLowerCase().includes('austin')) {
+      return { latitude: 30.2672, longitude: -97.7431 }; // Austin downtown
+    } else {
+      return { latitude: 27.9506, longitude: -82.4572 }; // Tampa downtown (default)
+    }
+  });
+
   // Share card ref and state for image generation
   const shareCardRef = useRef<View | null>(null);
   const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
@@ -171,8 +207,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   
   // Email copy state
   const [emailCopied, setEmailCopied] = useState(false);
-  
-
   
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -306,17 +340,29 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         
         // Determine city from location string
         const city = location.toLowerCase().includes('austin') ? 'austin' : 
+                     location.toLowerCase().includes('miami') ? 'miami' : 
                      location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         
-        // Force refresh data from GitHub
+        // Force refresh data from GitHub with aggressive cache clearing
+        logger.info('ResultsScreen: Clearing cache and forcing refresh for', city);
+        await githubDataService.clearCache(); // Clear all cache first
         if (city === 'tampa') {
           await githubDataService.forceRefreshTampaData();
+        } else if (city === 'miami') {
+          await githubDataService.forceRefreshMiamiData();
         } else {
           await githubDataService.refreshData(city);
         }
         
-        // Check last update time silently
+        // Check last update time and cache status
         const lastUpdate = await githubDataService.getLastUpdateTime(city);
+        const cacheStatus = await githubDataService.getCacheStatus(city);
+        logger.info('ResultsScreen: Cache status after refresh:', { 
+          city, 
+          lastUpdate, 
+          hasCache: cacheStatus.hasCache, 
+          age: cacheStatus.age 
+        });
         
         const filters: SearchFilters = {};
         if (dateSelection) {
@@ -394,7 +440,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       const city = location.toLowerCase().includes('austin') ? 'austin' : 
                    location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
       
-      // Force refresh data from GitHub
+      // Force refresh data from GitHub with aggressive cache clearing
+      logger.info('ResultsScreen: Pull-to-refresh clearing cache for', city);
+      await githubDataService.clearCache(); // Clear all cache first
       if (city === 'tampa') {
         await githubDataService.forceRefreshTampaData();
       } else {
@@ -474,14 +522,149 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     }
   };
 
-  const getGymCountText = (count: number, location: string): string => {
-    if (count === 0) {
-      return `No gyms found in ${location}`;
-    } else if (count === 1) {
-      return `Showing 1 gym in ${location}`;
-    } else {
-      return `Showing ${count} gyms in ${location}`;
+  // Check if any filters are currently active
+  const hasActiveFilters = (): boolean => {
+    return activeFilters.gi || activeFilters.nogi || activeFilters.price === 'free' || selectedRadius !== null;
+  };
+
+  // Generate contextual empty state messages based on active filters
+  const getEmptyStateMessage = (): { title: string; subtitle: string; icon: string } => {
+    const hasFilters = hasActiveFilters();
+    
+    // No filters active (shouldn't happen but good fallback)
+    if (!hasFilters) {
+      return {
+        title: 'No gyms found',
+        subtitle: `No open mats available in ${location}`,
+        icon: 'search-outline'
+      };
     }
+
+    // Check individual filter types
+    const hasRadius = selectedRadius !== null;
+    const hasFree = activeFilters.price === 'free';
+    const hasGi = activeFilters.gi;
+    const hasNoGi = activeFilters.nogi;
+    
+    // Multiple filters active
+    if ((hasRadius && hasFree) || (hasRadius && (hasGi || hasNoGi)) || (hasFree && (hasGi || hasNoGi))) {
+      return {
+        title: 'No matching gyms',
+        subtitle: 'No gyms match your current filters. Try adjusting your search criteria.',
+        icon: 'filter-outline'
+      };
+    }
+    
+    // Radius filter only
+    if (hasRadius && !hasFree && !hasGi && !hasNoGi) {
+      return {
+        title: 'No gyms in range',
+        subtitle: `No gyms within ${selectedRadius} miles. Try expanding your search radius.`,
+        icon: 'location-outline'
+      };
+    }
+    
+    // Free filter only
+    if (hasFree && !hasRadius && !hasGi && !hasNoGi) {
+      return {
+        title: 'No free gyms found',
+        subtitle: 'No free open mats available. Try removing the price filter.',
+        icon: 'card-outline'
+      };
+    }
+    
+    // Gi filter only
+    if (hasGi && !hasNoGi && !hasRadius && !hasFree) {
+      return {
+        title: 'No Gi sessions found',
+        subtitle: 'No Gi-only gyms available. Try selecting different class types.',
+        icon: 'shirt-outline'
+      };
+    }
+    
+    // No-Gi filter only
+    if (hasNoGi && !hasGi && !hasRadius && !hasFree) {
+      return {
+        title: 'No No-Gi sessions found',
+        subtitle: 'No No-Gi-only gyms available. Try selecting different class types.',
+        icon: 'shirt-outline'
+      };
+    }
+    
+    // Both Gi and No-Gi filters
+    if (hasGi && hasNoGi && !hasRadius && !hasFree) {
+      return {
+        title: 'No matching sessions',
+        subtitle: 'No gyms with both Gi and No-Gi sessions. Try selecting individual class types.',
+        icon: 'shirt-outline'
+      };
+    }
+    
+    // Fallback for any other combination
+    return {
+      title: 'No results found',
+      subtitle: 'No gyms match your current filters. Try adjusting your search criteria.',
+      icon: 'search-outline'
+    };
+  };
+
+  const getGymCountText = (filteredCount: number, totalCount: number, location: string): string => {
+    const hasFilters = hasActiveFilters();
+    
+    if (filteredCount === 0) {
+      return `No gyms found in ${location}`;
+    } else if (filteredCount === 1) {
+      if (hasFilters && totalCount > 1) {
+        return `Showing 1 of ${totalCount} gyms in ${location}`;
+      } else {
+        return `Showing 1 gym in ${location}`;
+      }
+    } else {
+      if (hasFilters && totalCount > filteredCount) {
+        return `Showing ${filteredCount} of ${totalCount} gyms in ${location}`;
+      } else {
+        return `Showing ${filteredCount} gyms in ${location}`;
+      }
+    }
+  };
+
+  // Shorten long addresses to essential parts (street and city)
+  const shortenAddress = (fullAddress: string): string => {
+    if (!fullAddress || fullAddress === 'Tampa Downtown' || fullAddress === 'Current Location' || fullAddress === 'Search Address') {
+      return fullAddress;
+    }
+
+    // Split address by commas
+    const parts = fullAddress.split(',').map(part => part.trim());
+    
+    // If we have at least 2 parts, take street and city
+    if (parts.length >= 2) {
+      const street = parts[0];
+      const city = parts[1];
+      
+      // Clean up common address patterns
+      let cleanStreet = street;
+      if (street.includes('Street')) cleanStreet = street.replace('Street', 'St');
+      if (street.includes('Avenue')) cleanStreet = street.replace('Avenue', 'Ave');
+      if (street.includes('Road')) cleanStreet = street.replace('Road', 'Rd');
+      if (street.includes('Drive')) cleanStreet = street.replace('Drive', 'Dr');
+      if (street.includes('Boulevard')) cleanStreet = street.replace('Boulevard', 'Blvd');
+      
+      // Handle cases where city might be in a different position
+      // Look for "Tampa" specifically in the parts
+      let cityPart = city;
+      for (let i = 1; i < parts.length; i++) {
+        if (parts[i].toLowerCase().includes('tampa')) {
+          cityPart = parts[i];
+          break;
+        }
+      }
+      
+      return `${cleanStreet}, ${cityPart}`;
+    }
+    
+    // Fallback: return first 50 characters with ellipsis if too long
+    return fullAddress.length > 50 ? fullAddress.substring(0, 50) + '...' : fullAddress;
   };
 
   const showFallbackAlert = (subject: string) => {
@@ -527,6 +710,145 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     if (filterName === 'Free') {
       handleFreeFilter();
     }
+  };
+
+  // Radius filter handler
+  const handleRadiusFilter = (radius: number | null) => {
+    // If clicking the same radius that's already selected, deselect it (show all)
+    if (selectedRadius === radius) {
+      setSelectedRadius(null);
+    } else {
+      setSelectedRadius(radius);
+    }
+  };
+
+  // Location picker handlers
+  const handleLocationPickerPress = () => {
+    setLocationPickerVisible(true);
+  };
+
+  const handleLocationSelect = async (locationType: 'tampa-downtown' | 'current-location' | 'search-address') => {
+    setSelectedLocationType(locationType);
+    
+    switch (locationType) {
+      case 'tampa-downtown':
+        setDisplayLocationText('Tampa Downtown');
+        setUserLocation({ latitude: 27.9506, longitude: -82.4572 });
+        break;
+      case 'current-location':
+        setDisplayLocationText('Current Location');
+        await handleGetCurrentLocation();
+        break;
+      case 'search-address':
+        setDisplayLocationText('Search Address');
+        setSearchModalVisible(true);
+        break;
+    }
+    
+    setLocationPickerVisible(false);
+  };
+
+  const handleCloseLocationPicker = () => {
+    setLocationPickerVisible(false);
+  };
+
+  // GPS location handler
+  const handleGetCurrentLocation = async () => {
+    try {
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Location Permission Required',
+          'Please enable location access to use your current location for distance calculations.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+        timeInterval: 5000,
+        distanceInterval: 10,
+      });
+
+      const newLocation = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+
+      setUserLocation(newLocation);
+      setDisplayLocationText('Current Location');
+      
+      logger.info('GPS location obtained:', { 
+        latitude: newLocation.latitude, 
+        longitude: newLocation.longitude 
+      });
+
+    } catch (error) {
+      logger.error('GPS location error:', { error: error.message });
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. Please try again or use a different option.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Search address handler
+  const handleSearchAddress = async () => {
+    if (!searchQuery.trim()) {
+      setSearchError('Please enter an address or location');
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      // Add Tampa context to search query if not already present
+      let query = searchQuery.trim();
+      if (!query.toLowerCase().includes('tampa') && !query.toLowerCase().includes('fl')) {
+        query = `${query}, Tampa, FL`;
+      }
+
+      const result = await GeocodingService.geocodeAddress(query, 'Tampa');
+      
+      if (result) {
+        const newLocation = {
+          latitude: result.latitude,
+          longitude: result.longitude,
+        };
+
+        setUserLocation(newLocation);
+        setDisplayLocationText(shortenAddress(result.formattedAddress));
+        setSearchModalVisible(false);
+        setSearchQuery('');
+        
+        logger.info('Address search successful:', { 
+          query, 
+          result: result.formattedAddress,
+          coordinates: `${result.latitude},${result.longitude}` 
+        });
+
+      } else {
+        setSearchError('Address not found. Please try a different search term.');
+      }
+
+    } catch (error) {
+      logger.error('Address search error:', { query: searchQuery, error: error.message });
+      setSearchError('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleCloseSearchModal = () => {
+    setSearchModalVisible(false);
+    setSearchQuery('');
+    setSearchError(null);
   };
 
 
@@ -726,9 +1048,30 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       filtered = filtered.filter(gym => gym.matFee === 0);
     }
     
+    // Apply radius filter
+    if (selectedRadius !== null) {
+      filtered = filtered.filter(gym => {
+        const distance = calculateGymDistance(userLocation, gym.coordinates);
+        return distance !== null && distance <= selectedRadius;
+      });
+    }
+    
+    // Sort by distance (closest first)
+    filtered = filtered.sort((a, b) => {
+      const distanceA = calculateGymDistance(userLocation, a.coordinates);
+      const distanceB = calculateGymDistance(userLocation, b.coordinates);
+      
+      // Handle cases where distance calculation fails
+      if (distanceA === null && distanceB === null) return 0;
+      if (distanceA === null) return 1; // Put gyms with no distance at the end
+      if (distanceB === null) return -1;
+      
+      return distanceA - distanceB; // Ascending order (closest first)
+    });
+    
     logger.success('Filtered gyms count:', { count: filtered.length });
     return filtered;
-  }, [sortedGyms, activeFilters]);
+  }, [sortedGyms, activeFilters, selectedRadius, userLocation]);
 
 
 
@@ -851,6 +1194,13 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           {/* Left side - Gym name */}
           <View style={styles.gymNameContainer}>
             <Text style={styles.gymName}>{gym.name}</Text>
+            {/* Distance display */}
+            {(() => {
+              const distance = calculateGymDistance(userLocation, gym.coordinates);
+              return distance ? (
+                <Text style={styles.distanceText}>{formatDistance(distance)}</Text>
+              ) : null;
+            })()}
           </View>
           
           {/* Right side - Logo */}
@@ -1025,31 +1375,35 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Navigate to map view
   const toggleViewMode = () => {
     haptics.light();
-    findNavigation.navigate('MapView');
+    findNavigation.navigate('MapView', {
+      location: userLocation || { latitude: 27.9506, longitude: -82.4572 },
+      locationText: displayLocationText || 'Tampa Downtown',
+      radius: selectedRadius || 15
+    });
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-      {/* Header */}
-      <Animated.View style={[styles.header, { opacity: headerAnim }]}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
-          activeOpacity={0.7}
-        >
-          <Image source={appIcon} style={styles.headerLogo} />
-        </TouchableOpacity>
-        <View style={styles.headerTextContainer}>
-                         <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
-          <Text style={styles.locationContext}>{getGymCountText(filteredGyms.length, location)}</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
-            {dateSelection && `${getDateSelectionDisplay(dateSelection)}`}
-          </Text>
-        </View>
+      {/* Header Container with Visual Polish */}
+      <View style={styles.headerContainer}>
+        {/* Header */}
+        <Animated.View style={[styles.header, { opacity: headerAnim }]}>
+          <View style={styles.headerTextContainer}>
+            <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
+            <Text style={styles.locationContext}>{getGymCountText(filteredGyms.length, sortedGyms.length, location)}</Text>
+          </View>
+        </Animated.View>
 
-      </Animated.View>
+        {/* Location Picker Row */}
+        <Animated.View style={[styles.locationPickerSection, { opacity: headerAnim }]}>
+          <TouchableOpacity style={styles.locationPickerButton} activeOpacity={0.7} onPress={handleLocationPickerPress}>
+            <Ionicons name="location" size={16} color="#60798A" />
+            <Text style={styles.locationPickerText} numberOfLines={1} ellipsizeMode='tail'>Near: {displayLocationText} ▼</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
-      {/* Filter Pills */}
-      <Animated.View style={[styles.filterSection, { alignItems: 'center' }, { opacity: filterAnim }]}>
+        {/* Filter Pills */}
+        <Animated.View style={[styles.filterSection, { alignItems: 'center' }, { opacity: filterAnim }]}>
         <ScrollView 
           horizontal={true} 
           showsHorizontalScrollIndicator={false}
@@ -1057,89 +1411,23 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             styles.filterContainer,
             {
               alignItems: 'center',
-              paddingHorizontal: 16,
+              paddingHorizontal: 12,
               paddingVertical: 8,
-              marginTop: 3,
-              marginBottom: 3,
-              paddingRight: 24
+              marginTop: 0,
+              marginBottom: 0,
+              paddingRight: 12
             }
           ]}
           style={{ flexGrow: 0 }}
         >
-          {/* Gi Toggle Filter */}
-          <TouchableOpacity 
-            style={[
-              styles.filterPill,
-              {
-                backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.gi ? 0 : 1,
-                borderColor: activeFilters.gi ? 'transparent' : '#E0E0E0',
-                marginRight: 8,
-                shadowColor: activeFilters.gi ? '#374151' : 'transparent',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: activeFilters.gi ? 0.3 : 0,
-                shadowRadius: 4,
-                elevation: activeFilters.gi ? 3 : 0,
-              }
-            ]}
-            onPress={() => toggleFilter('gi')}
-            activeOpacity={0.7}
-          >
-            <Text 
-              style={[
-                styles.filterPillText,
-                { 
-                  color: activeFilters.gi ? '#FFFFFF' : '#60798A',
-                  fontWeight: activeFilters.gi ? '700' : '500'
-                }
-              ]}
-              numberOfLines={1}
-            >
-              Gi ({sessionCounts.giCount})
-            </Text>
-          </TouchableOpacity>
-
-          {/* No-Gi Toggle Filter */}
-          <TouchableOpacity 
-            style={[
-              styles.filterPill,
-              {
-                backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.nogi ? 0 : 1,
-                borderColor: activeFilters.nogi ? 'transparent' : '#E0E0E0',
-                marginRight: 8,
-                shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: activeFilters.nogi ? 0.3 : 0,
-                shadowRadius: 4,
-                elevation: activeFilters.nogi ? 3 : 0,
-              }
-            ]}
-            onPress={() => toggleFilter('nogi')}
-            activeOpacity={0.7}
-          >
-            <Text 
-              style={[
-                styles.filterPillText,
-                { 
-                  color: activeFilters.nogi ? '#FFFFFF' : '#60798A',
-                  fontWeight: activeFilters.nogi ? '700' : '500'
-                }
-              ]}
-              numberOfLines={1}
-            >
-              No-Gi ({sessionCounts.nogiCount})
-            </Text>
-          </TouchableOpacity>
-
           {/* Free Toggle Filter */}
           <TouchableOpacity 
             style={[
               styles.filterPill,
               {
                 backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
-                borderWidth: activeFilters.price === 'free' ? 0 : 1,
-                borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
+                borderWidth: 1,
+                borderColor: activeFilters.price === 'free' ? 'transparent' : '#E5E7EB',
                 marginRight: 8,
                 shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
@@ -1165,114 +1453,239 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             </Text>
           </TouchableOpacity>
 
+          {/* Gi Toggle Filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: activeFilters.gi ? '#374151' : '#F0F3F5',
+                borderWidth: 1,
+                borderColor: activeFilters.gi ? 'transparent' : '#E5E7EB',
+                marginRight: 8,
+                shadowColor: activeFilters.gi ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.gi ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.gi ? 3 : 0,
+              }
+            ]}
+            onPress={() => toggleFilter('gi')}
+            activeOpacity={0.7}
+          >
+            <Text 
+              style={[
+                styles.filterPillText,
+                { 
+                  color: activeFilters.gi ? '#FFFFFF' : '#60798A',
+                  fontWeight: activeFilters.gi ? '700' : '500'
+                }
+              ]}
+              numberOfLines={1}
+            >
+              Gi
+            </Text>
+          </TouchableOpacity>
+
+          {/* No-Gi Toggle Filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: activeFilters.nogi ? '#374151' : '#F0F3F5',
+                borderWidth: 1,
+                borderColor: activeFilters.nogi ? 'transparent' : '#E5E7EB',
+                marginRight: 8,
+                shadowColor: activeFilters.nogi ? '#374151' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeFilters.nogi ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: activeFilters.nogi ? 3 : 0,
+              }
+            ]}
+            onPress={() => toggleFilter('nogi')}
+            activeOpacity={0.7}
+          >
+            <Text 
+              style={[
+                styles.filterPillText,
+                { 
+                  color: activeFilters.nogi ? '#FFFFFF' : '#60798A',
+                  fontWeight: activeFilters.nogi ? '700' : '500'
+                }
+              ]}
+              numberOfLines={1}
+            >
+              No-Gi
+            </Text>
+          </TouchableOpacity>
+
+          {/* Radius Filter Buttons */}
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: selectedRadius === 5 ? '#60798A' : '#F0F3F5',
+                borderWidth: 1,
+                borderColor: selectedRadius === 5 ? 'transparent' : '#E5E7EB',
+                marginRight: 8,
+                shadowColor: selectedRadius === 5 ? '#60798A' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: selectedRadius === 5 ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: selectedRadius === 5 ? 3 : 0,
+              }
+            ]}
+            onPress={() => handleRadiusFilter(5)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText, 
+              { 
+                color: selectedRadius === 5 ? '#FFFFFF' : '#60798A', 
+                fontWeight: selectedRadius === 5 ? '700' : '500' 
+              }
+            ]}>
+              5mi
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: selectedRadius === 10 ? '#60798A' : '#F0F3F5',
+                borderWidth: 1,
+                borderColor: selectedRadius === 10 ? 'transparent' : '#E5E7EB',
+                marginRight: 8,
+                shadowColor: selectedRadius === 10 ? '#60798A' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: selectedRadius === 10 ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: selectedRadius === 10 ? 3 : 0,
+              }
+            ]}
+            onPress={() => handleRadiusFilter(10)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText, 
+              { 
+                color: selectedRadius === 10 ? '#FFFFFF' : '#60798A', 
+                fontWeight: selectedRadius === 10 ? '700' : '500' 
+              }
+            ]}>
+              10mi
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor: selectedRadius === 15 ? '#60798A' : '#F0F3F5',
+                borderWidth: 1,
+                borderColor: selectedRadius === 15 ? 'transparent' : '#E5E7EB',
+                marginRight: 8,
+                shadowColor: selectedRadius === 15 ? '#60798A' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: selectedRadius === 15 ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: selectedRadius === 15 ? 3 : 0,
+              }
+            ]}
+            onPress={() => handleRadiusFilter(15)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterPillText, 
+              { 
+                color: selectedRadius === 15 ? '#FFFFFF' : '#60798A', 
+                fontWeight: selectedRadius === 15 ? '700' : '500' 
+              }
+            ]}>
+              15mi
+            </Text>
+          </TouchableOpacity>
+
           {/* Map Toggle Button */}
           <TouchableOpacity 
             style={[
               styles.filterPill,
               {
                 backgroundColor: '#F0F3F5',
-                borderWidth: 1,
-                borderColor: '#E0E0E0',
-                marginRight: 4,
-                shadowColor: 'transparent',
+                borderWidth: 2,
+                borderColor: '#60798A',
+                marginRight: 8,
+                shadowColor: '#60798A',
                 shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0,
+                shadowOpacity: 0.1,
                 shadowRadius: 4,
-                elevation: 0,
+                elevation: 2,
               }
             ]}
             onPress={toggleViewMode}
             activeOpacity={0.7}
           >
             <View style={styles.mapButtonContent}>
+              <Ionicons name="map-outline" size={14} color="#60798A" style={{ marginRight: 4 }} />
               <Text style={styles.mapText}>Map</Text>
             </View>
           </TouchableOpacity>
 
-
-
         </ScrollView>
-
-
       </Animated.View>
+      </View>
 
       {/* Content */}
       <Animated.View style={{ flex: 1, opacity: listAnim }}>
         {filteredGyms.length === 0 ? (
-          // Enhanced Empty State
+          // Enhanced Empty State with Contextual Messages
           <View style={styles.emptyStateContainer}>
-          {/* Icon */}
-          <View style={styles.emptyStateIconContainer}>
-            <Ionicons 
-              name="search-outline" 
-              size={64} 
-              color={theme.text.secondary} 
-            />
-          </View>
-          
-          {/* Title */}
-          <Text style={[styles.emptyStateTitle, { color: theme.text.primary }]}>
-            No open mats found
-          </Text>
-          
-          {/* Dynamic Subtitle based on filters */}
-          <Text style={[styles.emptyStateSubtitle, { color: theme.text.secondary }]}>
-            {(() => {
-              let subtitle = `No open mats in ${location}`;
-              
-              if (dateSelection) {
-                subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
-              }
-              
-              if (activeFilters.price === 'free') {
-                subtitle = `No free open mats in ${location}`;
-                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
-              }
-              
-              if (activeFilters.gi && !activeFilters.nogi) {
-                subtitle = `No Gi-only sessions found in ${location}`;
-                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
-              } else if (activeFilters.nogi && !activeFilters.gi) {
-                subtitle = `No No-Gi sessions found in ${location}`;
-                if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
-              }
-              
-              return subtitle;
-            })()}
-          </Text>
-          
-          {/* Action Buttons */}
-          <View style={styles.emptyStateButtons}>
-            <TouchableOpacity 
-              style={[styles.emptyStateButton, styles.secondaryButton]}
-              onPress={() => {
-                // Clear local filters
-                setActiveFilters({
-                  gi: false,
-                  nogi: false,
-                  price: null,
-                });
-                setShowFreeOnly(false);
-                // Navigate back to TimeSelection to reset date selection
-                findNavigation.navigate('TimeSelection');
-              }}
-            >
-              <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Clear Filters</Text>
-            </TouchableOpacity>
+            {/* Icon */}
+            <View style={styles.emptyStateIconContainer}>
+              <Ionicons 
+                name={getEmptyStateMessage().icon as any} 
+                size={64} 
+                color={theme.text.secondary} 
+              />
+            </View>
             
-            <TouchableOpacity 
-              style={[styles.emptyStateButton, styles.secondaryButton]}
-              onPress={() => findNavigation.navigate('TimeSelection')}
-            >
-              <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Change Day</Text>
-            </TouchableOpacity>
+            {/* Title */}
+            <Text style={[styles.emptyStateTitle, { color: theme.text.primary }]}>
+              {getEmptyStateMessage().title}
+            </Text>
+            
+            {/* Contextual Subtitle */}
+            <Text style={[styles.emptyStateSubtitle, { color: theme.text.secondary }]}>
+              {getEmptyStateMessage().subtitle}
+            </Text>
+            
+            {/* Action Buttons */}
+            <View style={styles.emptyStateButtons}>
+              <TouchableOpacity 
+                style={[styles.emptyStateButton, styles.secondaryButton]}
+                onPress={() => {
+                  // Clear all filters
+                  setActiveFilters({
+                    gi: false,
+                    nogi: false,
+                    price: null,
+                  });
+                  setSelectedRadius(null);
+                  setShowFreeOnly(false);
+                }}
+              >
+                <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Clear Filters</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.emptyStateButton, styles.secondaryButton]}
+                onPress={() => findNavigation.navigate('TimeSelection')}
+              >
+                <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Change Day</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          
-          {/* Suggestion Text */}
-          <Text style={[styles.emptyStateSuggestion, { color: theme.text.secondary }]}>
-            Try checking different days or clearing your filters
-          </Text>
-        </View>
       ) : isLoading ? (
         // Skeleton Loading State
         <FlatList
@@ -1379,6 +1792,151 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
 
 
+      {/* Location Picker Modal */}
+      <Modal
+        visible={locationPickerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseLocationPicker}
+      >
+        <TouchableWithoutFeedback onPress={handleCloseLocationPicker}>
+          <View style={styles.locationPickerModalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.locationPickerModalContent}>
+                <View style={styles.locationPickerModalHeader}>
+                  <Text style={styles.locationPickerModalTitle}>Choose Location</Text>
+                  <TouchableOpacity onPress={handleCloseLocationPicker} style={styles.locationPickerModalCloseButton}>
+                    <Ionicons name="close" size={24} color="#60798A" />
+                  </TouchableOpacity>
+                </View>
+                
+                <TouchableOpacity 
+                  style={[
+                    styles.locationPickerOption,
+                    selectedLocationType === 'tampa-downtown' && styles.locationPickerOptionSelected
+                  ]}
+                  onPress={() => handleLocationSelect('tampa-downtown')}
+                >
+                  <Ionicons name="location" size={20} color="#60798A" />
+                  <Text style={[
+                    styles.locationPickerOptionText,
+                    selectedLocationType === 'tampa-downtown' && styles.locationPickerOptionTextSelected
+                  ]}>
+                    Tampa Downtown
+                  </Text>
+                  {selectedLocationType === 'tampa-downtown' && (
+                    <Ionicons name="checkmark" size={20} color="#10B981" />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[
+                    styles.locationPickerOption,
+                    selectedLocationType === 'current-location' && styles.locationPickerOptionSelected
+                  ]}
+                  onPress={() => handleLocationSelect('current-location')}
+                >
+                  <Ionicons name="navigate" size={20} color="#60798A" />
+                  <Text style={[
+                    styles.locationPickerOptionText,
+                    selectedLocationType === 'current-location' && styles.locationPickerOptionTextSelected
+                  ]}>
+                    Current Location
+                  </Text>
+                  {selectedLocationType === 'current-location' && (
+                    <Ionicons name="checkmark" size={20} color="#10B981" />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[
+                    styles.locationPickerOption,
+                    selectedLocationType === 'search-address' && styles.locationPickerOptionSelected
+                  ]}
+                  onPress={() => handleLocationSelect('search-address')}
+                >
+                  <Ionicons name="search" size={20} color="#60798A" />
+                  <Text style={[
+                    styles.locationPickerOptionText,
+                    selectedLocationType === 'search-address' && styles.locationPickerOptionTextSelected
+                  ]}>
+                    Search Address
+                  </Text>
+                  {selectedLocationType === 'search-address' && (
+                    <Ionicons name="checkmark" size={20} color="#10B981" />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Search Address Modal */}
+      <Modal
+        visible={searchModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseSearchModal}
+      >
+        <TouchableWithoutFeedback onPress={handleCloseSearchModal}>
+          <View style={styles.searchModalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.searchModalContent}>
+                <View style={styles.searchModalHeader}>
+                  <Text style={styles.searchModalTitle}>Search Address</Text>
+                  <TouchableOpacity onPress={handleCloseSearchModal} style={styles.searchModalCloseButton}>
+                    <Ionicons name="close" size={24} color="#60798A" />
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.searchInputContainer}>
+                  <Ionicons name="search" size={20} color="#60798A" style={styles.searchInputIcon} />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Enter address, hotel, or landmark..."
+                    placeholderTextColor="#9CA3AF"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={handleSearchAddress}
+                    returnKeyType="search"
+                    autoFocus={true}
+                  />
+                </View>
+
+                {searchError && (
+                  <Text style={styles.searchErrorText}>{searchError}</Text>
+                )}
+
+                <View style={styles.searchModalButtons}>
+                  <TouchableOpacity 
+                    style={styles.searchModalCancelButton}
+                    onPress={handleCloseSearchModal}
+                  >
+                    <Text style={styles.searchModalCancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[
+                      styles.searchModalSearchButton,
+                      (!searchQuery.trim() || isSearching) && styles.searchModalSearchButtonDisabled
+                    ]}
+                    onPress={handleSearchAddress}
+                    disabled={!searchQuery.trim() || isSearching}
+                  >
+                    {isSearching ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.searchModalSearchButtonText}>Search</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {/* Contact Footer */}
       <ContactFooter />
 
@@ -1390,23 +1948,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
+
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    paddingTop: 50,
+    paddingBottom: 8,
     position: 'relative',
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  backIcon: {
-    fontSize: 24,
-    fontWeight: '700',
   },
   headerTextContainer: {
     position: 'absolute',
@@ -1415,33 +1975,194 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerLogo: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
   headerTitle: {
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 2,
     textAlign: 'center',
   },
-  headerSubtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    flex: 1,
-    textAlign: 'center',
-  },
-
   locationContext: {
-    fontSize: 15,
+    fontSize: 17,
     color: '#60798A',
     fontWeight: '500',
-    marginBottom: 8,
+    marginTop: 8,
+    marginBottom: 32,
     textAlign: 'center',
   },
-
+  locationPickerSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    marginHorizontal: 20,
+    marginTop: 0,
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: '#F8F9FA',
+  },
+  locationPickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  locationPickerText: {
+    fontSize: 14,
+    color: '#60798A',
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+  locationPickerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  locationPickerModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    margin: 20,
+    minWidth: 280,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  locationPickerModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  locationPickerModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  locationPickerModalCloseButton: {
+    padding: 4,
+  },
+  locationPickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  locationPickerOptionSelected: {
+    backgroundColor: '#F3F4F6',
+  },
+  locationPickerOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+    marginLeft: 12,
+    flex: 1,
+  },
+  locationPickerOptionTextSelected: {
+    color: '#111827',
+    fontWeight: '600',
+  },
+  searchModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    margin: 20,
+    minWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  searchModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  searchModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  searchModalCloseButton: {
+    padding: 4,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    backgroundColor: '#F9FAFB',
+  },
+  searchInputIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#111827',
+    paddingVertical: 12,
+  },
+  searchErrorText: {
+    color: '#EF4444',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  searchModalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  searchModalCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+  },
+  searchModalCancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  searchModalSearchButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#60798A',
+    alignItems: 'center',
+  },
+  searchModalSearchButtonDisabled: {
+    backgroundColor: '#9CA3AF',
+  },
+  searchModalSearchButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 0,
@@ -1488,6 +2209,12 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '700',
     marginBottom: 2,
+  },
+  distanceText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#60798A',
+    marginTop: 2,
   },
   ratingRow: {
     flexDirection: 'row',
@@ -1713,17 +2440,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 14,
     backgroundColor: '#F0F3F5',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     marginRight: 4,
-    minWidth: 60,
-    minHeight: 44,
+    minWidth: 45,
+    minHeight: 32,
     flexShrink: 0,
   },
   filterPillText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#111518',
     textAlign: 'center',
@@ -1733,13 +2462,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   filterSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 0,
+    paddingHorizontal: 0,
+    paddingVertical: 6,
     marginBottom: 0,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   // New compact card styles
   locationRow: {
     flexDirection: 'row',

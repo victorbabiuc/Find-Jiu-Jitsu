@@ -10,7 +10,7 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-import MapView, { Marker, Callout, Region } from 'react-native-maps';
+import MapView, { Marker, Callout, Region, Circle } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useApp } from '../context/AppContext';
@@ -35,20 +35,46 @@ interface ActiveFilters {
 }
 
 const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
-  console.log('🔍 MapViewScreen: Component rendering');
   
   const { theme } = useTheme();
   const { selectedLocation, favorites, toggleFavorite } = useApp();
   const { showTransitionalLoading, hideTransitionalLoading } = useLoading();
   
+  // Get parameters from navigation route
+  const { location, locationText, radius } = route.params || {};
+  
+  // Determine center location based on selected city
+  const getCenterLocation = () => {
+    if (locationText?.toLowerCase().includes('miami')) {
+      return { latitude: 25.7617, longitude: -80.1918 }; // Miami downtown
+    } else if (locationText?.toLowerCase().includes('austin')) {
+      return { latitude: 30.2672, longitude: -97.7431 }; // Austin downtown
+    } else {
+      return { latitude: 27.9506, longitude: -82.4572 }; // Tampa downtown (default)
+    }
+  };
+  
+  const centerLocation = location || getCenterLocation();
+  const radiusInMiles = radius || 15;
+  
+  // Calculate delta based on radius
+  const getDeltaForRadius = (radiusMiles: number): number => {
+    switch (radiusMiles) {
+      case 5: return 0.12;
+      case 10: return 0.24;
+      case 15: return 0.36;
+      default: return 0.24; // Default for 10 miles
+    }
+  };
+  
   const [gyms, setGyms] = useState<OpenMat[]>([]);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
 
   const [mapRegion, setMapRegion] = useState<Region>({
-    latitude: 27.9478, // Tampa default
-    longitude: -82.4588,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
+    latitude: centerLocation.latitude,
+    longitude: centerLocation.longitude,
+    latitudeDelta: getDeltaForRadius(radiusInMiles),
+    longitudeDelta: getDeltaForRadius(radiusInMiles),
   });
   
   // Filter state (matching ResultsScreen)
@@ -60,16 +86,26 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
   const mapRef = useRef<MapView>(null);
 
+  // Simple coordinate parsing function
+  const parseCoordinates = (coordinateString: string): { latitude: number; longitude: number } | null => {
+    try {
+      const [lat, lng] = coordinateString.split(',').map(coord => parseFloat(coord.trim()));
+      if (isNaN(lat) || isNaN(lng)) {
+        return null;
+      }
+      return { latitude: lat, longitude: lng };
+    } catch (error) {
+      return null;
+    }
+  };
+
   // Get user location
   useEffect(() => {
-    console.log('🔍 MapViewScreen: Getting user location');
     const getUserLocation = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        console.log('🔍 MapViewScreen: Location permission status:', status);
         if (status === 'granted') {
           const location = await Location.getCurrentPositionAsync({});
-          console.log('🔍 MapViewScreen: User location obtained:', location.coords);
           setUserLocation(location);
           
           // Center map on user location if available
@@ -80,9 +116,9 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             longitudeDelta: 0.1,
           });
         }
-      } catch (error) {
-        console.log('🔍 MapViewScreen: Location permission denied or error:', error);
-      }
+              } catch (error) {
+          // Silent fail for location permission
+        }
     };
 
     getUserLocation();
@@ -90,7 +126,6 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
   // Load gym data
   useEffect(() => {
-    console.log('🔍 MapViewScreen: Loading gym data for:', selectedLocation);
     const fetchGymData = async () => {
       try {
         // Show loading when fetch starts
@@ -98,44 +133,28 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         
         // Determine city from location string
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
+                     selectedLocation.toLowerCase().includes('miami') ? 'miami' : 
                      selectedLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
-        
-        console.log('🔍 MapViewScreen: Fetching data for city:', city);
         
         // Force refresh data from GitHub
         if (city === 'tampa') {
           await githubDataService.forceRefreshTampaData();
+        } else if (city === 'miami') {
+          await githubDataService.forceRefreshMiamiData();
         } else {
           await githubDataService.refreshData(city);
         }
         
         // Get gym data
         const gymData = await apiService.getOpenMats(city);
-        console.log('🔍 MapViewScreen: Gym data loaded:', gymData.length, 'gyms');
-        console.log('🔍 MapViewScreen: Sample gym with coordinates:', gymData.find(g => g.coordinates));
-        console.log('🔍 MapViewScreen: First gym data structure:', JSON.stringify(gymData[0], null, 2));
         setGyms(gymData);
+        console.log('🔍 MapViewScreen: Loaded gym data:', gymData.length, 'gyms');
         
-        // Center map on selected city
-        if (city === 'tampa') {
-          setMapRegion({
-            latitude: 27.9478,
-            longitude: -82.4588,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          });
-        } else if (city === 'austin') {
-          setMapRegion({
-            latitude: 30.2672,
-            longitude: -97.7431,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          });
-        }
+        // Don't override map region - keep the one set from route parameters
         
-      } catch (error) {
-        console.error('🔍 MapViewScreen: Error fetching gym data:', error);
-      } finally {
+              } catch (error) {
+          // Silent fail for gym data loading
+        } finally {
         // Hide loading when done
         hideTransitionalLoading();
       }
@@ -146,7 +165,6 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
   // Update map region when it changes
   useEffect(() => {
-    console.log('🔍 MapViewScreen: Map region updated:', mapRegion);
     if (mapRef.current && mapRegion) {
       mapRef.current.animateToRegion(mapRegion, 1000);
     }
@@ -181,6 +199,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
     // Sort by distance (for now, just keep original order)
     console.log('🔍 MapViewScreen: Filtered gyms:', filtered.length, 'gyms');
+    console.log('🔍 MapViewScreen: Active filters:', activeFilters);
+    console.log('🔍 MapViewScreen: First few gyms:', filtered.slice(0, 3).map(g => ({ name: g.name, coordinates: g.coordinates })));
     return filtered;
   }, [gyms, activeFilters]);
 
@@ -254,15 +274,12 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     // Check if coordinates are reasonable for the city
     const isReasonableDistance = distance <= 50; // 50 miles max
     
-    if (!isReasonableDistance) {
-      console.warn('⚠️ Coordinate Validation: Gym', gymName, 'is', distance.toFixed(1), 'miles from', city, 'center');
-      console.warn('⚠️ Coordinate Validation: Coordinates', latitude, longitude, 'seem too far from expected location');
-    }
-
     // Check for coordinates that might be over water
     const isOverWater = checkIfOverWater(latitude, longitude, cityKey);
-    if (isOverWater) {
-      console.warn('⚠️ Coordinate Validation: Gym', gymName, 'coordinates', latitude, longitude, 'appear to be over water');
+    
+    // Only log critical issues
+    if (!isReasonableDistance || isOverWater) {
+      console.warn('⚠️ Coordinate issue detected for', gymName);
     }
 
     // Return true for all coordinates (non-blocking)
@@ -307,24 +324,30 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     return false;
   };
 
-  // Comprehensive coordinate validation (informational only)
+  // Simple coordinate validation for Tampa area
   const validateGymCoordinates = (latitude: number, longitude: number, gymName: string, city: string): void => {
-    console.log('🔍 Coordinate Validation: Validating', gymName, 'at', latitude, longitude);
+    const issues: string[] = [];
     
-    // Step 1: Validate coordinate ranges
-    const hasValidRanges = validateCoordinateRanges(latitude, longitude);
-    if (!hasValidRanges) {
-      console.warn('⚠️ Coordinate Validation: Invalid coordinate ranges for', gymName);
+    // Check if coordinates are valid numbers
+    if (isNaN(latitude) || isNaN(longitude)) {
+      issues.push('Invalid coordinate format');
     }
     
-    // Step 2: Validate for specific city
-    const isValidForCity = validateCoordinatesForCity(latitude, longitude, city, gymName);
-    if (!isValidForCity) {
-      console.warn('⚠️ Coordinate Validation: Coordinates seem suspicious for', gymName, 'in', city);
+    // Check latitude bounds for Tampa area (27.5 to 28.5)
+    if (latitude < 27.5 || latitude > 28.5) {
+      issues.push('Latitude outside Tampa area bounds');
     }
     
-    if (hasValidRanges && isValidForCity) {
-      console.log('✅ Coordinate Validation: Coordinates valid for', gymName);
+    // Check longitude bounds for Tampa area (-83.0 to -82.0)
+    if (longitude < -83.0 || longitude > -82.0) {
+      issues.push('Longitude outside Tampa area bounds');
+    }
+    
+    const isValid = issues.length === 0;
+    
+    // Only log critical validation issues
+    if (!isValid && issues.length > 0) {
+      console.warn('⚠️ Coordinate validation issue for', gymName, ':', issues.join(', '));
     }
   };
 
@@ -332,7 +355,6 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
   const handleGymPress = (gym: OpenMat) => {
     haptics.light();
     // Navigate to gym details or show modal
-    console.log('🔍 MapViewScreen: Gym pressed:', gym.name);
   };
 
   // Handle directions
@@ -340,7 +362,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     haptics.light();
     const address = encodeURIComponent(gym.address);
     const url = Platform.OS === 'ios' 
-      ? `http://maps.apple.com/?daddr=${address}`
+      ? `maps://app?daddr=${address}`
       : `https://maps.google.com/?daddr=${address}`;
     
     Linking.openURL(url).catch(err => {
@@ -368,14 +390,14 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
 
 
-  console.log('🔍 MapViewScreen: Rendering main component with', filteredGyms.length, 'gyms');
+
 
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={mapRegion}
+        region={mapRegion}
         showsUserLocation={true}
         showsMyLocationButton={true}
         zoomEnabled={true}
@@ -384,12 +406,31 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         pitchEnabled={true}
         onMapReady={() => {
           console.log('🔍 MapViewScreen: Map is ready!');
+          console.log('🔍 MapViewScreen: Center location:', centerLocation);
+          console.log('🔍 MapViewScreen: Radius:', radiusInMiles, 'miles');
         }}
         onPress={(e) => {
           console.log('🔍 MapViewScreen: Map pressed at:', e.nativeEvent.coordinate);
         }}
       >
+        {/* Radius Circle */}
+        <Circle
+          center={centerLocation}
+          radius={radiusInMiles * 1609.34} // Convert miles to meters
+          fillColor="rgba(96, 121, 138, 0.1)"
+          strokeColor="rgba(96, 121, 138, 0.3)"
+          strokeWidth={2}
+        />
+
+        {/* Center Location Marker */}
+        <Marker
+          coordinate={centerLocation}
+          title={locationText || 'Selected Location'}
+          pinColor="#60798A"
+        />
+
         {/* Add gym markers if coordinates exist */}
+        {console.log('🔍 MapViewScreen: Rendering', filteredGyms.length, 'gym markers')}
         {filteredGyms.map((gym) => {
           console.log('🔍 MapViewScreen: Checking gym', gym.name, 'coordinates:', gym.coordinates, 'type:', typeof gym.coordinates);
           if (!gym.coordinates) {
@@ -397,11 +438,13 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             return null;
           }
           
-          const [latitude, longitude] = gym.coordinates.split(',').map(Number);
-          if (isNaN(latitude) || isNaN(longitude)) {
+          const coords = parseCoordinates(gym.coordinates);
+          if (!coords) {
             console.log('🔍 MapViewScreen: Gym', gym.name, 'has invalid coordinates:', gym.coordinates);
             return null;
           }
+          
+          const { latitude, longitude } = coords;
           
           // Validate coordinates (informational only - don't block markers)
           validateGymCoordinates(latitude, longitude, gym.name, selectedLocation);
@@ -413,12 +456,24 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
               key={gym.id}
               coordinate={{ latitude, longitude }}
               title={gym.name}
-              description={gym.address}
               onPress={() => {
                 haptics.light(); // Light haptic for marker selection
                 console.log('🔍 MapViewScreen: Gym marker pressed:', gym.name);
               }}
-            />
+            >
+              <Callout
+                onPress={() => handleDirections(gym)}
+                tooltip={false}
+              >
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>{gym.name}</Text>
+                  <TouchableOpacity onPress={() => handleDirections(gym)}>
+                    <Text style={styles.calloutAddress}>📍 {gym.address}</Text>
+                    <Text style={styles.calloutHint}>Tap for directions</Text>
+                  </TouchableOpacity>
+                </View>
+              </Callout>
+            </Marker>
           );
         })}
       </MapView>
@@ -440,10 +495,12 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
             Map View
           </Text>
           <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}>
-            {filteredGyms.length} gyms in {selectedLocation}
+            {filteredGyms.length} gyms • {locationText || 'Tampa Downtown'} • {radiusInMiles}mi radius
           </Text>
         </View>
       </View>
+
+
     </View>
   );
 };
@@ -491,6 +548,36 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  calloutContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    minWidth: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  calloutTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111518',
+    marginBottom: 4,
+  },
+  calloutAddress: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#60798A',
+    textDecorationLine: 'underline',
+  },
+  calloutHint: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
+    marginTop: 2,
+    fontStyle: 'italic',
   },
 });
 
