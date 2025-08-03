@@ -6,6 +6,7 @@ interface CachedData {
   data: OpenMat[];
   timestamp: number;
   location: string;
+  version: string;
 }
 
 interface CSVRow {
@@ -26,11 +27,13 @@ interface CSVRow {
 class GitHubDataService {
   private readonly CACHE_PREFIX = 'github_gym_data_';
   private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+  private readonly CACHE_VERSION = '1.5.2'; // Increment this to force cache refresh
   
   // GitHub raw URLs for CSV files
   private readonly CSV_URLS = {
     'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
-    'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv'
+    'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
+    'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv'
   };
 
   /**
@@ -48,6 +51,13 @@ class GitHubDataService {
       }
 
       const cached: CachedData = JSON.parse(cachedString);
+      
+      // Check if cache version is outdated
+      if (cached.version !== this.CACHE_VERSION) {
+        logger.info(`Cache version mismatch for ${location}: cached=${cached.version}, current=${this.CACHE_VERSION}`);
+        return true; // Version mismatch, needs fresh data
+      }
+      
       const age = Date.now() - cached.timestamp;
       
       // Cache duration: 1 hour
@@ -432,10 +442,12 @@ class GitHubDataService {
       const cachedData: CachedData = {
         data,
         timestamp: Date.now(),
-        location
+        location,
+        version: this.CACHE_VERSION
       };
       
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cachedData));
+      logger.info(`Cached data for ${location} with version ${this.CACHE_VERSION}`);
     } catch (error) {
       logger.error(`Error caching data for ${location}:`, error);
     }
@@ -484,6 +496,16 @@ class GitHubDataService {
     logger.force('Force refreshing Tampa data for Gracie Tampa South website...');
     await this.clearCache('tampa');
     return this.getGymData('tampa', true);
+  }
+
+  /**
+   * Force refresh Miami data specifically for updated CSV structure
+   * @returns Promise<OpenMat[]> - Fresh Miami data
+   */
+  async forceRefreshMiamiData(): Promise<OpenMat[]> {
+    logger.force('Force refreshing Miami data for updated CSV structure...');
+    await this.clearCache('miami');
+    return this.getGymData('miami', true);
   }
 
   /**
@@ -546,15 +568,16 @@ class GitHubDataService {
 
   /**
    * Force refresh data for all locations
-   * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[] }>
+   * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[] }>
    */
-  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[] }> {
-    const [tampaData, austinData] = await Promise.all([
+  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[] }> {
+    const [tampaData, austinData, miamiData] = await Promise.all([
       this.getGymData('tampa', true),
-      this.getGymData('austin', true)
+      this.getGymData('austin', true),
+      this.getGymData('miami', true)
     ]);
     
-    return { tampa: tampaData, austin: austinData };
+    return { tampa: tampaData, austin: austinData, miami: miamiData };
   }
 
   /**
