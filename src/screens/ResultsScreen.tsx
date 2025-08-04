@@ -130,6 +130,23 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Get location and date filtering from route params
   const location = route.params?.location || 'Tampa';
   const dateSelection = route.params?.dateSelection;
+
+  // Helper function to get location display name
+  const getLocationDisplayName = (location: string): string => {
+    switch(location.toLowerCase()) {
+      case 'austin':
+        return 'Austin Downtown';
+      case 'miami':
+        return 'Miami Downtown';
+      case 'stpete':
+      case 'st-pete':
+      case 'st. petersburg':
+        return 'St. Petersburg Downtown';
+      case 'tampa':
+      default:
+        return 'Tampa Downtown';
+    }
+  };
   
   // Memoize the dates array to prevent infinite re-renders
   const dates = useMemo(() => {
@@ -171,9 +188,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   const [selectedLocationType, setSelectedLocationType] = useState<'tampa-downtown' | 'current-location' | 'search-address'>('tampa-downtown');
   const [displayLocationText, setDisplayLocationText] = useState(() => {
     // Set initial location text based on selected city
-    if (location.toLowerCase().includes('miami')) return 'Miami Downtown';
-    if (location.toLowerCase().includes('austin')) return 'Austin Downtown';
-    return 'Tampa Downtown';
+    return getLocationDisplayName(location);
   });
   
   // Search modal state
@@ -185,12 +200,18 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // User location state
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number }>(() => {
     // Set initial coordinates based on selected city
-    if (location.toLowerCase().includes('miami')) {
-      return { latitude: 25.7617, longitude: -80.1918 }; // Miami downtown
-    } else if (location.toLowerCase().includes('austin')) {
-      return { latitude: 30.2672, longitude: -97.7431 }; // Austin downtown
-    } else {
-      return { latitude: 27.9506, longitude: -82.4572 }; // Tampa downtown (default)
+    switch(location.toLowerCase()) {
+      case 'miami':
+        return { latitude: 25.7617, longitude: -80.1918 }; // Miami downtown
+      case 'austin':
+        return { latitude: 30.2672, longitude: -97.7431 }; // Austin downtown
+      case 'stpete':
+      case 'st-pete':
+      case 'st. petersburg':
+        return { latitude: 27.7731, longitude: -82.6400 }; // St. Petersburg downtown
+      case 'tampa':
+      default:
+        return { latitude: 27.9506, longitude: -82.4572 }; // Tampa downtown (default)
     }
   });
 
@@ -743,8 +764,25 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     
     switch (locationType) {
       case 'tampa-downtown':
-        setDisplayLocationText('Tampa Downtown');
-        setUserLocation({ latitude: 27.9506, longitude: -82.4572 });
+        setDisplayLocationText(getLocationDisplayName(location));
+        // Set coordinates based on selected city
+        switch(location.toLowerCase()) {
+          case 'miami':
+            setUserLocation({ latitude: 25.7617, longitude: -80.1918 });
+            break;
+          case 'austin':
+            setUserLocation({ latitude: 30.2672, longitude: -97.7431 });
+            break;
+          case 'stpete':
+          case 'st-pete':
+          case 'st. petersburg':
+            setUserLocation({ latitude: 27.7731, longitude: -82.6400 });
+            break;
+          case 'tampa':
+          default:
+            setUserLocation({ latitude: 27.9506, longitude: -82.4572 });
+            break;
+        }
         break;
       case 'current-location':
         setDisplayLocationText('Current Location');
@@ -1557,7 +1595,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <Animated.View style={[styles.locationPickerSection, { opacity: headerAnim }]}>
           <TouchableOpacity style={styles.locationPickerButton} activeOpacity={0.7} onPress={handleLocationPickerPress}>
             <Ionicons name="location" size={16} color="#60798A" />
-            <Text style={styles.locationPickerText} numberOfLines={1} ellipsizeMode='tail'>Near: {displayLocationText} ▼</Text>
+            <Text style={styles.locationPickerText} numberOfLines={1} ellipsizeMode='tail'>Near: {getLocationDisplayName(location)} ▼</Text>
           </TouchableOpacity>
         </Animated.View>
 
