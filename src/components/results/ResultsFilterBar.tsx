@@ -50,6 +50,39 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
         ]}
         style={{ flexGrow: 0 }}
       >
+        {/* Free Toggle Filter - FIRST BUTTON */}
+        <TouchableOpacity 
+          style={[
+            styles.filterPill,
+            {
+              backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
+              borderWidth: activeFilters.price === 'free' ? 0 : 1,
+              borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
+              marginRight: 8,
+              shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
+              shadowRadius: 4,
+              elevation: activeFilters.price === 'free' ? 3 : 0,
+            }
+          ]}
+          onPress={() => handleFilterTap('Free')}
+          activeOpacity={0.7}
+        >
+          <Text 
+            style={[
+              styles.filterPillText,
+              { 
+                color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
+                fontWeight: activeFilters.price === 'free' ? '700' : '500'
+              }
+            ]}
+            numberOfLines={1}
+          >
+            FREE FIRST
+          </Text>
+        </TouchableOpacity>
+
         {/* Gi Toggle Filter */}
         <TouchableOpacity 
           style={[
@@ -113,39 +146,6 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
             numberOfLines={1}
           >
             No-Gi ({sessionCounts.nogiCount})
-          </Text>
-        </TouchableOpacity>
-
-        {/* Free Toggle Filter */}
-        <TouchableOpacity 
-          style={[
-            styles.filterPill,
-            {
-              backgroundColor: activeFilters.price === 'free' ? '#374151' : '#F0F3F5',
-              borderWidth: activeFilters.price === 'free' ? 0 : 1,
-              borderColor: activeFilters.price === 'free' ? 'transparent' : '#E0E0E0',
-              marginRight: 8,
-              shadowColor: activeFilters.price === 'free' ? '#374151' : 'transparent',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
-              shadowRadius: 4,
-              elevation: activeFilters.price === 'free' ? 3 : 0,
-            }
-          ]}
-          onPress={() => handleFilterTap('Free')}
-          activeOpacity={0.7}
-        >
-          <Text 
-            style={[
-              styles.filterPillText,
-              { 
-                color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.price === 'free' ? '700' : '500'
-              }
-            ]}
-            numberOfLines={1}
-          >
-            Free
           </Text>
         </TouchableOpacity>
 

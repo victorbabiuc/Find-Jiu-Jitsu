@@ -100,17 +100,11 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
         {/* Session Info */}
         <View style={styles.sessionSection}>
           <Text style={styles.openMatLabel}>Open Mat</Text>
-          <View style={styles.sessionHeader}>
-            <Text style={styles.sessionType}>
-              {getSessionTypeEmoji(String(session.type || ''))} {formatSessionType(session.type)}
-            </Text>
-            <Text style={styles.sessionDay}>
-              {String(session.day || '')}
-            </Text>
-          </View>
-          
-          <Text style={styles.sessionTime}>
-            {formatTime(String(session.time || ''))}
+          <Text style={styles.sessionType}>
+            {getSessionTypeEmoji(String(session.type || ''))} {formatSessionType(session.type)}
+          </Text>
+          <Text style={styles.sessionDateTime}>
+            {String(session.day || '')} {formatTime(String(session.time || ''))}
           </Text>
         </View>
       </View>
@@ -241,24 +235,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#111827',
   },
-  sessionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   sessionType: {
-    fontSize: 44,
-    fontWeight: 'bold',
-    marginRight: 20,
-    color: '#111827',
-  },
-  sessionDay: {
     fontSize: 48,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
     color: '#111827',
   },
-  sessionTime: {
-    fontSize: 68,
+  sessionDateTime: {
+    fontSize: 48,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#111827',
@@ -276,31 +261,30 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   footerAppIcon: {
-    width: 140,
-    height: 140,
-    marginRight: 20,
-    borderRadius: 70,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: 'transparent',
     resizeMode: 'contain',
+    marginBottom: 16,
   },
   footerTextContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   footerText: {
-    fontSize: 56,
-    textAlign: 'left',
+    fontSize: 48,
+    textAlign: 'center',
     fontWeight: '800',
     color: '#111827',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   footerSubtext: {
-    fontSize: 36,
-    textAlign: 'left',
+    fontSize: 32,
+    textAlign: 'center',
     fontWeight: '500',
     color: '#6B7280',
   },

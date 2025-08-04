@@ -21,7 +21,7 @@ assignees: ''
 
 - [ ] Create CSV file: `data/[city]-gyms.csv`
 - [ ] Add gym data with proper formatting
-- [ ] Run geocoding script: `node geocode-city.js [city]`
+- [ ] Run geocoding script: `node scripts/geocoding/geocode-city-improved.js [city]`
 - [ ] Update app code to include new city
 - [ ] Test locally with `npx expo start`
 - [ ] Submit pull request

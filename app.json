@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "JiuJitsu Finder",
-    "slug": "JiuJitsuFinder",
+    "slug": "OpenMatFinder",
     "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -43,6 +43,7 @@
       "eas": {
         "projectId": "f0275a64-ee82-483a-aafa-6306353c10cd"
       }
-    }
+    },
+    "owner": "glootieapp"
   }
 }

@@ -24,6 +24,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Location from 'expo-location';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
@@ -341,6 +342,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         // Determine city from location string
         const city = location.toLowerCase().includes('austin') ? 'austin' : 
                      location.toLowerCase().includes('miami') ? 'miami' : 
+                     location.toLowerCase().includes('st. petersburg') ? 'stpete' : 
                      location.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         
         // Force refresh data from GitHub with aggressive cache clearing
@@ -350,6 +352,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           await githubDataService.forceRefreshTampaData();
         } else if (city === 'miami') {
           await githubDataService.forceRefreshMiamiData();
+        } else if (city === 'stpete') {
+          await githubDataService.forceRefreshStPeteData();
         } else {
           await githubDataService.refreshData(city);
         }
@@ -407,11 +411,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       haptics.light(); // Light haptic for unfavoriting
     } else {
       haptics.success(); // Success haptic for favoriting
-      // Show loading and navigate to favorites tab when adding
-      showTransitionalLoading("Added to favorites!", 1500);
-      setTimeout(() => {
-        navigation.navigate('Favorites');
-      }, 500);
+      // Show brief feedback when adding to favorites
+      showTransitionalLoading("Added to favorites!", 1000);
     }
     
     // Heart button animation
@@ -857,7 +858,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Group gyms by name to combine multiple sessions per gym
   const groupGymsByLocation = (gyms: OpenMat[]): OpenMat[] => {
-    logger.group('Grouping gyms - input count:', { count: gyms.length });
+    // logger.group('Grouping gyms - input count:', { count: gyms.length });
     
     const grouped = gyms.reduce((acc, gym) => {
       if (!gym.name) {
@@ -876,7 +877,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         existing.openMats = [...existing.openMats, ...(gym.openMats || [])];
       } else {
         // First time seeing this gym, add it to the map
-                  logger.add(`Adding new gym: ${gym.name}`, { sessions: gym.openMats?.length || 0 });
+                  // logger.add(`Adding new gym: ${gym.name}`, { sessions: gym.openMats?.length || 0 });
         // Create a new object with a new array to avoid mutations
         acc.set(key, { ...gym, openMats: [...(gym.openMats || [])] });
       }
@@ -932,18 +933,18 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     }));
     
     logger.success('Grouping complete - output count:', { count: result.length });
-    logger.debug('Gym details:', result.map(gym => ({
-      name: gym.name,
-      sessions: gym.openMats.length,
-      sessionDetails: gym.openMats.map(session => `${session.day} ${session.time} (${session.type})`)
-    })));
+    // logger.debug('Gym details:', result.map(gym => ({
+    //   name: gym.name,
+    //   sessions: gym.openMats.length,
+    //   sessionDetails: gym.openMats.map(session => `${session.day} ${session.time} (${session.type})`)
+    // })));
     
     return result;
   };
 
   // Memoize grouped gyms - only recalculates when openMats changes
   const groupedGyms = useMemo(() => {
-    logger.group('Grouping gyms - input count:', { count: openMats.length });
+    // logger.group('Grouping gyms - input count:', { count: openMats.length });
     const grouped = groupGymsByLocation(openMats);
     logger.success('Grouping complete - output count:', { count: grouped.length });
     return grouped;
@@ -951,7 +952,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Memoize sorted gyms - only recalculates when groupedGyms changes
   const sortedGyms = useMemo(() => {
-    logger.sort('Sorting gyms by next session');
+    // logger.sort('Sorting gyms by next session');
     const sorted = sortByNextSession(groupedGyms);
     
     // Log the sorted order for debugging
@@ -991,11 +992,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Filter gyms based on active filters (uses pre-sorted gyms)
   const filteredGyms = useMemo(() => {
     logger.filter('Filtering gyms - openMats count:', { count: openMats.length });
-    logger.filter('Active filters:', activeFilters);
+    // logger.filter('Active filters:', activeFilters);
     
     // Start with pre-sorted gyms
     let filtered = sortedGyms;
-    logger.filter('After grouping - unique gyms count:', { count: filtered.length });
+    // logger.filter('After grouping - unique gyms count:', { count: filtered.length });
     
     // Apply Gi/No-Gi filters with smart logic
     if (activeFilters.gi || activeFilters.nogi) {
@@ -1170,7 +1171,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   };
 
   // Memoized GymCard component to prevent unnecessary re-renders
-  const GymCard = memo(({ gym, favorites, toggleFavorite, copyingGymId, copiedGymId, sharingGymId, handleShareImage, gymLogos, handleHeartPress, animateScale, heartScaleAnim, copyScaleAnim, websiteScaleAnim, directionsScaleAnim, shareScaleAnim }: {
+  const GymCard = memo(({ gym, favorites, toggleFavorite, copyingGymId, copiedGymId, sharingGymId, handleShareImage, gymLogos, handleHeartPress, animateScale, heartScaleAnim, copyScaleAnim, websiteScaleAnim, directionsScaleAnim, shareScaleAnim, index }: {
     gym: OpenMat;
     favorites: Set<string>;
     toggleFavorite: (id: string) => void;
@@ -1186,9 +1187,88 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     websiteScaleAnim: Animated.Value;
     directionsScaleAnim: Animated.Value;
     shareScaleAnim: Animated.Value;
+    index: number;
   }) => {
+
+    // Subtle button animation - native iOS feel
+    const animateButtonPress = (animValue: Animated.Value) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      
+      // Instantly scale to 0.97 (very subtle)
+      Animated.timing(animValue, {
+        toValue: 0.97,
+        duration: 100,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const animateButtonRelease = (animValue: Animated.Value) => {
+      // Smoothly return to 1.0
+      Animated.timing(animValue, {
+        toValue: 1.0,
+        duration: 100,
+        useNativeDriver: true,
+      }).start();
+    };
+
+
+
+    // Subtle button handlers - native iOS feel
+    const handleWebsitePress = () => {
+      console.log('BUTTON PRESSED: website');
+      if (gym.website && gym.website.trim() !== '') {
+        animateButtonPress(websiteScaleAnim);
+        openWebsite(gym.website);
+        // Return to normal scale after a short delay
+        setTimeout(() => animateButtonRelease(websiteScaleAnim), 100);
+      }
+    };
+
+    const handleDirectionsPress = () => {
+      console.log('BUTTON PRESSED: directions');
+      if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
+        animateButtonPress(directionsScaleAnim);
+        openDirections(gym.address);
+        // Return to normal scale after a short delay
+        setTimeout(() => animateButtonRelease(directionsScaleAnim), 100);
+      }
+    };
+
+    const handleHeartPressLocal = () => {
+      console.log('BUTTON PRESSED: heart');
+      animateButtonPress(heartScaleAnim);
+      haptics.light();
+      handleHeartPress(gym);
+      // Return to normal scale after a short delay
+      setTimeout(() => animateButtonRelease(heartScaleAnim), 100);
+    };
+
+    const handleCopyPress = () => {
+      console.log('BUTTON PRESSED: copy');
+      if (copyingGymId !== gym.id && copiedGymId !== gym.id) {
+        animateButtonPress(copyScaleAnim);
+        handleCopyGymWithState(gym);
+        // Return to normal scale after a short delay
+        setTimeout(() => animateButtonRelease(copyScaleAnim), 100);
+      }
+    };
+
+    const handleSharePress = () => {
+      console.log('BUTTON PRESSED: share');
+      if (sharingGymId !== gym.id) {
+        animateButtonPress(shareScaleAnim);
+        haptics.light();
+        handleShareImage(gym);
+        // Return to normal scale after a short delay
+        setTimeout(() => animateButtonRelease(shareScaleAnim), 100);
+      }
+    };
+
+
+
     return (
       <View key={gym.id} style={styles.card}>
+        <View style={styles.cardTouchable}>
         {/* Header: Gym Name + Logo */}
         <View style={styles.cardHeader}>
           {/* Left side - Gym name */}
@@ -1270,14 +1350,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Animated.View style={{ transform: [{ scale: websiteScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.iconButton, (!gym.website || gym.website.trim() === '') && styles.disabledIconButton]}
-              onPress={() => {
-                if (gym.website && gym.website.trim() !== '') {
-                  openWebsite(gym.website);
-                }
-              }}
+              onPress={handleWebsitePress}
               disabled={!gym.website || gym.website.trim() === ''}
-              onPressIn={() => animateScale(websiteScaleAnim, 0.95)}
-              onPressOut={() => animateScale(websiteScaleAnim, 1.0)}
+              activeOpacity={1}
             >
               <Ionicons 
                 name="globe-outline" 
@@ -1291,14 +1366,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Animated.View style={{ transform: [{ scale: directionsScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.iconButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledIconButton]}
-              onPress={() => {
-                if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
-                  openDirections(gym.address);
-                }
-              }}
+              onPress={handleDirectionsPress}
               disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
-              onPressIn={() => animateScale(directionsScaleAnim, 0.95)}
-              onPressOut={() => animateScale(directionsScaleAnim, 1.0)}
+              activeOpacity={1}
             >
               <Ionicons 
                 name="location-outline" 
@@ -1312,12 +1382,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
             <TouchableOpacity 
               style={styles.iconButton}
-              onPress={() => {
-                haptics.light();
-                handleHeartPress(gym);
-              }}
-              onPressIn={() => animateScale(heartScaleAnim, 0.95)}
-              onPressOut={() => animateScale(heartScaleAnim, 1.0)}
+              onPress={handleHeartPressLocal}
+              activeOpacity={1}
             >
               <Text style={[
                 styles.iconText, 
@@ -1333,10 +1399,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Animated.View style={{ transform: [{ scale: copyScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.iconButton, copyingGymId === gym.id && styles.disabledIconButton]}
-              onPress={() => handleCopyGymWithState(gym)}
+              onPress={handleCopyPress}
               disabled={copyingGymId === gym.id || copiedGymId === gym.id}
-              onPressIn={() => animateScale(copyScaleAnim, 0.95)}
-              onPressOut={() => animateScale(copyScaleAnim, 1.0)}
+              activeOpacity={1}
             >
               {copyingGymId === gym.id ? (
                 <ActivityIndicator size="small" color="#60798A" />
@@ -1352,13 +1417,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           <Animated.View style={{ transform: [{ scale: shareScaleAnim }] }}>
             <TouchableOpacity 
               style={[styles.iconButton, sharingGymId === gym.id && styles.disabledIconButton]}
-              onPress={() => {
-                haptics.light();
-                handleShareImage(gym);
-              }}
+              onPress={handleSharePress}
               disabled={sharingGymId === gym.id}
-              onPressIn={() => animateScale(shareScaleAnim, 0.95)}
-              onPressOut={() => animateScale(shareScaleAnim, 1.0)}
+              activeOpacity={1}
             >
               {sharingGymId === gym.id ? (
                 <ActivityIndicator size="small" color="#111518" />
@@ -1368,6 +1429,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             </TouchableOpacity>
           </Animated.View>
         </View>
+      </View>
       </View>
     );
   });
@@ -1627,7 +1689,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             activeOpacity={0.7}
           >
             <View style={styles.mapButtonContent}>
-              <Ionicons name="map-outline" size={14} color="#60798A" style={{ marginRight: 4 }} />
               <Text style={styles.mapText}>Map</Text>
             </View>
           </TouchableOpacity>
@@ -1703,7 +1764,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <FlatList
           data={filteredGyms}
           keyExtractor={(gym) => gym.name} // Use name since IDs are inconsistent
-          renderItem={({ item: gym }) => (
+          renderItem={({ item: gym, index }) => (
             <GymCard
               gym={gym}
               favorites={favorites}
@@ -1720,6 +1781,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
               websiteScaleAnim={websiteScaleAnim}
               directionsScaleAnim={directionsScaleAnim}
               shareScaleAnim={shareScaleAnim}
+              index={index}
             />
           )}
           contentContainerStyle={styles.scrollContent}
@@ -2176,10 +2238,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     padding: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  cardTouchable: {
+    flex: 1,
   },
   logoCircle: {
     width: 48,

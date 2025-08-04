@@ -49,6 +49,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
       return { latitude: 25.7617, longitude: -80.1918 }; // Miami downtown
     } else if (locationText?.toLowerCase().includes('austin')) {
       return { latitude: 30.2672, longitude: -97.7431 }; // Austin downtown
+    } else if (locationText?.toLowerCase().includes('st. petersburg')) {
+      return { latitude: 27.7731, longitude: -82.6400 }; // St. Petersburg downtown
     } else {
       return { latitude: 27.9506, longitude: -82.4572 }; // Tampa downtown (default)
     }
@@ -134,6 +136,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         // Determine city from location string
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
                      selectedLocation.toLowerCase().includes('miami') ? 'miami' : 
+                     selectedLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
                      selectedLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         
         // Force refresh data from GitHub
@@ -141,6 +144,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           await githubDataService.forceRefreshTampaData();
         } else if (city === 'miami') {
           await githubDataService.forceRefreshMiamiData();
+        } else if (city === 'stpete') {
+          await githubDataService.forceRefreshStPeteData();
         } else {
           await githubDataService.refreshData(city);
         }

@@ -33,7 +33,8 @@ class GitHubDataService {
   private readonly CSV_URLS = {
     'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
     'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
-    'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv'
+    'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv',
+    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms.csv'
   };
 
   /**
@@ -509,6 +510,16 @@ class GitHubDataService {
   }
 
   /**
+   * Force refresh St. Petersburg data (for new city addition)
+   * @returns Promise<OpenMat[]> - Fresh St. Petersburg data
+   */
+  async forceRefreshStPeteData(): Promise<OpenMat[]> {
+    logger.force('Force refreshing St. Petersburg data for new city addition...');
+    await this.clearCache('stpete');
+    return this.getGymData('stpete', true);
+  }
+
+  /**
    * Get the last update timestamp for a location
    * @param location - The location to check
    * @returns Promise<number | null> - Timestamp of last update or null if no cache
@@ -568,16 +579,17 @@ class GitHubDataService {
 
   /**
    * Force refresh data for all locations
-   * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[] }>
+   * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[], stpete: OpenMat[] }>
    */
-  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[] }> {
-    const [tampaData, austinData, miamiData] = await Promise.all([
+  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[], stpete: OpenMat[] }> {
+    const [tampaData, austinData, miamiData, stpeteData] = await Promise.all([
       this.getGymData('tampa', true),
       this.getGymData('austin', true),
-      this.getGymData('miami', true)
+      this.getGymData('miami', true),
+      this.getGymData('stpete', true)
     ]);
     
-    return { tampa: tampaData, austin: austinData, miami: miamiData };
+    return { tampa: tampaData, austin: austinData, miami: miamiData, stpete: stpeteData };
   }
 
   /**

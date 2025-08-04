@@ -11,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { OpenMat } from '../../types';
 import { haptics } from '../../utils';
-import { SearchSuggestions, SkeletonCard } from '../index';
+import SearchSuggestions from '../SearchSuggestions';
+import SkeletonCard from '../SkeletonCard';
 
 interface DashboardSearchSectionProps {
   isSearching: boolean;

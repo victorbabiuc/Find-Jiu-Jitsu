@@ -1,10 +1,10 @@
 id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
 austin-10th-planet-austin,10th planet austin,"4509 Freidrich Ln #210, Austin, TX 78744",https://10patx.com/,0,25,35,Saturday,12pm-2pm,NoGi,"30.2070873,-97.750738",2025-01-20
 austin-10th-planet-austin,10th planet austin,"4509 Freidrich Ln #210, Austin, TX 78744",https://10patx.com/,0,25,35,Sunday,12-2pm,NoGi,"30.2070873,-97.750738",2025-01-20
-austin-10th-planet-round-rock,10th planet round rock,"3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664",https://10patx.com/,0,0,,Sunday,12-3pm,Gi/NoGi,,2025-01-20
+austin-10th-planet-round-rock,10th planet round rock,"3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664",https://10patx.com/,0,0,,Sunday,12-3pm,Gi/NoGi,"30.49370250,-97.67476450",2025-01-20
 austin-atos,Atos,"11701 Bee Caves Rd Suite 110, Austin, TX 78738",https://atosjiujitsu.com/,0,0,,Saturday,11:30am-12:30pm,Gi/NoGi,"30.2751119,-97.8014446",2025-01-20
-austin-austin-submission-fighting,Austin Submission Fighting,"11940 Menchaca Rd #104, Austin, TX 78748",http://www.austinsubfight.com/,0,0,,Sunday,11am-1pm,Gi/NoGi,,2025-01-20
-austin-austin-submission-fighting,Austin Submission Fighting,"11940 Menchaca Rd #104, Austin, TX 78748",http://www.austinsubfight.com/,0,0,,Sunday,6pm-8pm,Gi/NoGi,,2025-01-20
+austin-austin-submission-fighting,Austin Submission Fighting,"11940 Menchaca Rd #104, Austin, TX 78748",http://www.austinsubfight.com/,0,0,,Sunday,11am-1pm,Gi/NoGi,"30.19966640,-97.80760950",2025-01-20
+austin-austin-submission-fighting,Austin Submission Fighting,"11940 Menchaca Rd #104, Austin, TX 78748",http://www.austinsubfight.com/,0,0,,Sunday,6pm-8pm,Gi/NoGi,"30.19966640,-97.80760950",2025-01-20
 austin-black-widow-mma,Black widow MMA,"2007 Kramer Ln #101, Austin, TX 78758",https://blackwidowmma.com/,0,0,,Thursday,12pm-1pm,Gi/NoGi,"30.388225,-97.7101372",2025-01-20
 austin-brazilian-top-team,Brazilian Top Team,"9313 Anderson Mill Rd, Austin, TX 78729",https://bttusa.com/,0,35,,Saturday,12pm-1pm,Gi,"30.4502058,-97.7839624",2025-01-20
 austin-brazilian-top-team,Brazilian Top Team,"9313 Anderson Mill Rd, Austin, TX 78729",https://bttusa.com/,0,35,,Saturday,1pm-2pm,NoGi,"30.4502058,-97.7839624",2025-01-20
@@ -13,10 +13,10 @@ austin-coopers,Coopers,"12129 N FM 620 Suite # 330, Austin, TX 78750",https://co
 austin-coopers,Coopers,"12129 N FM 620 Suite # 330, Austin, TX 78750",https://coopersjiujitsu.com/,0,0,,Sunday,4pm,Gi/NoGi,"30.4612868,-97.8174358",2025-01-20
 austin-coopers,Coopers,"12129 N FM 620 Suite # 330, Austin, TX 78750",https://coopersjiujitsu.com/,0,0,,Tuesday,6:30pm-7:30pm,Gi/NoGi,"30.4612868,-97.8174358",2025-01-20
 austin-coopers,Coopers,"12129 N FM 620 Suite # 330, Austin, TX 78750",https://coopersjiujitsu.com/,0,0,,Thursday,6:30pm-7:30pm,Gi/NoGi,"30.4612868,-97.8174358",2025-01-20
-austin-free-world-jiu-jitsu,Free world jiu jitsu,"1202 Farm To Market 685, Pflugerville, TX 78660",,0,0,,Sunday,11am-1pm,Gi/NoGi,,2025-01-20
+austin-free-world-jiu-jitsu,Free world jiu jitsu,"1202 Farm To Market 685, Pflugerville, TX 78660",,0,0,,Sunday,11am-1pm,Gi/NoGi,"30.44965050,-97.60573850",2025-01-20
 austin-gracie-humaita,Gracie Humaita,"321 W Ben White Blvd Suite 108, Austin, TX 78704",https://graciehumaita.com/,0,0,30,,,Gi/NoGi,"30.2235953,-97.7671641",2025-01-20
-austin-integracao-jiu-jitsu,Integração Jiu Jitsu,"1600 W Stassney Ln c, Austin, TX 78745",https://ijjatx.com/,0,0,,Friday,6:45pm-7:45pm,Gi/NoGi,,2025-01-20
-austin-stoic-jiujitsu,stoic jiujitsu,"4955 Bell Springs Rd #5, Dripping Springs, TX 78620",,0,0,,,,Gi/NoGi,,2025-01-20
+austin-integracao-jiu-jitsu,Integração Jiu Jitsu,"1600 W Stassney Ln c, Austin, TX 78745",https://ijjatx.com/,0,0,,Friday,6:45pm-7:45pm,Gi/NoGi,"30.21360000,-97.79264260",2025-01-20
+austin-stoic-jiujitsu,stoic jiujitsu,"4955 Bell Springs Rd #5, Dripping Springs, TX 78620",,0,0,,,,Gi/NoGi,"30.25098360,-98.12927960",2025-01-20
 austin-johns-gym,John's Gym,"11416 Ranch Rd 620 N, Austin, TX 78726",https://www.johnsgymatx.com/,0,0,,Monday,7pm-8pm,Gi/NoGi,"30.4077225,-97.8519533",2025-01-20
 austin-johns-gym,John's Gym,"11416 Ranch Rd 620 N, Austin, TX 78726",https://www.johnsgymatx.com/,0,0,,Wednesday,7pm-8pm,Gi/NoGi,"30.4077225,-97.8519533",2025-01-20
 austin-johns-gym,John's Gym,"11416 Ranch Rd 620 N, Austin, TX 78726",https://www.johnsgymatx.com/,0,0,,Friday,12:00pm,Gi/NoGi,"30.4077225,-97.8519533",2025-01-20
@@ -28,15 +28,15 @@ austin-renzo-gracie,Renzo Gracie,"4631 Airport Blvd STE 114, Austin, TX 78751",h
 austin-renzo-gracie,Renzo Gracie,"4631 Airport Blvd STE 114, Austin, TX 78751",https://renzogracie.com/,0,0,20,Sunday,2pm-4pm,Gi/NoGi,"30.3067572,-97.7154666",2025-01-20
 austin-renzo-gracie,Renzo Gracie,"4631 Airport Blvd STE 114, Austin, TX 78751",https://renzogracie.com/,0,0,20,Sunday,10am-3pm,Gi/NoGi,"30.3067572,-97.7154666",2025-01-20
 austin-relson-gracie,Relson Gracie,"Austin, TX",https://relsongracie.com/,0,0,,,,Gi/NoGi,"30.2711286,-97.7436995",2025-01-20
-austin-six-blades,Six Blades,"13642 N Hwy 183 #300, Austin, TX 78750",https://www.sixbladesaustin.com/,0,0,30,Monday,6:30pm-7:30pm,Gi/NoGi,,2025-01-20
+austin-six-blades,Six Blades,"13642 N Hwy 183 #300, Austin, TX 78750",https://www.sixbladesaustin.com/,0,0,30,Monday,6:30pm-7:30pm,Gi/NoGi,"30.51261960,-97.82466770",2025-01-20
 austin-triple-threat-marble-falls,triple threat,"2415 Commerce St, Marble Falls, TX 78654",,0,0,,,,Gi/NoGi,"30.5949523,-98.2695239",2025-01-20
 austin-true-jiu-jitsu,true jiu jitsu,"2111 Sam Bass Rd, Round Rock, TX 78681",,0,0,,,,Gi/NoGi,"30.5252573,-97.7107625",2025-01-20
-austin-vasquez-academy,Vasquez Academy,"12110 Menchaca Rd #401, Austin, TX 78748",,0,0,,Monday,7:30pm-8:30pm,Gi/NoGi,,2025-01-20
-austin-violet-crown-jiu-jitsu,Violet crown jiu jitsu,"1609 Ohlen Rd ste. B, Austin, TX 78758",https://violetcrownjiujitsu.com/,0,0,,,,NoGi,,2025-01-20
-austin-vow-bjj,VOW BJJ,"5555 N Lamar Blvd C109, Austin, TX 78751",https://vowbjj.com/,0,0,,Sunday,12pm-4pm,NoGi,,2025-01-20
-austin-gracie-barra-south,Gracie Barra South Austin,"8204 Brodie Ln #102, Austin, TX 78745",https://gbsouthaustin.com/,0,20,30,Saturday,12:00pm-1:30pm,Gi/NoGi,,2025-01-20
-austin-east-austin-jiujitsu,East Austin Jiujitsu Parlor,"979 Springdale Rd #111, Austin, TX 78702",https://eastaustinjiujitsu.com/,0,0,,,,Gi/NoGi,,2025-01-20
-austin-gracie-barra-north,Gracie Barra North Austin,"8868 Research Blvd #608, Austin, TX 78758",,0,0,,,,Gi/NoGi,,2025-01-20
-austin-fight-factory,Fight Factory Jiu-jitsu,"9607 Research Blvd #675, Austin, TX 78759",,0,0,,,,Gi/NoGi,,2025-01-20
+austin-vasquez-academy,Vasquez Academy,"12110 Menchaca Rd #401, Austin, TX 78748",,0,0,,Monday,7:30pm-8:30pm,Gi/NoGi,"30.19966640,-97.80760950",2025-01-20
+austin-violet-crown-jiu-jitsu,Violet crown jiu jitsu,"1609 Ohlen Rd ste. B, Austin, TX 78758",https://violetcrownjiujitsu.com/,0,0,,,,NoGi,"30.36403800,-97.71485100",2025-01-20
+austin-vow-bjj,VOW BJJ,"5555 N Lamar Blvd C109, Austin, TX 78751",https://vowbjj.com/,0,0,,Sunday,12pm-4pm,NoGi,"30.32128460,-97.72925560",2025-01-20
+austin-gracie-barra-south,Gracie Barra South Austin,"8204 Brodie Ln #102, Austin, TX 78745",https://gbsouthaustin.com/,0,20,30,Saturday,12:00pm-1:30pm,Gi/NoGi,"30.22062830,-97.82623790",2025-01-20
+austin-east-austin-jiujitsu,East Austin Jiujitsu Parlor,"979 Springdale Rd #111, Austin, TX 78702",https://eastaustinjiujitsu.com/,0,0,,,,Gi/NoGi,"30.25201830,-97.70410640",2025-01-20
+austin-gracie-barra-north,Gracie Barra North Austin,"8868 Research Blvd #608, Austin, TX 78758",,0,0,,,,Gi/NoGi,"30.37797670,-97.73423290",2025-01-20
+austin-fight-factory,Fight Factory Jiu-jitsu,"9607 Research Blvd #675, Austin, TX 78759",,0,0,,,,Gi/NoGi,"30.40359970,-97.74514950",2025-01-20
 austin-gracie-humaita-oak-hill,Gracie Humaitá Austin Oak Hill,"6120 US-290, Austin, TX 78735",,0,0,,Saturday,7:30pm-8:30pm,Gi/NoGi,"30.2350282,-97.8614734",2025-01-20
 austin-cornerstone,Cornerstone Jiu Jitsu Academy,"1309 Leander Dr #604, Leander, TX 78641",,0,0,,Saturday,10am-12pm,Gi/NoGi,"30.5616098,-97.8437661",2025-01-20
