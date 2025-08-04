@@ -998,6 +998,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     let filtered = sortedGyms;
     // logger.filter('After grouping - unique gyms count:', { count: filtered.length });
     
+    // Check if any filters are active
+    const hasActiveFilters = activeFilters.gi || activeFilters.nogi || activeFilters.price === 'free';
+    
     // Apply Gi/No-Gi filters with smart logic
     if (activeFilters.gi || activeFilters.nogi) {
       
@@ -1074,9 +1077,24 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     return filtered;
   }, [sortedGyms, activeFilters, selectedRadius, userLocation]);
 
+  // Helper function to check if a gym has confirmed schedules
+  const hasConfirmedSchedules = (gym: OpenMat): boolean => {
+    return gym.openMats && gym.openMats.length > 0 && 
+           gym.openMats.some(session => 
+             session.day !== 'Contact' && 
+             session.time !== 'Contact for schedule' &&
+             session.type !== 'Contact'
+           );
+  };
 
-
-
+  // Helper function to get session display text for gyms without confirmed schedules
+  const getSessionDisplayText = (gym: OpenMat): string => {
+    if (hasConfirmedSchedules(gym)) {
+      return 'Open Mat Sessions';
+    } else {
+      return 'Contact for Schedule';
+    }
+  };
 
   // Helper to open website
   // Helper to copy gym details with state management
@@ -1302,20 +1320,43 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         </View>
 
         {/* Session Type Subtitle */}
-        <Text style={styles.sessionSubtitle}>Open Mat Sessions</Text>
+        <Text style={styles.sessionSubtitle}>{getSessionDisplayText(gym)}</Text>
 
         {/* Sessions Section */}
         <View style={styles.sessionsSection}>
-                        {gym.openMats.map((session: OpenMatSession, index: number) => (
-            <View key={index} style={styles.sessionBlock}>
-              <Text style={styles.dayHeader}>
-                {session.day.toUpperCase()}
-              </Text>
-              <Text style={styles.timeRange}>
-                {formatTimeRange(session.time)} • {getSessionTypeWithIcon(session.type)}
+          {hasConfirmedSchedules(gym) ? (
+            // Show confirmed sessions
+            gym.openMats.map((session: OpenMatSession, index: number) => (
+              <View key={index} style={styles.sessionBlock}>
+                <View style={styles.sessionHeaderRow}>
+                  <Text style={styles.dayHeader}>
+                    {session.day.toUpperCase()}
+                  </Text>
+                  <View style={styles.confirmedBadge}>
+                    <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                    <Text style={styles.confirmedText}>Confirmed</Text>
+                  </View>
+                </View>
+                <Text style={styles.timeRange}>
+                  {formatTimeRange(session.time)} • {getSessionTypeWithIcon(session.type)}
+                </Text>
+              </View>
+            ))
+          ) : (
+            // Show contact message for gyms without confirmed schedules
+            <View style={styles.contactSessionBlock}>
+              <View style={styles.sessionHeaderRow}>
+                <Text style={styles.contactHeader}>Schedule Information</Text>
+                <View style={styles.contactBadge}>
+                  <Ionicons name="call" size={16} color="#F59E0B" />
+                  <Text style={styles.contactText}>Contact Required</Text>
+                </View>
+              </View>
+              <Text style={styles.contactMessage}>
+                Contact this gym directly for open mat schedule and availability
               </Text>
             </View>
-          ))}
+          )}
         </View>
 
         {/* Fees Section */}
@@ -1452,7 +1493,12 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <Animated.View style={[styles.header, { opacity: headerAnim }]}>
           <View style={styles.headerTextContainer}>
             <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
-            <Text style={styles.locationContext}>{getGymCountText(filteredGyms.length, sortedGyms.length, location)}</Text>
+            <Text style={styles.locationContext}>
+              {getGymCountText(filteredGyms.length, sortedGyms.length, location)}
+              {!hasActiveFilters() && filteredGyms.length > 0 && (
+                <Text style={{ color: '#10B981', fontWeight: '600' }}> • All Gyms</Text>
+              )}
+            </Text>
           </View>
         </Animated.View>
 
@@ -1669,6 +1715,48 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             </Text>
           </TouchableOpacity>
 
+          {/* Show All Button */}
+          {hasActiveFilters() && (
+            <TouchableOpacity 
+              style={[
+                styles.filterPill,
+                {
+                  backgroundColor: '#10B981',
+                  borderWidth: 1,
+                  borderColor: '#10B981',
+                  marginRight: 8,
+                  shadowColor: '#10B981',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }
+              ]}
+              onPress={() => {
+                // Clear all filters to show ALL gyms
+                setActiveFilters({
+                  gi: false,
+                  nogi: false,
+                  price: null,
+                });
+                setSelectedRadius(null);
+                setShowFreeOnly(false);
+                haptics.success();
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.filterPillText, 
+                { 
+                  color: '#FFFFFF', 
+                  fontWeight: '700' 
+                }
+              ]}>
+                Show All
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* Map Toggle Button */}
           <TouchableOpacity 
             style={[
@@ -1726,7 +1814,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
               <TouchableOpacity 
                 style={[styles.emptyStateButton, styles.secondaryButton]}
                 onPress={() => {
-                  // Clear all filters
+                  // Clear all filters to show ALL gyms
                   setActiveFilters({
                     gi: false,
                     nogi: false,
@@ -1734,9 +1822,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                   });
                   setSelectedRadius(null);
                   setShowFreeOnly(false);
+                  // Force refresh to show all gyms including those with "Contact for schedule"
+                  onRefresh();
                 }}
               >
-                <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Clear Filters</Text>
+                <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Show All Gyms</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -2683,11 +2773,63 @@ const styles = StyleSheet.create({
   sessionBlock: {
     marginBottom: 8,
   },
+  sessionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
   dayHeader: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111518',
-    marginBottom: 2,
+  },
+  confirmedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  confirmedText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#10B981',
+    marginLeft: 2,
+  },
+  contactSessionBlock: {
+    marginBottom: 8,
+    backgroundColor: '#FFFBEB',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  contactHeader: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  contactBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  contactText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#F59E0B',
+    marginLeft: 2,
+  },
+  contactMessage: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#92400E',
+    fontStyle: 'italic',
   },
   timeRange: {
     fontSize: 14,
