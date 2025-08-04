@@ -1100,8 +1100,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Helper function to get session display text for gyms without confirmed schedules
   const getSessionDisplayText = (gym: OpenMat): string => {
     if (hasConfirmedSchedules(gym)) {
-      const sessionCount = getSessionCount(gym);
-      return `Open Mat Sessions (${sessionCount})`;
+      // const sessionCount = getSessionCount(gym);
+      return 'Open Mat Sessions';
     } else {
       return 'Contact for Schedule';
     }
@@ -1126,6 +1126,27 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       return 0;
     }
     return gym.openMats.length;
+  };
+
+  // Helper function to format last updated date
+  const formatLastUpdated = (lastUpdated: string | undefined): string => {
+    if (!lastUpdated || lastUpdated === '' || lastUpdated === 'Contact') {
+      return 'Unknown';
+    }
+    try {
+      const date = new Date(lastUpdated);
+      if (isNaN(date.getTime())) {
+        return 'Unknown';
+      }
+      // Format as "Jan 28, 2025"
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch {
+      return 'Unknown';
+    }
   };
 
   // Helper to open website
@@ -1358,22 +1379,20 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <View style={styles.sessionsSection}>
           {hasConfirmedSchedules(gym) ? (
             // Show confirmed sessions
-            gym.openMats.map((session: OpenMatSession, index: number) => (
-              <View key={index} style={styles.sessionBlock}>
+            gym.openMats.map((session: OpenMatSession, index: number) => {
+              console.log('Session data:', session);  // ADD THIS LINE
+              return (
+                <View key={index} style={styles.sessionBlock}>
                 <View style={styles.sessionHeaderRow}>
                   <Text style={styles.dayHeader}>
                     {session.day.toUpperCase()}
                   </Text>
-                  <View style={styles.confirmedBadge}>
-                    <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-                    <Text style={styles.confirmedText}>Confirmed</Text>
-                  </View>
                 </View>
                 <Text style={styles.timeRange}>
                   {formatTimeRange(session.time)} • {getSessionTypeWithIcon(session.type)}
                 </Text>
               </View>
-            ))
+            )})
           ) : (
             // Show contact message for gyms without confirmed schedules
             <View style={styles.contactSessionBlock}>
@@ -1413,7 +1432,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         {/* Last Updated Section */}
         <View style={styles.lastUpdatedContainer}>
           <Text style={styles.lastUpdatedText}>
-            Last updated: {gym.lastUpdated ? formatDate(gym.lastUpdated) : 'Unknown'}
+            Last updated: {formatLastUpdated(gym.lastUpdated)}
           </Text>
         </View>
 
@@ -2818,20 +2837,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111518',
   },
-  confirmedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  confirmedText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#10B981',
-    marginLeft: 2,
-  },
+
   contactSessionBlock: {
     marginBottom: 8,
     backgroundColor: '#FFFBEB',

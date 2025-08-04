@@ -299,7 +299,7 @@ class ApiService {
     };
   }
 
-  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean, showAllGyms?: boolean): Promise<OpenMat[]>
+  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean, showAllGyms?: boolean): Promise<OpenMat[]> {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'Tampa';
     
