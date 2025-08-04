@@ -144,8 +144,28 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
     }
   };
 
+  const handlePhonePress = async () => {
+    if (!gym.phoneNumber) return;
+    
+    try {
+      const phoneUrl = `tel:${gym.phoneNumber}`;
+      await Linking.openURL(phoneUrl);
+    } catch (error) {
+      Alert.alert('Error', 'Unable to open phone app');
+    }
+  };
+
   const formatWebsiteUrl = (url: string) => {
     return url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+  };
+
+  const formatPhoneNumber = (phone: string) => {
+    // Remove any non-digit characters and format as (XXX) XXX-XXXX
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+    return phone; // Return original if not 10 digits
   };
 
   return (
@@ -225,6 +245,22 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
               </TouchableOpacity>
               <Text style={{ color: '#666', fontSize: 14 }}>{gym.distance} miles away</Text>
             </View>
+
+            {/* Phone Number */}
+            {gym.phoneNumber && (
+              <View style={{ marginBottom: 20 }}>
+                <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Phone</Text>
+                <TouchableOpacity onPress={handlePhonePress}>
+                  <Text style={{ 
+                    color: '#3B82F6', 
+                    textDecorationLine: 'underline',
+                    fontSize: 16
+                  }}>
+                    {formatPhoneNumber(gym.phoneNumber)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
             {/* Website */}
             {gym.website && (
