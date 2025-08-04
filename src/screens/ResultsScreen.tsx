@@ -1100,10 +1100,32 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Helper function to get session display text for gyms without confirmed schedules
   const getSessionDisplayText = (gym: OpenMat): string => {
     if (hasConfirmedSchedules(gym)) {
-      return 'Open Mat Sessions';
+      const sessionCount = getSessionCount(gym);
+      return `Open Mat Sessions (${sessionCount})`;
     } else {
       return 'Contact for Schedule';
     }
+  };
+
+  // Helper function to format fee display
+  const formatFeeDisplay = (fee: any): { text: string; color: string } => {
+    if (fee === 0) {
+      return { text: 'Free', color: '#10B981' };
+    } else if (typeof fee === 'number' && fee > 0) {
+      return { text: `$${fee}`, color: '#111518' };
+    } else if (fee === 'Contact' || fee === 'contact') {
+      return { text: 'Contact gym', color: '#F59E0B' };
+    } else {
+      return { text: 'Contact gym', color: '#9CA3AF' };
+    }
+  };
+
+  // Helper function to get session count
+  const getSessionCount = (gym: OpenMat): number => {
+    if (!gym.openMats || gym.openMats.length === 0) {
+      return 0;
+    }
+    return gym.openMats.length;
   };
 
   // Helper to open website
@@ -1376,14 +1398,14 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           </View>
           <View style={styles.feeItem}>
             <Text style={styles.feeLabel}>Open mat - </Text>
-            <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}>
-              {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
+            <Text style={[styles.feeValue, { color: formatFeeDisplay(gym.matFee).color }]}>
+              {formatFeeDisplay(gym.matFee).text}
             </Text>
           </View>
           <View style={styles.feeItem}>
             <Text style={styles.feeLabel}>Class Drop in - </Text>
-            <Text style={styles.feeValue}>
-              {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
+            <Text style={[styles.feeValue, { color: formatFeeDisplay(gym.dropInFee).color }]}>
+              {formatFeeDisplay(gym.dropInFee).text}
             </Text>
           </View>
         </View>
