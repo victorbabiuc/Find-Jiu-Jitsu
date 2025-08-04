@@ -163,6 +163,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
   // Radius filter state
   const [selectedRadius, setSelectedRadius] = useState<number | null>(null); // null = "All" (default)
 
+  // Show All Gyms mode state
+  const [showAllGyms, setShowAllGyms] = useState(false);
+
   // Location picker state
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
   const [selectedLocationType, setSelectedLocationType] = useState<'tampa-downtown' | 'current-location' | 'search-address'>('tampa-downtown');
@@ -377,7 +380,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         }
         
         logger.search('Filters being sent to API:', filters);
-        const data = await apiService.getOpenMats(location, filters, true);
+        const data = await apiService.getOpenMats(location, filters, true, showAllGyms);
         logger.success('ResultsScreen: Data loaded successfully -', { count: data.length, firstGym: data[0] });
         
         setOpenMats(data);
@@ -389,7 +392,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       }
     };
     fetchData();
-  }, [location, dateSelection, paramsKey]);
+  }, [location, dateSelection, paramsKey, showAllGyms]);
 
   const handleGymPress = (gym: OpenMat) => {
     haptics.light(); // Light haptic for gym card selection
@@ -525,6 +528,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Check if any filters are currently active
   const hasActiveFilters = (): boolean => {
+    // If showAllGyms is true, consider no active filters (for UI purposes)
+    if (showAllGyms) {
+      return false;
+    }
     return activeFilters.gi || activeFilters.nogi || activeFilters.price === 'free' || selectedRadius !== null;
   };
 
@@ -686,6 +693,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   const toggleFilter = (filterType: 'gi' | 'nogi') => {
     haptics.selection(); // Selection haptic for filter changes
+    setShowAllGyms(false); // Exit Show All mode when filters are applied
     setActiveFilters(prev => {
       const newFilters = {
         ...prev,
@@ -697,6 +705,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   const handleFreeFilter = () => {
     haptics.selection(); // Selection haptic for filter changes
+    setShowAllGyms(false); // Exit Show All mode when filters are applied
     const newValue = !showFreeOnly;
     setShowFreeOnly(newValue);
     
@@ -715,6 +724,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Radius filter handler
   const handleRadiusFilter = (radius: number | null) => {
+    setShowAllGyms(false); // Exit Show All mode when filters are applied
     // If clicking the same radius that's already selected, deselect it (show all)
     if (selectedRadius === radius) {
       setSelectedRadius(null);
@@ -1495,7 +1505,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
             <Text style={styles.locationContext}>
               {getGymCountText(filteredGyms.length, sortedGyms.length, location)}
-              {!hasActiveFilters() && filteredGyms.length > 0 && (
+              {showAllGyms && filteredGyms.length > 0 && (
                 <Text style={{ color: '#10B981', fontWeight: '600' }}> • All Gyms</Text>
               )}
             </Text>
@@ -1741,6 +1751,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                 });
                 setSelectedRadius(null);
                 setShowFreeOnly(false);
+                setShowAllGyms(true); // Enable Show All mode
                 haptics.success();
               }}
               activeOpacity={0.7}
@@ -1822,6 +1833,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
                   });
                   setSelectedRadius(null);
                   setShowFreeOnly(false);
+                  setShowAllGyms(true); // Enable Show All mode
                   // Force refresh to show all gyms including those with "Contact for schedule"
                   onRefresh();
                 }}

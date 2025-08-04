@@ -299,7 +299,7 @@ class ApiService {
     };
   }
 
-  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean): Promise<OpenMat[]> {
+  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean, showAllGyms?: boolean): Promise<OpenMat[]>
     // Ensure location is never undefined or empty
     const safeLocation = location || 'Tampa';
     
@@ -315,8 +315,8 @@ class ApiService {
       
 
       
-      // Apply date filtering if specified
-      if (filters?.dateSelection || filters?.dates) {
+      // Apply date filtering if specified (skip if showAllGyms is true)
+      if ((filters?.dateSelection || filters?.dates) && !showAllGyms) {
         githubData = this.filterGymsByDate(githubData, filters);
       }
       
@@ -328,8 +328,8 @@ class ApiService {
       // Fallback to mock data
       let mockData = safeLocation.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;
       
-      // Apply date filtering to mock data as well
-      if (filters?.dateSelection || filters?.dates) {
+      // Apply date filtering to mock data as well (skip if showAllGyms is true)
+      if ((filters?.dateSelection || filters?.dates) && !showAllGyms) {
         mockData = this.filterGymsByDate(mockData, filters);
       }
       
