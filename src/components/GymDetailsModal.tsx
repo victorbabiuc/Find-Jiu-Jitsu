@@ -8,6 +8,8 @@ import {
   Dimensions,
   Platform,
   Animated,
+  Linking,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { OpenMat } from '../types';
@@ -111,6 +113,41 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
     }
   };
 
+  const handleAddressPress = async () => {
+    try {
+      const encodedAddress = encodeURIComponent(gym.address);
+      const mapsUrl = `maps://0,0?q=${encodedAddress}`;
+      
+      const canOpen = await Linking.canOpenURL(mapsUrl);
+      if (canOpen) {
+        await Linking.openURL(mapsUrl);
+      } else {
+        // Fallback to Apple Maps or Google Maps web URL
+        const fallbackUrl = Platform.OS === 'ios' 
+          ? `http://maps.apple.com/?q=${encodedAddress}`
+          : `https://maps.google.com/?q=${encodedAddress}`;
+        await Linking.openURL(fallbackUrl);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Unable to open maps app');
+    }
+  };
+
+  const handleWebsitePress = async () => {
+    if (!gym.website) return;
+    
+    try {
+      const url = gym.website.startsWith('http') ? gym.website : `https://${gym.website}`;
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert('Error', 'Unable to open website');
+    }
+  };
+
+  const formatWebsiteUrl = (url: string) => {
+    return url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+  };
+
   return (
     <Modal
       visible={visible}
@@ -177,9 +214,33 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
             {/* Location */}
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Location</Text>
-              <Text>{gym.address}</Text>
-              <Text>{gym.distance} miles away</Text>
+              <TouchableOpacity onPress={handleAddressPress} style={{ marginBottom: 5 }}>
+                <Text style={{ 
+                  color: '#3B82F6', 
+                  textDecorationLine: 'underline',
+                  fontSize: 16
+                }}>
+                  {gym.address}
+                </Text>
+              </TouchableOpacity>
+              <Text style={{ color: '#666', fontSize: 14 }}>{gym.distance} miles away</Text>
             </View>
+
+            {/* Website */}
+            {gym.website && (
+              <View style={{ marginBottom: 20 }}>
+                <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Website</Text>
+                <TouchableOpacity onPress={handleWebsitePress}>
+                  <Text style={{ 
+                    color: '#3B82F6', 
+                    textDecorationLine: 'underline',
+                    fontSize: 16
+                  }}>
+                    {formatWebsiteUrl(gym.website)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
             {/* Schedule */}
             <View style={{ marginBottom: 20 }}>
@@ -209,16 +270,6 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
               </Text>
             </View>
           </ScrollView>
-
-          {/* Footer */}
-          <View style={{ paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8, backgroundColor: '#F9FAFB', borderTopWidth: 1, borderTopColor: '#F3F4F6' }}>
-            <TouchableOpacity
-              style={{ backgroundColor: '#3B82F6', padding: 15, borderRadius: 10, alignItems: 'center' }}
-              onPress={() => {/* Add navigation logic */}}
-            >
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Get Directions</Text>
-            </TouchableOpacity>
-          </View>
         </Animated.View>
       </Animated.View>
     </Modal>
