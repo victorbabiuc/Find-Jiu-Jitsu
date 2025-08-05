@@ -134,10 +134,12 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         showTransitionalLoading('Loading map data...', 2000);
         
         // Determine city from location string
+        console.log('🔍 MapViewScreen: selectedLocation:', selectedLocation);
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
                      selectedLocation.toLowerCase().includes('miami') ? 'miami' : 
                      selectedLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
                      selectedLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
+        console.log('🔍 MapViewScreen: Determined city:', city);
         
         // Force refresh data from GitHub
         if (city === 'tampa') {
@@ -151,9 +153,11 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         }
         
         // Get gym data
-        const gymData = await apiService.getOpenMats(city);
+        console.log('🔍 MapViewScreen: Fetching gym data for city:', city);
+        const gymData = await apiService.getOpenMats(city, undefined, true); // Force refresh
         setGyms(gymData);
         console.log('🔍 MapViewScreen: Loaded gym data:', gymData.length, 'gyms');
+        console.log('🔍 MapViewScreen: Gym names:', gymData.map(g => g.name));
         
         // Don't override map region - keep the one set from route parameters
         
