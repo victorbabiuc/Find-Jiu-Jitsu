@@ -24,6 +24,25 @@ interface CSVRow {
   lastUpdated?: string; // Optional YYYY-MM-DD format date
 }
 
+interface CSVRowNew {
+  id: string;
+  name: string;
+  address: string;
+  website: string;
+  distance: string;
+  matFee: string;
+  dropInFee: string;
+  coordinates?: string;
+  lastUpdated?: string;
+  monday?: string;
+  tuesday?: string;
+  wednesday?: string;
+  thursday?: string;
+  friday?: string;
+  saturday?: string;
+  sunday?: string;
+}
+
 class GitHubDataService {
   private readonly CACHE_PREFIX = 'github_gym_data_';
   private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -34,7 +53,7 @@ class GitHubDataService {
     'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
     'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
     'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv',
-    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms.csv'
+    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms-new-format.csv'
   };
 
   /**
@@ -95,7 +114,7 @@ class GitHubDataService {
 
       // Fetch fresh data from GitHub
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
-      const parsedData = this.parseCSVToOpenMats(csvData);
+      const parsedData = this.parseCSVToOpenMats(csvData, normalizedLocation);
       
       // Cache the new data
       await this.cacheData(normalizedLocation, parsedData);
@@ -230,7 +249,17 @@ class GitHubDataService {
    * @param csvData - Raw CSV string
    * @returns OpenMat[] - Array of parsed gym data
    */
-  private parseCSVToOpenMats(csvData: string): OpenMat[] {
+  private parseCSVToOpenMats(csvData: string, location?: string): OpenMat[] {
+    // Use new format for St Pete, old format for other cities
+    if (location === 'stpete') {
+      return this.parseCSVToOpenMatsNewFormat(csvData);
+    }
+    
+    // Use old format for all other cities
+    return this.parseCSVToOpenMatsOldFormat(csvData);
+  }
+
+  private parseCSVToOpenMatsOldFormat(csvData: string): OpenMat[] {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
     
@@ -316,6 +345,140 @@ class GitHubDataService {
 
     // Debug: Log the parsing results
     logger.debug('CSV parsing completed:', { 
+      totalRows: csvRows.length,
+      uniqueGyms: sortedGyms.length,
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+    });
+
+    return sortedGyms;
+  }
+
+  /**
+   * Parse session data from new format: "5:00 PM - Gi/NoGi"
+   * @param sessionData - Raw session string from CSV
+   * @param day - Day of the week (e.g., "sunday")
+   * @returns OpenMatSession object or null if no session
+   */
+  private parseSessionFromDayColumn(sessionData: string, day: string): OpenMatSession | null {
+    if (!sessionData || sessionData.trim() === '') {
+      return null;
+    }
+    
+    // Handle multiple sessions separated by commas
+    const sessions = sessionData.split(',').map(s => s.trim());
+    
+    // For now, just parse the first session
+    const firstSession = sessions[0];
+    
+    // Parse "5:00 PM - Gi/NoGi" format
+    const parts = firstSession.split(' - ');
+    
+    if (parts.length < 2) {
+      // Fallback: treat entire string as time, assume "both" type
+      return {
+        day: day.charAt(0).toUpperCase() + day.slice(1), // "sunday" -> "Sunday"
+        time: firstSession.trim(),
+        type: 'both'
+      };
+    }
+    
+    // Handle cases like "9:00 AM - 10:30 AM - NoGi" (3 parts)
+    // or "5:00 PM - Gi/NoGi" (2 parts)
+    const time = parts.slice(0, -1).join(' - ').trim(); // All parts except the last
+    const type = parts[parts.length - 1].trim(); // Last part is the type
+    
+    return {
+      day: day.charAt(0).toUpperCase() + day.slice(1),
+      time: time,
+      type: this.validateSessionType(type)
+    };
+  }
+
+  /**
+   * Parse CSV data using the new format (one row per gym with day columns)
+   * @param csvData - Raw CSV data string
+   * @returns OpenMat[] - Array of gym data
+   */
+  private parseCSVToOpenMatsNewFormat(csvData: string): OpenMat[] {
+    const lines = csvData.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
+    
+    // Validate headers for new format
+    const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'dropInFee'];
+    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+    
+    if (missingHeaders.length > 0) {
+      throw new Error(`Missing required CSV headers for new format: ${missingHeaders.join(', ')}`);
+    }
+
+    // Parse CSV rows
+    const csvRows: CSVRowNew[] = lines.slice(1).map(line => {
+      const values = this.parseCSVLine(line);
+      const row: CSVRowNew = {
+        id: values[headers.indexOf('id')] || '',
+        name: values[headers.indexOf('name')] || '',
+        address: values[headers.indexOf('address')] || '',
+        website: values[headers.indexOf('website')] || '',
+        distance: values[headers.indexOf('distance')] || '0',
+        matFee: values[headers.indexOf('matFee')] || '0',
+        dropInFee: values[headers.indexOf('dropInFee')] || '',
+        coordinates: values[headers.indexOf('coordinates')] || undefined,
+        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined,
+        monday: values[headers.indexOf('monday')] || undefined,
+        tuesday: values[headers.indexOf('tuesday')] || undefined,
+        wednesday: values[headers.indexOf('wednesday')] || undefined,
+        thursday: values[headers.indexOf('thursday')] || undefined,
+        friday: values[headers.indexOf('friday')] || undefined,
+        saturday: values[headers.indexOf('saturday')] || undefined,
+        sunday: values[headers.indexOf('sunday')] || undefined
+      };
+      
+      return row;
+    });
+
+    // Convert each row to OpenMat object
+    const gyms = csvRows.map(row => {
+      if (!row.id || !row.name) {
+        logger.warn('Skipping row with missing id or name:', { row });
+        return null;
+      }
+
+      const gym: OpenMat = {
+        id: row.id,
+        name: row.name.trim(),
+        address: row.address,
+        website: row.website && row.website.trim() !== '' ? row.website : undefined,
+        distance: parseFloat(row.distance) || 0,
+        matFee: parseInt(row.matFee) || 0,
+        dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
+        coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
+        lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
+        openMats: []
+      };
+      
+      // Parse sessions from day columns
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      days.forEach(day => {
+        const sessionData = row[day as keyof CSVRowNew] as string | undefined;
+        if (sessionData && sessionData.trim() !== '') {
+          const session = this.parseSessionFromDayColumn(sessionData, day);
+          if (session) {
+            gym.openMats.push(session);
+          }
+        }
+      });
+      
+      return gym;
+    }).filter((gym): gym is OpenMat => gym !== null);
+
+    // Sort sessions by day order for each gym
+    const sortedGyms = gyms.map(gym => ({
+      ...gym,
+      openMats: this.sortSessionsByDay(gym.openMats)
+    }));
+
+    // Debug: Log the parsing results
+    logger.debug('New format CSV parsing completed:', { 
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
       sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
