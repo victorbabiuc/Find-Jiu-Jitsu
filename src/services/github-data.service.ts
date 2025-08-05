@@ -98,23 +98,31 @@ class GitHubDataService {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'tampa';
     
+    console.log(`[DEBUG] getGymData called for location: ${safeLocation}, forceRefresh: ${forceRefresh}`);
+    
     try {
       const normalizedLocation = safeLocation.toLowerCase();
+      console.log(`[DEBUG] Normalized location: ${normalizedLocation}`);
       
       // Check if data is stale or force refresh is requested
       const isStale = await this.isDataStale(normalizedLocation);
+      console.log(`[DEBUG] Data is stale: ${isStale}`);
       
       // Check cache first (unless force refresh or data is stale)
       if (!forceRefresh && !isStale) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
+          console.log(`[DEBUG] Using cached data for ${normalizedLocation}, ${cachedData.length} gyms`);
           return cachedData;
         }
       }
 
       // Fetch fresh data from GitHub
+      console.log(`[DEBUG] Fetching fresh data for ${normalizedLocation}`);
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
+      console.log(`[DEBUG] CSV data length: ${csvData.length} characters`);
       const parsedData = this.parseCSVToOpenMats(csvData, normalizedLocation);
+      console.log(`[DEBUG] Parsed ${parsedData.length} gyms for ${normalizedLocation}`);
       
       // Cache the new data
       await this.cacheData(normalizedLocation, parsedData);
@@ -250,12 +258,16 @@ class GitHubDataService {
    * @returns OpenMat[] - Array of parsed gym data
    */
   private parseCSVToOpenMats(csvData: string, location?: string): OpenMat[] {
+    console.log(`[DEBUG] parseCSVToOpenMats called for location: ${location}`);
+    
     // Use new format for St Pete, old format for other cities
     if (location === 'stpete') {
+      console.log('[DEBUG] Using new format parser for St Pete');
       return this.parseCSVToOpenMatsNewFormat(csvData);
     }
     
     // Use old format for all other cities
+    console.log('[DEBUG] Using old format parser for other cities');
     return this.parseCSVToOpenMatsOldFormat(csvData);
   }
 
@@ -400,8 +412,10 @@ class GitHubDataService {
    * @returns OpenMat[] - Array of gym data
    */
   private parseCSVToOpenMatsNewFormat(csvData: string): OpenMat[] {
+    console.log('[DEBUG] parseCSVToOpenMatsNewFormat called');
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
+    console.log('[DEBUG] CSV headers:', headers);
     
     // Validate headers for new format
     const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'dropInFee'];
@@ -458,12 +472,15 @@ class GitHubDataService {
       
       // Parse sessions from day columns
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      console.log(`[DEBUG] Parsing sessions for gym: ${gym.name}`);
       days.forEach(day => {
         const sessionData = row[day as keyof CSVRowNew] as string | undefined;
+        console.log(`[DEBUG] ${day}: "${sessionData}"`);
         if (sessionData && sessionData.trim() !== '') {
           const session = this.parseSessionFromDayColumn(sessionData, day);
           if (session) {
             gym.openMats.push(session);
+            console.log(`[DEBUG] Added session: ${session.day} ${session.time} ${session.type}`);
           }
         }
       });
@@ -478,11 +495,13 @@ class GitHubDataService {
     }));
 
     // Debug: Log the parsing results
-    logger.debug('New format CSV parsing completed:', { 
+    console.log('[DEBUG] New format CSV parsing completed:', { 
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
       sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
     });
+    
+    console.log('[DEBUG] All St Pete gyms:', sortedGyms.map(g => ({ name: g.name, sessions: g.openMats.length, coordinates: g.coordinates })));
 
     return sortedGyms;
   }
