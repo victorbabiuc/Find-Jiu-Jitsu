@@ -153,10 +153,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         // For Tampa Bay area, load both Tampa and St Pete data
         let allGymData = [];
         
-        if (city === 'tampa' || city === 'stpete') {
-          console.log('🔍 MapViewScreen: Loading Tampa Bay area data (Tampa + St Pete)');
-          console.log('🔍 MapViewScreen: City determined as:', city);
-          console.log('🔍 MapViewScreen: Will load both Tampa and St Pete data');
+        if (city === 'tampa') {
+          console.log('🔍 MapViewScreen: Loading Tampa data only');
           
           // Load Tampa data
           console.log('🔍 MapViewScreen: Loading Tampa data...');
@@ -164,6 +162,11 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           const tampaData = await apiService.getOpenMats('tampa', undefined, true);
           console.log('🔍 MapViewScreen: Loaded Tampa data:', tampaData.length, 'gyms');
           console.log('🔍 MapViewScreen: Tampa gym IDs:', tampaData.map(g => g.id));
+          
+          allGymData = tampaData;
+          console.log('🔍 MapViewScreen: Final Tampa data:', allGymData.length, 'gyms');
+        } else if (city === 'stpete') {
+          console.log('🔍 MapViewScreen: Loading St Pete data only');
           
           // Load St Pete data
           console.log('🔍 MapViewScreen: Loading St Pete data...');
@@ -175,10 +178,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           console.log('🔍 MapViewScreen: Loaded St Pete data:', stpeteData.length, 'gyms');
           console.log('🔍 MapViewScreen: St Pete gym IDs:', stpeteData.map(g => g.id));
           
-          // Combine the data
-          allGymData = [...tampaData, ...stpeteData];
-          console.log('🔍 MapViewScreen: Combined Tampa Bay data:', allGymData.length, 'gyms');
-          console.log('🔍 MapViewScreen: All gym IDs:', allGymData.map(g => g.id));
+          allGymData = stpeteData;
+          console.log('🔍 MapViewScreen: Final St Pete data:', allGymData.length, 'gyms');
         } else {
           // For other cities, load single city data
           if (city === 'miami') {
