@@ -260,9 +260,9 @@ class GitHubDataService {
   private parseCSVToOpenMats(csvData: string, location?: string): OpenMat[] {
     console.log(`[DEBUG] parseCSVToOpenMats called for location: ${location}`);
     
-    // Use new format for St Pete, old format for other cities
-    if (location === 'stpete') {
-      console.log('[DEBUG] Using new format parser for St Pete');
+    // Use new format for St Pete and Austin, old format for other cities
+    if (location === 'stpete' || location === 'austin') {
+      console.log(`[DEBUG] Using new format parser for ${location}`);
       return this.parseCSVToOpenMatsNewFormat(csvData);
     }
     
