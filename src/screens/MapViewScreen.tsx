@@ -128,10 +128,13 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
 
   // Load gym data
   useEffect(() => {
-    const fetchGymData = async () => {
-      try {
-        // Show loading when fetch starts
-        showTransitionalLoading('Loading map data...', 2000);
+      const fetchGymData = async () => {
+    try {
+      // Show loading when fetch starts
+      showTransitionalLoading('Loading map data...', 2000);
+      
+      // Debug: Log the selectedLocation immediately
+      console.log('🔍 MapViewScreen: fetchGymData called with selectedLocation:', selectedLocation);
         
         // Determine city from location string
         console.log('🔍 MapViewScreen: selectedLocation:', selectedLocation);
@@ -158,7 +161,9 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           
           // Load St Pete data
           console.log('🔍 MapViewScreen: Loading St Pete data...');
+          console.log('🔍 MapViewScreen: Calling forceRefreshStPeteData...');
           await githubDataService.forceRefreshStPeteData();
+          console.log('🔍 MapViewScreen: forceRefreshStPeteData completed');
           console.log('🔍 MapViewScreen: About to call apiService.getOpenMats for stpete');
           const stpeteData = await apiService.getOpenMats('stpete', undefined, true);
           console.log('🔍 MapViewScreen: Loaded St Pete data:', stpeteData.length, 'gyms');
