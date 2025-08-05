@@ -321,8 +321,10 @@ class GitHubDataService {
       
       if (!gymMap.has(gymName)) {
         // Create new gym entry using the first occurrence's data
+        // Clean up the ID to remove any suffixes like -1, -2, -3
+        const cleanId = row.id.replace(/-\d+$/, '');
         const gym = {
-          id: row.id, // Use the first ID as the primary ID
+          id: cleanId, // Use cleaned ID without suffixes
           name: gymName,
           address: row.address,
           website: row.website && row.website.trim() !== '' ? row.website : undefined,
@@ -356,11 +358,21 @@ class GitHubDataService {
     }));
 
     // Debug: Log the parsing results
-    logger.debug('CSV parsing completed:', { 
+    console.log('[DEBUG] Old format CSV parsing completed:', { 
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
       sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
     });
+    
+    // Check for duplicate IDs
+    const ids = sortedGyms.map(g => g.id);
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      console.log('[DEBUG] WARNING: Duplicate IDs found in Tampa data!');
+      console.log('[DEBUG] All IDs:', ids);
+      const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+      console.log('[DEBUG] Duplicate IDs:', duplicates);
+    }
 
     return sortedGyms;
   }

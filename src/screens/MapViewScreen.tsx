@@ -148,18 +148,23 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           console.log('🔍 MapViewScreen: Loading Tampa Bay area data (Tampa + St Pete)');
           
           // Load Tampa data
+          console.log('🔍 MapViewScreen: Loading Tampa data...');
           await githubDataService.forceRefreshTampaData();
           const tampaData = await apiService.getOpenMats('tampa', undefined, true);
           console.log('🔍 MapViewScreen: Loaded Tampa data:', tampaData.length, 'gyms');
+          console.log('🔍 MapViewScreen: Tampa gym IDs:', tampaData.map(g => g.id));
           
           // Load St Pete data
+          console.log('🔍 MapViewScreen: Loading St Pete data...');
           await githubDataService.forceRefreshStPeteData();
           const stpeteData = await apiService.getOpenMats('stpete', undefined, true);
           console.log('🔍 MapViewScreen: Loaded St Pete data:', stpeteData.length, 'gyms');
+          console.log('🔍 MapViewScreen: St Pete gym IDs:', stpeteData.map(g => g.id));
           
           // Combine the data
           allGymData = [...tampaData, ...stpeteData];
           console.log('🔍 MapViewScreen: Combined Tampa Bay data:', allGymData.length, 'gyms');
+          console.log('🔍 MapViewScreen: All gym IDs:', allGymData.map(g => g.id));
         } else {
           // For other cities, load single city data
           if (city === 'miami') {
