@@ -137,6 +137,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
       console.log('🔍 MapViewScreen: fetchGymData called with selectedLocation:', selectedLocation);
       console.log('🔍 MapViewScreen: selectedLocation type:', typeof selectedLocation);
       console.log('🔍 MapViewScreen: selectedLocation length:', selectedLocation?.length);
+      console.log('🔍 MapViewScreen: selectedLocation includes "st":', selectedLocation?.toLowerCase().includes('st'));
+      console.log('🔍 MapViewScreen: selectedLocation includes "petersburg":', selectedLocation?.toLowerCase().includes('petersburg'));
         
         // Determine city from location string
         console.log('🔍 MapViewScreen: selectedLocation:', selectedLocation);
@@ -154,6 +156,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         if (city === 'tampa' || city === 'stpete') {
           console.log('🔍 MapViewScreen: Loading Tampa Bay area data (Tampa + St Pete)');
           console.log('🔍 MapViewScreen: City determined as:', city);
+          console.log('🔍 MapViewScreen: Will load both Tampa and St Pete data');
           
           // Load Tampa data
           console.log('🔍 MapViewScreen: Loading Tampa data...');
