@@ -135,6 +135,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         
         // Determine city from location string
         console.log('🔍 MapViewScreen: selectedLocation:', selectedLocation);
+        console.log('🔍 MapViewScreen: selectedLocation.toLowerCase():', selectedLocation.toLowerCase());
+        console.log('🔍 MapViewScreen: includes("st. petersburg"):', selectedLocation.toLowerCase().includes('st. petersburg'));
         const city = selectedLocation.toLowerCase().includes('austin') ? 'austin' : 
                      selectedLocation.toLowerCase().includes('miami') ? 'miami' : 
                      selectedLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
@@ -157,6 +159,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
           // Load St Pete data
           console.log('🔍 MapViewScreen: Loading St Pete data...');
           await githubDataService.forceRefreshStPeteData();
+          console.log('🔍 MapViewScreen: About to call apiService.getOpenMats for stpete');
           const stpeteData = await apiService.getOpenMats('stpete', undefined, true);
           console.log('🔍 MapViewScreen: Loaded St Pete data:', stpeteData.length, 'gyms');
           console.log('🔍 MapViewScreen: St Pete gym IDs:', stpeteData.map(g => g.id));
