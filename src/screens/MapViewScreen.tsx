@@ -141,23 +141,40 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
                      selectedLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
         console.log('🔍 MapViewScreen: Determined city:', city);
         
-        // Force refresh data from GitHub
-        if (city === 'tampa') {
+        // For Tampa Bay area, load both Tampa and St Pete data
+        let allGymData = [];
+        
+        if (city === 'tampa' || city === 'stpete') {
+          console.log('🔍 MapViewScreen: Loading Tampa Bay area data (Tampa + St Pete)');
+          
+          // Load Tampa data
           await githubDataService.forceRefreshTampaData();
-        } else if (city === 'miami') {
-          await githubDataService.forceRefreshMiamiData();
-        } else if (city === 'stpete') {
+          const tampaData = await apiService.getOpenMats('tampa', undefined, true);
+          console.log('🔍 MapViewScreen: Loaded Tampa data:', tampaData.length, 'gyms');
+          
+          // Load St Pete data
           await githubDataService.forceRefreshStPeteData();
+          const stpeteData = await apiService.getOpenMats('stpete', undefined, true);
+          console.log('🔍 MapViewScreen: Loaded St Pete data:', stpeteData.length, 'gyms');
+          
+          // Combine the data
+          allGymData = [...tampaData, ...stpeteData];
+          console.log('🔍 MapViewScreen: Combined Tampa Bay data:', allGymData.length, 'gyms');
         } else {
-          await githubDataService.refreshData(city);
+          // For other cities, load single city data
+          if (city === 'miami') {
+            await githubDataService.forceRefreshMiamiData();
+          } else if (city === 'austin') {
+            await githubDataService.refreshData('austin');
+          }
+          
+          allGymData = await apiService.getOpenMats(city, undefined, true);
+          console.log('🔍 MapViewScreen: Loaded single city data:', allGymData.length, 'gyms');
         }
         
-        // Get gym data
-        console.log('🔍 MapViewScreen: Fetching gym data for city:', city);
-        const gymData = await apiService.getOpenMats(city, undefined, true); // Force refresh
-        setGyms(gymData);
-        console.log('🔍 MapViewScreen: Loaded gym data:', gymData.length, 'gyms');
-        console.log('🔍 MapViewScreen: Gym names:', gymData.map(g => g.name));
+        setGyms(allGymData);
+        console.log('🔍 MapViewScreen: Final gym data:', allGymData.length, 'gyms');
+        console.log('🔍 MapViewScreen: Gym names:', allGymData.map(g => g.name));
         
         // Don't override map region - keep the one set from route parameters
         
