@@ -11,45 +11,53 @@ This guide provides step-by-step instructions for adding a new city to JiuJitsu 
 
 ---
 
-## 1. CSV File Format
+## 1. CSV File Format (NEW FORMAT)
 
 ### Required Headers (Exact Order)
 Your CSV file must have these headers in exactly this order:
 ```
-id,name,address,website,phoneNumber,coordinates,distance,sessionDay,sessionTime,sessionType,matFee,dropInFee,lastUpdated
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
 ```
 
 ### Column Descriptions
 
 | Column | Required | Description | Format | Example |
 |--------|----------|-------------|--------|---------|
-| `id` | ✅ | Unique identifier for each gym session | `city-gymname-number` | `miami-fightsports-1` |
-| `name` | ✅ | Gym name | Text | `Fightsports Miami` |
+| `id` | ✅ | Unique identifier for each gym | `city-gymname` | `miami-fightsports` |
+| `name` | ✅ | Gym name | Text in quotes | `"Fightsports Miami"` |
 | `address` | ✅ | Full address | Text in quotes | `"615 5th St, Miami Beach, FL 33139"` |
-| `website` | ✅ | Gym website URL | URL | `https://miami.fightsportsglobal.com` |
-| `phoneNumber` | ❌ | Phone number (can be empty) | Text or empty | `(305) 555-0123` |
-| `coordinates` | ✅ | GPS coordinates | `latitude,longitude` | `25.7749,-80.1378` |
+| `website` | ❌ | Gym website URL | URL | `https://miami.fightsportsglobal.com` |
 | `distance` | ✅ | Distance (set to 0) | Number | `0` |
-| `sessionDay` | ✅ | Day of the week | Text | `Friday` |
-| `sessionTime` | ✅ | Session time | Time format | `7:15 PM` |
-| `sessionType` | ✅ | Type of session | `Gi`, `NoGi`, `Gi/NoGi`, `MMA` | `Gi/NoGi` |
 | `matFee` | ✅ | Open mat fee | Number | `0` (for free) |
-| `dropInFee` | ✅ | Drop-in class fee | Number | `35` |
-| `lastUpdated` | ❌ | Last update date | YYYY-MM-DD | `2025-01-28` |
+| `dropInFee` | ❌ | Drop-in class fee | Number | `35` |
+| `coordinates` | ✅ | GPS coordinates | `"latitude,longitude"` in quotes | `"25.7749,-80.1378"` |
+| `last_updated` | ❌ | Last update date | YYYY-MM-DD | `2025-01-28` |
+| `monday` | ❌ | Monday sessions | `"Time - Type"` | `"5:00 PM - Gi/NoGi"` |
+| `tuesday` | ❌ | Tuesday sessions | `"Time - Type"` | `"6:30 PM - 7:30 PM - NoGi"` |
+| `wednesday` | ❌ | Wednesday sessions | `"Time - Type"` | `"11:00 AM - Gi"` |
+| `thursday` | ❌ | Thursday sessions | `"Time - Type"` | `"8:30 PM - 9:30 PM - Gi/NoGi"` |
+| `friday` | ❌ | Friday sessions | `"Time - Type"` | `"6:00 PM - Gi/NoGi"` |
+| `saturday` | ❌ | Saturday sessions | `"Time - Type"` | `"10:00 AM - 12:00 PM - Gi/NoGi"` |
+| `sunday` | ❌ | Sunday sessions | `"Time - Type"` | `"9:00 AM - Gi/NoGi"` |
 
 ### Example Row
 ```csv
-miami-fightsports-1,Fightsports Miami,"615 5th St, Miami Beach, FL 33139",https://miami.fightsportsglobal.com,,"25.7749,-80.1378",0,Friday,7:15 PM,Gi/NoGi,0,0,
+miami-fightsports,"Fightsports Miami","615 5th St, Miami Beach, FL 33139",https://miami.fightsportsglobal.com,0,0,35,"25.7749,-80.1378",2025-01-28,,,,,"7:15 PM - Gi/NoGi",,
 ```
 
 ### Special Formatting Requirements
 
-1. **Addresses**: Must be in quotes if they contain commas
-2. **Coordinates**: Must be in `latitude,longitude` format with no spaces
-3. **IDs**: Must be unique and follow pattern `city-gymname-number`
-4. **Session Types**: Use exact values: `Gi`, `NoGi`, `Gi/NoGi`, `MMA`
-5. **Times**: Use 12-hour format with AM/PM
-6. **Fees**: Use `0` for free sessions
+1. **One Row Per Gym**: Each gym gets exactly one row, regardless of how many sessions it has
+2. **Addresses**: Must be in quotes if they contain commas
+3. **Coordinates**: Must be in quotes: `"latitude,longitude"` (comma requires quotes)
+4. **IDs**: Must be unique and follow pattern `city-gymname` (no numbers needed)
+5. **Session Format**: `"Time - SessionType"` (e.g., `"5:00 PM - Gi/NoGi"`)
+6. **Time Ranges**: Use format `"6:30 PM - 7:30 PM - NoGi"`
+7. **Multiple Sessions**: Separate with commas: `"5:00 PM - Gi, 7:00 PM - NoGi"`
+8. **Session Types**: Use exact values: `Gi`, `NoGi`, `Gi/NoGi`, `MMA Sparring`
+9. **Times**: Use 12-hour format with AM/PM
+10. **Fees**: Use `0` for free sessions
+11. **Empty Days**: Leave empty if no sessions on that day
 
 ---
 
@@ -346,9 +354,10 @@ The app automatically:
 3. Record the coordinates
 
 ### Coordinate Format
-- **Format**: `latitude,longitude` (no spaces)
+- **Format**: `"latitude,longitude"` (must be in quotes due to comma)
 - **Precision**: At least 6 decimal places
-- **Example**: `25.7749,-80.1378`
+- **Example**: `"25.7749,-80.1378"`
+- **Important**: The comma in coordinates requires quotes around the entire field
 
 ### City Boundary Validation
 Your coordinates should be within these ranges:
@@ -398,9 +407,51 @@ Your coordinates should be within these ranges:
 3. Verify fresh data loads from GitHub
 4. Check that cache works for subsequent loads
 
+### Step 5: CSV Format Validation
+1. **Test CSV parsing**: Use a CSV validator to ensure proper format
+2. **Check quoted fields**: Verify coordinates and addresses are properly quoted
+3. **Validate session format**: Ensure sessions follow `"Time - Type"` pattern
+4. **Test with sample data**: Start with 1-2 gyms before adding all data
+5. **Verify GitHub rendering**: Check that GitHub displays your CSV correctly
+
+### Pre-Deployment Checklist
+- [ ] CSV has correct headers in exact order
+- [ ] All coordinates are quoted: `"25.7749,-80.1378"`
+- [ ] Session format is correct: `"5:00 PM - Gi/NoGi"`
+- [ ] No trailing spaces after quoted fields
+- [ ] Each gym has exactly one row
+- [ ] Empty day columns are truly empty (no hidden characters)
+- [ ] CSV renders correctly on GitHub
+- [ ] App loads data without parsing errors
+- [ ] Map shows gym markers correctly
+- [ ] Filters work properly
+
 ---
 
 ## Common Issues and Solutions
+
+### Issue: CSV parsing errors
+**Symptoms**: "Any value after quoted field isn't allowed" or parsing fails
+**Solutions**:
+- Ensure coordinates are quoted: `"25.7749,-80.1378"`
+- Remove trailing spaces after quoted fields
+- Check for embedded line breaks in addresses
+- Use proper CSV escaping for fields with commas
+
+### Issue: Sessions not appearing
+**Symptoms**: Gym shows but no sessions listed
+**Solutions**:
+- Verify session format: `"5:00 PM - Gi/NoGi"`
+- Check for typos in day column names (monday, tuesday, etc.)
+- Ensure session data is in quotes if it contains commas
+- Test with simple session format first
+
+### Issue: Coordinates causing parsing errors
+**Symptoms**: CSV fails to parse or coordinates split across columns
+**Solutions**:
+- Always quote coordinates: `"25.7749,-80.1378"`
+- Use proper CSV parsing that handles quoted fields
+- Test coordinates in a CSV validator
 
 ### Issue: Gym data not loading
 **Solution**: Check that your CSV URL is correct and accessible

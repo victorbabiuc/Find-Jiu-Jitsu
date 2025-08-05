@@ -6,11 +6,11 @@ CSV format specifications, data sources, geocoding process, and data quality sta
 
 ## CSV Format Specifications
 
-### Required Columns
-All city CSV files MUST have these exact columns in this order:
+### NEW FORMAT (Current)
+All city CSV files use the new one-row-per-gym format with these exact columns:
 
 ```csv
-id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
 ```
 
 ### Column Details
@@ -24,11 +24,15 @@ id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,session
 | `distance` | number | ✅ | Distance from user (use 0) | `0` |
 | `matFee` | number | ✅ | Open mat fee (0 for free) | `0` |
 | `dropInFee` | number | ❌ | Drop-in class fee | `20` |
-| `sessionDay` | string | ✅ | Day of the week | `Friday` |
-| `sessionTime` | string | ✅ | Time format | `"5:00 PM"` |
-| `sessionType` | string | ✅ | Session type | `NoGi` |
-| `coordinates` | string | ❌ | "lat,long" format | `"27.8896,-82.4948"` |
+| `coordinates` | string | ❌ | "lat,long" format in quotes | `"27.8896,-82.4948"` |
 | `last_updated` | string | ❌ | YYYY-MM-DD format | `2025-01-28` |
+| `monday` | string | ❌ | Session data for Monday | `"5:00 PM - Gi/NoGi"` |
+| `tuesday` | string | ❌ | Session data for Tuesday | `"6:30 PM - 7:30 PM - NoGi"` |
+| `wednesday` | string | ❌ | Session data for Wednesday | `"11:00 AM - Gi"` |
+| `thursday` | string | ❌ | Session data for Thursday | `"8:30 PM - 9:30 PM - Gi/NoGi"` |
+| `friday` | string | ❌ | Session data for Friday | `"6:00 PM - Gi/NoGi"` |
+| `saturday` | string | ❌ | Session data for Saturday | `"10:00 AM - 12:00 PM - Gi/NoGi"` |
+| `sunday` | string | ❌ | Session data for Sunday | `"9:00 AM - Gi/NoGi"` |
 
 ### Data Types & Validation
 
@@ -37,47 +41,62 @@ id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,session
 - **Examples**: `tampa-stjj-1`, `austin-10th-planet-austin`
 - **Rules**: Lowercase, hyphens only, no spaces
 
-#### Session Types
-- **Valid Values**: `Gi`, `NoGi`, `Gi/NoGi`, `Both`
-- **Case Sensitive**: Use exact values
-- **Default**: `Gi/NoGi` for mixed sessions
+#### Session Format (NEW)
+- **Pattern**: `"Time - SessionType"`
+- **Examples**:
+  - `"5:00 PM - Gi/NoGi"`
+  - `"6:30 PM - 7:30 PM - NoGi"` (time ranges)
+  - `"11:00 AM - Gi"`
+  - `"10:00 AM - 12:00 PM - Gi/NoGi"` (time ranges)
+- **Multiple Sessions**: Separate with commas: `"5:00 PM - Gi, 7:00 PM - NoGi"`
+- **Session Types**: `Gi`, `NoGi`, `Gi/NoGi`, `MMA Sparring`
 
 #### Time Formats
 - **Supported Formats**:
-  - `"5:00 PM"` (Tampa style)
-  - `"12pm"` (Austin style)
-  - `"6:30pm"` (Austin style)
-  - `"11:00 AM - 1:00 PM"` (time ranges)
+  - `"5:00 PM"` (standard)
+  - `"6:30 PM - 7:30 PM"` (time ranges)
+  - `"10:00 AM - 12:00 PM"` (time ranges)
 - **Case Insensitive**: App handles both cases
 - **24-hour Format**: Not supported
 
 #### Coordinates Format
-- **Pattern**: `"latitude,longitude"`
+- **Pattern**: `"latitude,longitude"` (must be in quotes)
 - **Precision**: 6-7 decimal places
 - **Example**: `"27.8896,-82.4948"`
+- **Important**: Must be quoted due to comma in value
 - **Validation**: Must be valid lat/long values
 
-### Example CSV Files
+### Example CSV Files (NEW FORMAT)
 
-#### Tampa Format
+#### Tampa Example
 ```csv
-id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
-tampa-stjj-1,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611","https://southtampajiujitsu.com/",0,0,20,Friday,"5:00 PM",NoGi,"27.8896,-82.4948",2025-01-28
-tampa-robson,"Robson Moura","11220 W Hillsborough Ave, Tampa, FL 33635","https://robsonmoura.com/",0,0,0,Friday,"6:00 PM",Gi/NoGi,"28.0123,-82.5869",2025-01-28
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
+tampa-stjj-1,"South Tampa Jiu Jitsu","4916 South Lois Ave, Tampa, FL 33611",https://southtampajiujitsu.com/,0,0,20,"27.8933026,-82.5153407",2025-01-28,,,,,"5:00 PM - NoGi","11:00 AM - MMA Sparring","9:00 AM - Gi"
+tampa-robson,"Robson Moura","11220 W Hillsborough Ave, Tampa, FL 33635",https://robsonmoura.com/,0,0,0,"28.0123,-82.5869",2025-01-28,,,,,"6:00 PM - Gi/NoGi",,
+tampa-humaita,"Gracie Humaita","8610 Citrus Park Dr, Tampa, FL 33625",https://www.graciehumaita.com,0,0,0,"28.0682,-82.5759",2025-01-28,,,,,"6:30 PM - 7:30 PM - Gi/NoGi",,
 ```
 
-#### Austin Format
+#### Austin Example
 ```csv
-id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
-austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744","https://10patx.com/",0,25,35,Saturday,"12pm-2pm",NoGi,"30.2070873,-97.750738",2025-01-20
-austin-atos,"Atos","11701 Bee Caves Rd Suite 110, Austin, TX 78738","https://atosjiujitsu.com/",0,0,,Saturday,"11:30am-12:30pm",Gi/NoGi,"30.2751119,-97.8014446",2025-01-20
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
+austin-10th-planet-austin,"10th planet austin","4509 Freidrich Ln #210, Austin, TX 78744",https://10patx.com/,0,25,35,"30.2070873,-97.750738",2025-01-28,,,,,,"12:00 PM - 2:00 PM - NoGi","12 - 2:00 PM - NoGi"
+austin-coopers,"Coopers","12129 N FM 620 Suite # 330, Austin, TX 78750",https://coopersjiujitsu.com/,0,0,0,"30.4612868,-97.8174358",2025-01-28,,"6:30 PM - 7:30 PM - Gi/NoGi",,"6:30 PM - 7:30 PM - Gi/NoGi",,"1:00 PM - Gi/NoGi","4:00 PM - Gi/NoGi"
+```
+
+#### Miami Example
+```csv
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
+miami-10th-planet,"10th Planet Miami","123 Main St, Miami, FL 33101",https://10thplanetmiami.com,0,0,0,"25.7749,-80.1378",2025-01-28,,,,,,"12:00 PM - 2:00 PM - NoGi",
+miami-gracie,"Rilion Gracie Jiu-Jitsu Academy (HEADQUARTERS)","456 Oak Ave, Miami, FL 33102",https://riliongracie.com,0,0,0,"25.7617,-80.1918",2025-01-28,,,,,,,"11:00 AM - 12:30 PM - Gi/NoGi"
 ```
 
 ## Data Sources
 
 ### Current Cities
-- **Tampa, FL**: 19 gyms, comprehensive coverage
-- **Austin, TX**: 35+ gyms, growing coverage
+- **Tampa, FL**: 23 gyms, comprehensive coverage
+- **Austin, TX**: 19 gyms, comprehensive coverage
+- **Miami, FL**: 77 gyms, comprehensive coverage
+- **St. Petersburg, FL**: 3 gyms, comprehensive coverage
 
 ### Data Collection Process
 1. **Manual Research**: Find gyms offering open mats

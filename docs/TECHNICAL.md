@@ -222,10 +222,16 @@ interface GymSearchResult {
 }
 ```
 
-### CSV Data Structure
+### CSV Data Structure (NEW FORMAT)
 ```csv
-id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
 ```
+
+**Key Changes**:
+- **One row per gym** (instead of one row per session)
+- **Day-specific columns** for sessions (monday, tuesday, etc.)
+- **Session format**: `"Time - SessionType"` (e.g., `"5:00 PM - Gi/NoGi"`)
+- **Quoted coordinates**: `"latitude,longitude"` to handle comma separation
 
 ## Authentication System
 
@@ -340,12 +346,36 @@ try {
 ### CSV Parsing Implementation
 **File**: `src/services/github-data.service.ts`
 
-**Parsing Flow**:
+**Dual Format Support**:
+- **New Format**: `parseCSVToOpenMatsNewFormat()` for St. Pete, Austin, Miami, Tampa
+- **Legacy Format**: `parseCSVToOpenMatsOldFormat()` for other cities
+- **Automatic Selection**: Based on city parameter
+
+**New Format Parsing Flow**:
 1. **Fetch CSV**: Download from GitHub
-2. **Parse Rows**: Convert CSV to objects
-3. **Validate Data**: Check required fields
-4. **Transform**: Convert to OpenMat format
-5. **Cache**: Store in AsyncStorage
+2. **Parse Headers**: Extract column names
+3. **Process Rows**: One row per gym
+4. **Extract Sessions**: Parse day columns for session data
+5. **Session Parsing**: `parseSessionFromDayColumn()` handles `"Time - Type"` format
+6. **Validate Data**: Check required fields
+7. **Transform**: Convert to OpenMat format
+8. **Cache**: Store in AsyncStorage
+
+**Session Parsing Logic**:
+```typescript
+private parseSessionFromDayColumn(sessionData: string, day: string): OpenMatSession | null {
+  if (!sessionData || sessionData.trim() === '') { return null; }
+  const sessions = sessionData.split(',').map(s => s.trim());
+  const firstSession = sessions[0];
+  const parts = firstSession.split(' - ');
+  if (parts.length < 2) {
+    return { day: day.charAt(0).toUpperCase() + day.slice(1), time: firstSession.trim(), type: 'both' };
+  }
+  const time = parts.slice(0, -1).join(' - ').trim();
+  const type = parts[parts.length - 1].trim();
+  return { day: day.charAt(0).toUpperCase() + day.slice(1), time: time, type: this.validateSessionType(type) };
+}
+```
 
 **Error Handling**:
 ```typescript
