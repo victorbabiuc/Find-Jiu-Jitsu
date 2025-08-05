@@ -216,6 +216,18 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     }
   }, [mapRegion]);
 
+  // Force map refresh when gyms load to ensure markers render
+  useEffect(() => {
+    if (gyms.length > 0 && mapRef.current) {
+      // Small delay to ensure markers are added to the map
+      setTimeout(() => {
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(mapRegion, 500);
+        }
+      }, 200);
+    }
+  }, [gyms.length, mapRegion]);
+
   // Filter and sort gyms (matching ResultsScreen logic)
   const filteredGyms = useMemo(() => {
     let filtered = [...gyms];
