@@ -293,7 +293,7 @@ const DashboardScreen: React.FC = () => {
             }}
           >
             <View style={styles.cityCardContent}>
-              <Text style={styles.cityEmoji}>🌴</Text>
+              <Text style={styles.cityEmoji}>☀️</Text>
               <View style={styles.cityCardText}>
                 <Text style={[
                   styles.cityCardTitle,
