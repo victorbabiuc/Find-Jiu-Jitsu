@@ -135,6 +135,8 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
       
       // Debug: Log the selectedLocation immediately
       console.log('🔍 MapViewScreen: fetchGymData called with selectedLocation:', selectedLocation);
+      console.log('🔍 MapViewScreen: selectedLocation type:', typeof selectedLocation);
+      console.log('🔍 MapViewScreen: selectedLocation length:', selectedLocation?.length);
         
         // Determine city from location string
         console.log('🔍 MapViewScreen: selectedLocation:', selectedLocation);
@@ -151,6 +153,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         
         if (city === 'tampa' || city === 'stpete') {
           console.log('🔍 MapViewScreen: Loading Tampa Bay area data (Tampa + St Pete)');
+          console.log('🔍 MapViewScreen: City determined as:', city);
           
           // Load Tampa data
           console.log('🔍 MapViewScreen: Loading Tampa data...');
