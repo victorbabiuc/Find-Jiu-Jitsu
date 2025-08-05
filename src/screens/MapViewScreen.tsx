@@ -370,7 +370,7 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
     return false;
   };
 
-  // Simple coordinate validation for Tampa area
+  // Simple coordinate validation for different cities
   const validateGymCoordinates = (latitude: number, longitude: number, gymName: string, city: string): void => {
     const issues: string[] = [];
     
@@ -379,14 +379,27 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
       issues.push('Invalid coordinate format');
     }
     
-    // Check latitude bounds for Tampa area (27.5 to 28.5)
-    if (latitude < 27.5 || latitude > 28.5) {
-      issues.push('Latitude outside Tampa area bounds');
-    }
+    // Define coordinate bounds for different cities
+    const cityBounds = {
+      'tampa': { lat: { min: 27.5, max: 28.5 }, lng: { min: -83.0, max: -82.0 } },
+      'st. petersburg': { lat: { min: 27.5, max: 28.5 }, lng: { min: -83.0, max: -82.0 } },
+      'austin': { lat: { min: 30.0, max: 30.8 }, lng: { min: -98.0, max: -97.4 } },
+      'miami': { lat: { min: 25.5, max: 26.5 }, lng: { min: -81.0, max: -80.0 } }
+    };
     
-    // Check longitude bounds for Tampa area (-83.0 to -82.0)
-    if (longitude < -83.0 || longitude > -82.0) {
-      issues.push('Longitude outside Tampa area bounds');
+    const cityKey = city.toLowerCase();
+    const bounds = cityBounds[cityKey as keyof typeof cityBounds];
+    
+    if (bounds) {
+      // Check latitude bounds for the specific city
+      if (latitude < bounds.lat.min || latitude > bounds.lat.max) {
+        issues.push(`Latitude outside ${city} area bounds`);
+      }
+      
+      // Check longitude bounds for the specific city
+      if (longitude < bounds.lng.min || longitude > bounds.lng.max) {
+        issues.push(`Longitude outside ${city} area bounds`);
+      }
     }
     
     const isValid = issues.length === 0;
