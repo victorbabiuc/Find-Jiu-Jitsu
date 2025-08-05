@@ -463,9 +463,12 @@ class GitHubDataService {
     });
 
     // Convert each row to OpenMat object
-    const gyms = csvRows.map(row => {
+    console.log('[DEBUG] Processing', csvRows.length, 'CSV rows');
+    const gyms = csvRows.map((row, index) => {
+      console.log(`[DEBUG] Processing row ${index + 1}:`, { id: row.id, name: row.name });
+      
       if (!row.id || !row.name) {
-        logger.warn('Skipping row with missing id or name:', { row });
+        console.log('[DEBUG] Skipping row with missing id or name:', { row });
         return null;
       }
 
@@ -481,6 +484,8 @@ class GitHubDataService {
         lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
         openMats: []
       };
+      
+      console.log('[DEBUG] Created gym object:', { id: gym.id, name: gym.name, coordinates: gym.coordinates });
       
       // Parse sessions from day columns
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -499,6 +504,11 @@ class GitHubDataService {
       
       return gym;
     }).filter((gym): gym is OpenMat => gym !== null);
+    
+    console.log('[DEBUG] After filter:', gyms.length, 'gyms');
+    gyms.forEach((gym, index) => {
+      console.log(`[DEBUG] Gym ${index + 1}:`, { id: gym.id, name: gym.name, sessions: gym.openMats.length });
+    });
 
     // Sort sessions by day order for each gym
     const sortedGyms = gyms.map(gym => ({
@@ -728,9 +738,13 @@ class GitHubDataService {
    * @returns Promise<OpenMat[]> - Fresh St. Petersburg data
    */
   async forceRefreshStPeteData(): Promise<OpenMat[]> {
+    console.log('[DEBUG] forceRefreshStPeteData called');
     logger.force('Force refreshing St. Petersburg data for new city addition...');
     await this.clearCache('stpete');
-    return this.getGymData('stpete', true);
+    console.log('[DEBUG] Cleared St Pete cache');
+    const result = await this.getGymData('stpete', true);
+    console.log('[DEBUG] forceRefreshStPeteData result:', result.length, 'gyms');
+    return result;
   }
 
   /**
