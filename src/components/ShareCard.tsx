@@ -3,14 +3,21 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { OpenMat, OpenMatSession } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ShareCardProps {
   gym: OpenMat;
   session: OpenMatSession;
   includeImGoing?: boolean;
+  style?: 'classic' | 'modern' | 'dark';
 }
 
-const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includeImGoing = false }, ref) => {
+const ShareCard = React.forwardRef<View, ShareCardProps>(({ 
+  gym, 
+  session, 
+  includeImGoing = false, 
+  style = 'classic' 
+}, ref) => {
   const { theme } = useTheme();
 
   const getSessionTypeEmoji = (type: string) => {
@@ -51,10 +58,98 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
     }
   };
 
-  return (
-    <View ref={ref} style={styles.container}>
+  // Get gym brand colors for modern style
+  const getGymBrandColors = () => {
+    const gymId = String(gym.id || '');
+    if (gymId.includes('10th-planet')) {
+      return ['#FF6B35', '#CC4A1A']; // Orange gradient
+    } else if (gymId.includes('stjj')) {
+      return ['#1E40AF', '#1E3A8A']; // Blue gradient
+    } else if (gymId.includes('gracie-tampa-south')) {
+      return ['#DC2626', '#B91C1C']; // Red gradient
+    } else if (gymId.includes('tmt')) {
+      return ['#059669', '#047857']; // Green gradient
+    } else {
+      return ['#3B82F6', '#1D4ED8']; // Default blue gradient
+    }
+  };
+
+  const brandColors = getGymBrandColors();
+
+  // Style-specific styles
+  const getStyleSpecificStyles = () => {
+    switch (style) {
+      case 'modern':
+        return {
+          container: { backgroundColor: 'transparent' },
+          contentCard: { 
+            backgroundColor: 'transparent',
+            borderWidth: 0,
+            shadowOpacity: 0.2,
+          },
+          gymName: { color: '#FFFFFF' },
+          gymAddress: { color: '#E5E7EB' },
+          websiteText: { color: '#E5E7EB' },
+          openMatLabel: { color: '#FFFFFF' },
+          sessionType: { color: '#FFFFFF' },
+          sessionDateTime: { color: '#FFFFFF' },
+          inviteText: { color: '#FFFFFF' },
+          footerText: { color: '#FFFFFF' },
+          footerSubtext: { color: '#E5E7EB' },
+        };
+      case 'dark':
+        return {
+          container: { backgroundColor: '#000000' },
+          contentCard: { 
+            backgroundColor: '#1F2937',
+            borderColor: '#374151',
+          },
+          gymName: { color: '#FFFFFF' },
+          gymAddress: { color: '#9CA3AF' },
+          websiteText: { color: '#9CA3AF' },
+          openMatLabel: { color: '#FFFFFF' },
+          sessionType: { color: '#FFFFFF' },
+          sessionDateTime: { color: '#FFFFFF' },
+          inviteText: { color: '#FFFFFF' },
+          footerText: { color: '#FFFFFF' },
+          footerSubtext: { color: '#9CA3AF' },
+        };
+      default: // classic
+        return {
+          container: { backgroundColor: '#F9FAFB' },
+          contentCard: { 
+            backgroundColor: '#FFFFFF',
+            borderColor: '#D1D5DB',
+          },
+          gymName: { color: '#111827' },
+          gymAddress: { color: '#6B7280' },
+          websiteText: { color: '#6B7280' },
+          openMatLabel: { color: '#111827' },
+          sessionType: { color: '#111827' },
+          sessionDateTime: { color: '#111827' },
+          inviteText: { color: '#111827' },
+          footerText: { color: '#111827' },
+          footerSubtext: { color: '#6B7280' },
+        };
+    }
+  };
+
+  const styleStyles = getStyleSpecificStyles();
+
+  const renderContent = () => (
+    <View ref={ref} style={[styles.container, styleStyles.container]}>
+      {/* Gradient background for modern style */}
+      {style === 'modern' && (
+        <LinearGradient
+          colors={brandColors as [string, string]}
+          style={styles.gradientBackground}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      )}
+
       {/* Main Content Card */}
-      <View style={styles.contentCard}>
+      <View style={[styles.contentCard, styleStyles.contentCard]}>
         {/* Gym Info */}
         <View style={styles.gymSection}>
           {/* Gym Logo - Optimized for performance */}
@@ -80,30 +175,30 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
           })()}
           
           {/* Gym Name */}
-          <Text style={styles.gymName}>{String(gym.name || '')}</Text>
+          <Text style={[styles.gymName, styleStyles.gymName]}>{String(gym.name || '')}</Text>
           
           {/* Address */}
-          <Text style={styles.gymAddress}>{String(gym.address || '')}</Text>
+          <Text style={[styles.gymAddress, styleStyles.gymAddress]}>{String(gym.address || '')}</Text>
           
           {/* Website (if available) */}
           {gym.website && (
             <View style={styles.websiteContainer}>
-              <Ionicons name="globe-outline" size={16} color="#6B7280" style={styles.websiteIcon} />
-              <Text style={styles.websiteText}>{gym.website}</Text>
+              <Ionicons name="globe-outline" size={16} color={style === 'dark' ? '#9CA3AF' : '#6B7280'} style={styles.websiteIcon} />
+              <Text style={[styles.websiteText, styleStyles.websiteText]}>{gym.website}</Text>
             </View>
           )}
         </View>
 
         {/* Divider */}
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: style === 'dark' ? '#374151' : '#E5E7EB' }]} />
 
         {/* Session Info */}
         <View style={styles.sessionSection}>
-          <Text style={styles.openMatLabel}>Open Mat</Text>
-          <Text style={styles.sessionType}>
+          <Text style={[styles.openMatLabel, styleStyles.openMatLabel]}>Open Mat</Text>
+          <Text style={[styles.sessionType, styleStyles.sessionType]}>
             {getSessionTypeEmoji(String(session.type || ''))} {formatSessionType(session.type)}
           </Text>
-          <Text style={styles.sessionDateTime}>
+          <Text style={[styles.sessionDateTime, styleStyles.sessionDateTime]}>
             {String(session.day || '')} {formatTime(String(session.time || ''))}
           </Text>
         </View>
@@ -111,7 +206,7 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
 
       {/* Personal CTA */}
       <View style={styles.inviteSection}>
-        <Text style={styles.inviteText}>
+        <Text style={[styles.inviteText, styleStyles.inviteText]}>
           {includeImGoing ? 'I\'m going, come train with me! 🔥' : 'Join me for training! 🔥'}
         </Text>
       </View>
@@ -125,16 +220,18 @@ const ShareCard = React.forwardRef<View, ShareCardProps>(({ gym, session, includ
           onError={(error) => console.log('Footer app icon error:', error)}
         />
         <View style={styles.footerTextContainer}>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, styleStyles.footerText]}>
             JiuJitsu Finder
           </Text>
-          <Text style={styles.footerSubtext}>
+          <Text style={[styles.footerSubtext, styleStyles.footerSubtext]}>
             Find your next roll
           </Text>
         </View>
       </View>
     </View>
   );
+
+  return renderContent();
 });
 
 const styles = StyleSheet.create({
@@ -150,6 +247,13 @@ const styles = StyleSheet.create({
     padding: 40,
     paddingTop: 80,
     justifyContent: 'space-between',
+  },
+  gradientBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   contentCard: {
     backgroundColor: '#FFFFFF',

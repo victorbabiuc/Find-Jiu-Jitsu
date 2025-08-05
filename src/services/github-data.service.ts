@@ -392,13 +392,33 @@ class GitHubDataService {
     if (!lastUpdated) {
       return undefined;
     }
+
+    // Check if the value is "Contact" or any other non-date string
+    const trimmedValue = lastUpdated.trim().toLowerCase();
+    if (trimmedValue === 'contact' || trimmedValue === 'n/a' || trimmedValue === 'unknown' || trimmedValue === '') {
+      return undefined;
+    }
+
+    // Check if the value looks like a valid date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(trimmedValue)) {
+      // If it doesn't match the expected format, don't try to parse it
+      return undefined;
+    }
+
     try {
       const date = new Date(lastUpdated);
-      return date.toISOString();
-          } catch (e) {
-        logger.warn(`Could not parse lastUpdated date: ${lastUpdated}`, { error: e });
+      
+      // Check if the parsed date is valid
+      if (isNaN(date.getTime())) {
         return undefined;
       }
+      
+      return date.toISOString();
+    } catch (e) {
+      logger.warn(`Could not parse lastUpdated date: ${lastUpdated}`, { error: e });
+      return undefined;
+    }
   }
 
   /**

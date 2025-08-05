@@ -72,6 +72,15 @@
     <string>Light</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>FacebookAppID</key>
+    <string>4089098401378828</string>
+    <key>FacebookDisplayName</key>
+    <string>JiuJitsu Finder</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>instagram</string>
+      <string>instagram-stories</string>
+    </array>
     	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>JiuJitsu Finder uses your location to show nearby gyms and provide directions.</string>
   </dict>

@@ -17,13 +17,14 @@ import * as Clipboard from 'expo-clipboard';
 import { captureCardAsImage } from '../utils/screenshot';
 import { OpenMat, OpenMatSession } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import ShareCard from './ShareCard';
 
 interface CustomShareModalProps {
   visible: boolean;
   onClose: () => void;
   gym: OpenMat;
   session: OpenMatSession;
-  shareCardRef: React.RefObject<View>;
+  shareCardRef: React.RefObject<View | null>;
   imageUri?: string;
 }
 
@@ -37,11 +38,17 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
   shareCardRef,
   imageUri,
 }) => {
+  // Guard against null gym
+  if (!gym) {
+    return null;
+  }
+
   const { theme } = useTheme();
 
   // State for tracking sharing progress
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
+  const [cardStyle, setCardStyle] = useState<'classic' | 'modern' | 'dark'>('classic');
 
   // Social sharing options with icons and colors
   const shareOptions = [
@@ -89,7 +96,7 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
     },
   ];
 
-  // Capture image when modal opens
+  // Capture image when modal opens or style changes
   useEffect(() => {
     if (visible && !capturedImageUri) {
       // Add a delay to ensure ShareCard is fully rendered
@@ -97,7 +104,7 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
         captureImage();
       }, 300);
     }
-  }, [visible]);
+  }, [visible, cardStyle]);
 
   // Clean up captured image when modal closes
   useEffect(() => {
@@ -254,6 +261,8 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
     }
   };
 
+  console.log('CustomShareModal rendering, visible:', visible, 'gym:', gym?.name);
+  
   return (
     <Modal
       visible={visible}
@@ -289,6 +298,60 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
             </Text>
           </View>
 
+          {/* Style Picker */}
+          <View style={styles.stylePickerContainer}>
+            <Text style={[styles.stylePickerLabel, { color: theme.text.secondary }]}>
+              Card Style
+            </Text>
+            <View style={styles.stylePickerButtons}>
+              <TouchableOpacity 
+                style={[
+                  styles.styleButton, 
+                  cardStyle === 'classic' && styles.styleButtonActive,
+                  { borderColor: theme.border }
+                ]}
+                onPress={() => setCardStyle('classic')}
+              >
+                                 <Text style={[
+                   styles.styleButtonText, 
+                   { color: cardStyle === 'classic' ? '#3B82F6' : theme.text.primary }
+                 ]}>
+                   Classic
+                 </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[
+                  styles.styleButton, 
+                  cardStyle === 'modern' && styles.styleButtonActive,
+                  { borderColor: theme.border }
+                ]}
+                onPress={() => setCardStyle('modern')}
+              >
+                                 <Text style={[
+                   styles.styleButtonText, 
+                   { color: cardStyle === 'modern' ? '#3B82F6' : theme.text.primary }
+                 ]}>
+                   Modern
+                 </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[
+                  styles.styleButton, 
+                  cardStyle === 'dark' && styles.styleButtonActive,
+                  { borderColor: theme.border }
+                ]}
+                onPress={() => setCardStyle('dark')}
+              >
+                                 <Text style={[
+                   styles.styleButtonText, 
+                   { color: cardStyle === 'dark' ? '#3B82F6' : theme.text.primary }
+                 ]}>
+                   Dark
+                 </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* Preview Card Section */}
           <View style={styles.previewSection}>
             <Text style={[styles.previewLabel, { color: theme.text.secondary }]}>
@@ -305,38 +368,41 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
                 </View>
               )}
               
-              {/* Mini preview of the ShareCard */}
-              <View style={styles.previewCardContent}>
-                <View style={styles.previewGymInfo}>
-                  <View style={styles.previewLogo}>
-                    {/* Use actual gym logo if available, otherwise show initials */}
-                    {(String(gym.id || '').includes('10th-planet')) ? (
-                      <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.previewLogoImage} />
-                    ) : (String(gym.id || '').includes('stjj')) ? (
-                      <Image source={require('../../assets/logos/STJJ.png')} style={styles.previewLogoImage} />
-                    ) : (String(gym.id || '').includes('gracie-tampa-south')) ? (
-                      <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.previewLogoImage} />
-                    ) : (String(gym.id || '').includes('tmt')) ? (
-                      <Image source={require('../../assets/logos/TMT.png')} style={styles.previewLogoImage} />
-                    ) : (
-                      <Text style={styles.previewLogoText}>
-                        {gym.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
-                      </Text>
-                    )}
-                  </View>
-                  <View style={styles.previewText}>
-                    <Text style={[styles.previewGymName, { color: theme.text.primary }]}>
-                      {gym.name}
-                    </Text>
-                    <Text style={[styles.previewSession, { color: theme.text.secondary }]}>
-                      {session?.day} • {session?.time}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.previewAppIcon}>
-                  <Ionicons name="fitness" size={16} color={theme.text.secondary} />
-                </View>
+                        {/* Mini preview of the ShareCard */}
+          <View style={styles.previewCardContent}>
+            <View style={styles.previewGymInfo}>
+              <View style={styles.previewLogo}>
+                {/* Use actual gym logo if available, otherwise show initials */}
+                {gym && (String(gym.id || '').includes('10th-planet')) ? (
+                  <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.previewLogoImage} />
+                ) : gym && (String(gym.id || '').includes('stjj')) ? (
+                  <Image source={require('../../assets/logos/STJJ.png')} style={styles.previewLogoImage} />
+                ) : gym && (String(gym.id || '').includes('gracie-tampa-south')) ? (
+                  <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.previewLogoImage} />
+                ) : gym && (String(gym.id || '').includes('tmt')) ? (
+                  <Image source={require('../../assets/logos/TMT.png')} style={styles.previewLogoImage} />
+                ) : (
+                  <Text style={styles.previewLogoText}>
+                    {gym.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
+                  </Text>
+                )}
               </View>
+              <View style={styles.previewText}>
+                <Text style={[styles.previewGymName, { color: theme.text.primary }]}>
+                  {gym.name}
+                </Text>
+                <Text style={[styles.previewSession, { color: theme.text.secondary }]}>
+                  {session?.day} • {session?.time}
+                </Text>
+                <Text style={[styles.previewStyle, { color: theme.text.secondary }]}>
+                  Style: {cardStyle.charAt(0).toUpperCase() + cardStyle.slice(1)}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.previewAppIcon}>
+              <Ionicons name="fitness" size={16} color={theme.text.secondary} />
+            </View>
+          </View>
             </View>
           </View>
 
@@ -385,6 +451,24 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
           <View style={styles.bottomSpacing} />
         </TouchableOpacity>
       </TouchableOpacity>
+
+      {/* Hidden ShareCard for image generation */}
+      {(() => {
+        if (gym && session) {
+          return (
+            <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+              <ShareCard 
+                ref={shareCardRef}
+                gym={gym}
+                session={session}
+                includeImGoing={true}
+                style={cardStyle}
+              />
+            </View>
+          );
+        }
+        return null;
+      })()}
     </Modal>
   );
 };
@@ -436,6 +520,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     lineHeight: 22,
+  },
+  stylePickerContainer: {
+    marginBottom: 24,
+  },
+  stylePickerLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  stylePickerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  styleButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  styleButtonActive: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderColor: '#3B82F6',
+  },
+  styleButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   previewSection: {
     marginBottom: 32,
@@ -511,6 +625,11 @@ const styles = StyleSheet.create({
   previewSession: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  previewStyle: {
+    fontSize: 12,
+    fontWeight: '400',
+    marginTop: 2,
   },
   previewAppIcon: {
     width: 32,

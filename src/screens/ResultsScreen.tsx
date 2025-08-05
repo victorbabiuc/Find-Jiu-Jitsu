@@ -182,6 +182,9 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Show All Gyms mode state
   const [showAllGyms, setShowAllGyms] = useState(false);
+  const [cardStyle, setCardStyle] = useState<'classic' | 'modern' | 'dark'>('classic');
+  const [stylePickerVisible, setStylePickerVisible] = useState(false);
+  const [gymToShare, setGymToShare] = useState<OpenMat | null>(null);
 
   // Location picker state
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
@@ -215,7 +218,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     }
   });
 
-  // Share card ref and state for image generation
+  // Share card ref for image generation
   const shareCardRef = useRef<View | null>(null);
   const [shareCardGym, setShareCardGym] = useState<OpenMat | null>(null);
   const [shareCardSession, setShareCardSession] = useState<any>(null);
@@ -1229,8 +1232,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         return;
       }
 
-      logger.share('Setting ShareCard data:', { gym: gym.name, session: firstSession });
-      
       // Set the gym and session for the ShareCard
       setShareCardGym(gym);
       setShareCardSession(firstSession);
@@ -1238,12 +1239,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       // Use requestAnimationFrame for better timing
       requestAnimationFrame(async () => {
         try {
-          logger.capture('Capturing and sharing image...');
-          
-          // Capture the ShareCard as an image with optimized settings
+          // Capture the ShareCard as an image with Classic style
           const imageUri = await captureCardAsImage(shareCardRef, {
             format: 'png',
-            quality: 0.9, // Slightly reduced quality for faster processing
+            quality: 0.9,
             width: 1080,
             height: 1920
           });
@@ -1251,12 +1250,12 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           // Share using native iOS share sheet
           await Share.share({
             url: imageUri,
-                          message: `Check out this open mat session at ${gym.name}! 🥋\n\n${firstSession.day} at ${firstSession.time}\n\nFind more sessions with JiuJitsu Finder!`
+            message: `Check out this open mat session at ${gym.name}! 🥋\n\n${firstSession.day} at ${firstSession.time}\n\nFind more sessions with JiuJitsu Finder!`
           });
           
           haptics.success(); // Success haptic for successful share
-                  } catch (error) {
-            logger.error('Error capturing and sharing:', error);
+        } catch (error) {
+          console.error('Error capturing and sharing:', error);
           haptics.error(); // Error haptic for failed share
           Alert.alert(
             '❌ Sharing Error',
@@ -1362,16 +1361,20 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       }
     };
 
-    const handleSharePress = () => {
-      console.log('BUTTON PRESSED: share');
-      if (sharingGymId !== gym.id) {
-        animateButtonPress(shareScaleAnim);
-        haptics.light();
-        handleShareImage(gym);
-        // Return to normal scale after a short delay
-        setTimeout(() => animateButtonRelease(shareScaleAnim), 100);
-      }
-    };
+        const handleSharePress = () => {
+          console.log('BUTTON PRESSED: share');
+          if (sharingGymId !== gym.id) {
+            animateButtonPress(shareScaleAnim);
+            haptics.light();
+            // Call handleShareImage directly with gym and first session
+            const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
+            if (firstSession) {
+              handleShareImage(gym);
+            }
+            // Return to normal scale after a short delay
+            setTimeout(() => animateButtonRelease(shareScaleAnim), 100);
+          }
+        };
 
 
 
@@ -1998,23 +2001,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         </Animated.View>
 
 
-      {/* Hidden ShareCard for image generation */}
-      {(() => {
-        if (shareCardGym && shareCardSession) {
-          logger.render('Rendering ShareCard with ref:', { exists: shareCardRef.current ? 'exists' : 'null' });
-          return (
-            <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
-              <ShareCard 
-                ref={shareCardRef}
-                gym={shareCardGym}
-                session={shareCardSession}
-                includeImGoing={true}
-              />
-            </View>
-          );
-        }
-        return null;
-      })()}
+
 
       {/* Gym Details Modal */}
       <GymDetailsModal
@@ -2033,7 +2020,23 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         onHide={() => setShowToast(false)}
       />
 
-
+      {/* Hidden ShareCard for image generation */}
+      {(() => {
+        if (shareCardGym && shareCardSession) {
+          return (
+            <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+              <ShareCard 
+                ref={shareCardRef}
+                gym={shareCardGym}
+                session={shareCardSession}
+                includeImGoing={true}
+                style="classic"
+              />
+            </View>
+          );
+        }
+        return null;
+      })()}
 
       {/* Location Picker Modal */}
       <Modal
