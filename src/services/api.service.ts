@@ -309,6 +309,7 @@ class ApiService {
       // Determine city from location string
       const city = safeLocation.toLowerCase().includes('austin') ? 'austin' : 
                    safeLocation.toLowerCase().includes('miami') ? 'miami' : 
+                   safeLocation.toLowerCase().includes('stpete') ? 'stpete' : 
                    safeLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
                    safeLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
       
