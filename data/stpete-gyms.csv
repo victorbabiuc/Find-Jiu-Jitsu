@@ -1,4 +1,4 @@
-id,name,address,website,distance,matFee,dropInFee,sessionDay,sessionTime,sessionType,coordinates,last_updated
-stpete-bjj,St Pete BJJ,"5540 Haines Rd N, St Petersburg, FL 33714","https://www.stpetebjj.com/",0,0,0,Sunday,"5:00 PM",Gi/NoGi,"27.8117,-82.6509",2025-01-28
-stpete-inside-control,Inside Control Academy,"4654 28th St N, St Petersburg, FL 33714","https://insidecontrolacademy.com/",0,0,0,Sunday,"11:00 AM",Gi/NoGi,"27.7947,-82.6826",2025-01-28
-stpete-gracie-largo,Gracie Jiu Jitsu Largo,"5047 Ulmerton Road, Largo, FL 33760","https://graciejiujitsulargo.com/",0,25,0,Sunday,"9:00 AM - 10:30 AM",NoGi,"27.8467,-82.7837",2025-01-28 
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
+stpete-bjj,St Pete BJJ,"5540 Haines Rd N, St Petersburg, FL 33714","https://www.stpetebjj.com/",0,0,0,"27.8117,-82.6509",2025-01-28,,,,,,,"5:00 PM - Gi/NoGi"
+stpete-inside-control,Inside Control Academy,"4654 28th St N, St Petersburg, FL 33714","https://insidecontrolacademy.com/",0,0,0,"27.7947,-82.6826",2025-01-28,,,,,,,"11:00 AM - Gi/NoGi"
+stpete-gracie-largo,Gracie Jiu Jitsu Largo,"5047 Ulmerton Road, Largo, FL 33760","https://graciejiujitsulargo.com/",0,25,0,"27.8467,-82.7837",2025-01-28,,,,,,,"9:00 AM - 10:30 AM - NoGi" 

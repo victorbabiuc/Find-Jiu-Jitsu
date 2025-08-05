@@ -53,7 +53,7 @@ class GitHubDataService {
     'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
     'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
     'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv',
-    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms-new-format.csv'
+    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms.csv'
   };
 
   /**
