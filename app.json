@@ -2,7 +2,7 @@
   "expo": {
     "name": "JiuJitsu Finder",
     "slug": "OpenMatFinder",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
       "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.OpenMatFinder",
-      "buildNumber": "18",
+      "buildNumber": "19",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "JiuJitsu Finder uses your location to show nearby gyms on the map and calculate distances."
