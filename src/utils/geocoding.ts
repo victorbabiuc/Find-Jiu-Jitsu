@@ -58,7 +58,7 @@ export class GeocodingService {
       return null;
 
     } catch (error) {
-      logger.error('Geocoding error:', { address, error: error.message });
+      logger.error('Geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }
@@ -93,7 +93,7 @@ export class GeocodingService {
 
       return null;
     } catch (error) {
-      logger.error('Google geocoding error:', { address, error: error.message });
+      logger.error('Google geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }
@@ -129,7 +129,7 @@ export class GeocodingService {
 
       return null;
     } catch (error) {
-      logger.error('Nominatim geocoding error:', { address, error: error.message });
+      logger.error('Nominatim geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }
@@ -156,7 +156,7 @@ export class GeocodingService {
       const data = await response.json();
       return data;
     } catch (error) {
-      logger.error('Nominatim request failed:', { url, error: error.message });
+      logger.error('Nominatim request failed:', { url, error: error instanceof Error ? error.message : 'Unknown error' });
       throw error;
     }
   }
@@ -330,7 +330,7 @@ export class GeocodingService {
 
       return { latitude, longitude };
     } catch (error) {
-      logger.error('Error parsing coordinates:', { coordString, error: error.message });
+      logger.error('Error parsing coordinates:', { coordString, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }

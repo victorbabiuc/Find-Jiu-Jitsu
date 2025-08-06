@@ -840,7 +840,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       });
 
     } catch (error) {
-      logger.error('GPS location error:', { error: error.message });
+      logger.error('GPS location error:', { error: error instanceof Error ? error.message : 'Unknown error' });
       Alert.alert(
         'Location Error',
         'Unable to get your current location. Please try again or use a different option.',
@@ -890,7 +890,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
       }
 
     } catch (error) {
-      logger.error('Address search error:', { query: searchQuery, error: error.message });
+      logger.error('Address search error:', { query: searchQuery, error: error instanceof Error ? error.message : 'Unknown error' });
       setSearchError('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
@@ -2732,10 +2732,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  distanceText: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
+
   feeContainer: {
     marginBottom: 2,
   },

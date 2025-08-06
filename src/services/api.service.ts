@@ -305,15 +305,16 @@ class ApiService {
     
     console.log('🔍 ApiService: getOpenMats called with location:', safeLocation, 'forceRefresh:', forceRefresh);
     
+    // Determine city from location string
+    const city = safeLocation.toLowerCase().includes('austin') ? 'austin' : 
+                 safeLocation.toLowerCase().includes('miami') ? 'miami' : 
+                 safeLocation.toLowerCase().includes('stpete') ? 'stpete' : 
+                 safeLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
+                 safeLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
+    
+    console.log('🔍 ApiService: Determined city:', city);
+    
     try {
-      // Determine city from location string
-      const city = safeLocation.toLowerCase().includes('austin') ? 'austin' : 
-                   safeLocation.toLowerCase().includes('miami') ? 'miami' : 
-                   safeLocation.toLowerCase().includes('stpete') ? 'stpete' : 
-                   safeLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
-                   safeLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
-      
-      console.log('🔍 ApiService: Determined city:', city);
       
       // Try GitHub service first with force refresh if requested
       let githubData = await githubDataService.getGymData(city, forceRefresh || false);

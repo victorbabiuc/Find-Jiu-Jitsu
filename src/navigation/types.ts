@@ -26,7 +26,11 @@ export type FindStackParamList = {
     dateSelection?: string;
     dates?: string[];
   };
-  MapView: undefined;
+  MapView: {
+    location?: { latitude: number; longitude: number };
+    locationText?: string;
+    radius?: number;
+  };
 };
 
 // Screen Names (matching ViewType)

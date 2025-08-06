@@ -501,7 +501,6 @@ const MapViewScreen: React.FC<MapViewScreenProps> = ({ route, navigation }) => {
         />
 
         {/* Add gym markers if coordinates exist */}
-        {console.log('🔍 MapViewScreen: Rendering', filteredGyms.length, 'gym markers')}
         {filteredGyms.map((gym) => {
           console.log('🔍 MapViewScreen: Checking gym', gym.name, 'coordinates:', gym.coordinates, 'type:', typeof gym.coordinates);
           if (!gym.coordinates) {

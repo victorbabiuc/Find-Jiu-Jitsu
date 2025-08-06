@@ -36,6 +36,7 @@ export interface User {
     goingUsers?: User[]; // Optional array of users attending
     coordinates?: string; // Optional coordinates in "latitude,longitude" format
     lastUpdated?: string; // Optional ISO date string for when data was last updated
+    phoneNumber?: string; // Optional phone number for gym contact
   }
   
   export interface OpenMatSession {
