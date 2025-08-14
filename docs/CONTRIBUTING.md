@@ -241,10 +241,8 @@ git push origin feature/add-miami-gyms
 ## Getting Help
 
 ### Resources
-- [Development Guide](DEVELOPMENT.md) - Technical setup and new architecture
-- [Data Management](DATA.md) - Detailed CSV specifications
-- [Technical Details](TECHNICAL.md) - Updated architecture, hooks, and APIs
-- [Custom Hooks Guide](../src/hooks/README.md) - How to use the custom hooks
+- [Development Guide](DEVELOPMENT.md) - Technical setup and architecture
+- [API Reference](API.md) - Data structures and service documentation
 
 ### Contact
 - **Email**: glootieapp@gmail.com
@@ -253,4 +251,4 @@ git push origin feature/add-miami-gyms
 
 ---
 
-[← Back to README](../README.md) | [Data Management →](DATA.md) 
+[← Back to README](../README.md) | [API Reference →](API.md) 
