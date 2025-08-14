@@ -17,7 +17,7 @@ export const formatTimeRange = (sessionTime: string): string => {
     if (parts.length >= 2) {
       // Handle special case like "12-2pm" where first part is missing period
       let startTime = parts[0];
-      let endTime = parts[1];
+      const endTime = parts[1];
       
       // If start time doesn't have AM/PM but end time does, infer from end time
       if (!startTime.match(/(am|pm)$/i) && endTime.match(/(am|pm)$/i)) {
