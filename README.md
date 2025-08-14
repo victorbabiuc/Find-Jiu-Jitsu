@@ -88,12 +88,10 @@ src/
 
 ## Documentation
 
-- 📖 [Development Guide](docs/DEVELOPMENT.md) - Technical setup and new architecture
-- 🏢 [Adding Gyms & Cities](docs/CONTRIBUTING.md) - How to contribute gym data
-- 🔧 [Technical Details](docs/TECHNICAL.md) - Updated stack, hooks, and architecture
-- 🗺️ [Roadmap](docs/ROADMAP.md) - Planned features and known issues
-- 📊 [Data Management](docs/DATA.md) - CSV formats and geocoding
-- 🔧 [Maintenance Guide](MAINTENANCE.md) - Ongoing upkeep and quality assurance
+- 📖 [Development Guide](docs/DEVELOPMENT.md) - Technical setup, authentication, and architecture
+- 🏢 [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute gym data and code
+- 📡 [API Reference](docs/API.md) - Technical reference and data structures
+- 🗺️ [Roadmap](docs/ROADMAP.md) - Planned features and development progress
 
 ## Quick Contributing
 

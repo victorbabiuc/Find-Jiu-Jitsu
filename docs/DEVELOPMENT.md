@@ -1,6 +1,6 @@
 # 🛠️ Development Guide
 
-Technical setup, architecture, and development workflow for JiuJitsu Finder.
+Complete setup and development guide for JiuJitsu Finder.
 
 [← Back to README](../README.md)
 
@@ -9,206 +9,239 @@ Technical setup, architecture, and development workflow for JiuJitsu Finder.
 ### Prerequisites
 - Node.js (v16 or higher)
 - Expo CLI
-- iOS Simulator (for development)
+- iOS device with Expo Go app
 
 ### Installation
 ```bash
 git clone https://github.com/victorbabiuc/Find-Jiu-Jitsu.git
-cd FindJiuJitsu
+cd JiuJitsu-Finder
 npm install
 npx expo start
 ```
 
-### Key Commands
+### Development Server
 ```bash
-# Run development server
+# Start development server
 npx expo start
 
-# Run with cache clear
+# Start with cache clear
 npx expo start --clear
 
-# Build for production
-npx eas build -p ios --profile production
-
-# Submit to App Store
-npx eas submit -p ios
+# Run web version
+npx expo start --web
 ```
+
+## Testing Your App
+
+### Option 1: iOS Device (Recommended)
+1. **Download "Expo Go"** from iOS App Store
+2. **Scan QR code** from terminal/browser
+3. **Test on real device** - Most accurate testing
+
+### Option 2: Web Browser
+1. **Run:** `npx expo start --web`  
+2. **Test in browser** - Quick iterations
+
+**Note:** iOS Simulator not available on Windows. Use physical iOS device or cloud Mac services for full iOS testing.
 
 ## Technical Stack
 
 ### Core Framework
-- **Framework**: React Native with Expo SDK 53
-- **Language**: TypeScript for full type safety
-- **Navigation**: React Navigation v6 with streamlined user flow
-- **State Management**: Context API + Custom Hooks
-- **Data Storage**: AsyncStorage for local favorites
+- **React Native** with Expo SDK 53
+- **TypeScript** for type safety
+- **Navigation:** React Navigation v6
+- **State:** Context API + Custom Hooks
+- **Storage:** AsyncStorage
 
-### Architecture & Components
-- **Component Architecture**: Modular sub-components with focused responsibilities
-- **Custom Hooks**: Reusable state management patterns
-- **Utility Functions**: Centralized gym utilities and professional logging
-- **Type Safety**: Enhanced TypeScript interfaces and type definitions
+### Key Features
+- **Custom Hooks:** Reusable state management (useGymActions, useGymSearch, useGymModal, useGymFilters)
+- **Component Architecture:** Modular sub-components
+- **Professional Logging:** Categorized logging system
+- **Data Service:** GitHub-hosted CSV with caching
 
-### Data & Services
-- **Data Source**: GitHub-hosted CSV files for easy updates
-- **Data Service**: Custom GitHub data service with caching and last updated support
-- **API Service**: RESTful API service for gym data
-- **Storage Service**: Local storage utilities
-- **Search Service**: Debounced search with suggestions and recent searches
+## Authentication Setup
 
-### UI & UX
-- **Styling**: React Native StyleSheet with consistent design system
-- **Animations**: React Native Animated API with custom utility service
-- **Haptics**: expo-haptics for tactile feedback
-- **Icons**: Ionicons for consistent iconography
-- **Loading**: Custom belt progression loading animation
-- **Components**: Reusable UI components with proper TypeScript interfaces
+### Google Sign-In Setup
 
-### Sharing & Utilities
-- **Sharing**: Image sharing with react-native-view-shot and expo-sharing
-- **Clipboard**: expo-clipboard for text copying
-- **Location**: expo-location for user location services
-- **Linear Gradient**: expo-linear-gradient for visual effects
-- **View Shot**: react-native-view-shot for creating share images
-- **Logging**: Professional logging system with categorized output
+#### 1. Google Cloud Console
+1. Create OAuth 2.0 Client IDs for Web, iOS, and Android
+2. Configure OAuth consent screen with app info
+3. Add required scopes: `email`, `profile`, `openid`
 
-### Authentication (In Development)
-- **Google Sign-In**: @react-native-google-signin/google-signin
-- **Apple Sign-In**: expo-apple-authentication
-- **Auth Session**: expo-auth-session for OAuth flow
-
-## Project Structure
-
-```
-src/
-├── components/          # Reusable UI components
-│   ├── results/        # ResultsScreen sub-components
-│   │   ├── ResultsGymCard.tsx      # Individual gym card
-│   │   ├── ResultsFilterBar.tsx    # Filter pills and map toggle
-│   │   ├── ResultsHeader.tsx       # Header with location info
-│   │   └── ResultsEmptyState.tsx   # Empty state component
-│   ├── dashboard/      # DashboardScreen sub-components
-│   │   ├── DashboardSearchSection.tsx  # Search functionality
-│   │   ├── DashboardCityCards.tsx      # City selection cards
-│   │   └── DashboardGymModal.tsx       # Gym details modal
-│   ├── common/         # Shared components
-│   └── index.ts        # Component exports
-├── hooks/              # Custom hooks for state management
-│   ├── useGymActions.ts    # Gym interactions (website, directions, copy, share, favorite)
-│   ├── useGymSearch.ts     # Search state and debounced search
-│   ├── useGymModal.ts      # Modal visibility and selected gym state
-│   ├── useGymFilters.ts    # Filter state and application logic
-│   └── index.ts            # Hook exports
-├── context/            # React Context providers
-├── navigation/         # Navigation configuration
-├── screens/           # Main app screens (refactored)
-├── services/          # API and data services
-├── stores/            # State management
-├── types/             # TypeScript type definitions
-└── utils/             # Utility functions
-    ├── gymUtils.ts    # Centralized gym utilities
-    ├── logger.ts      # Professional logging system
-    └── index.ts       # Utility exports
-```
-
-## Development Workflow
-
-### 1. Feature Development
-1. Create feature branch: `git checkout -b feature/AmazingFeature`
-2. Use existing custom hooks for state management
-3. Create focused components following the new architecture
-4. Test on iOS Simulator
-5. Commit with descriptive message: `git commit -m 'Add AmazingFeature'`
-6. Push and create Pull Request
-
-### 2. Testing
-- Test on iOS Simulator for all screen sizes
-- Verify data loading and error states
-- Test sharing functionality
-- Check TypeScript compilation: `npx tsc --noEmit --skipLibCheck`
-- Verify custom hooks work correctly
-- Test component reusability
-
-### 3. Code Quality
-- Use TypeScript for all new code
-- Follow existing naming conventions
-- Use custom hooks for state management
-- Create focused, reusable components
-- Add proper error handling
-- Include loading states for async operations
-- Use the professional logging system
-
-## Known Issues & Fixes
-
-### Map View (In Development)
-- **Status**: Compilation errors preventing map functionality
-- **Issue**: react-native-maps plugin configuration and syntax errors
-- **Impact**: Map toggle shows location list instead of actual map
-- **Workaround**: Use list view for gym browsing
-
-### Authentication (In Development)
-- **Status**: UI implemented but backend not connected
-- **Issue**: Firebase integration not completed
-- **Impact**: Sign-in buttons present but not functional
-- **Workaround**: App works without authentication
-
-### Require Cycle Warning
-```
-WARN  Require cycle: src/navigation/AppNavigator.tsx -> src/screens/TimeSelectionScreen.tsx -> src/navigation/index.ts -> src/navigation/AppNavigator.tsx
-```
-
-**Fix**: Import directly from specific files instead of index:
+#### 2. Configuration
 ```typescript
-// Change from:
-import { useFindNavigation } from '../navigation';
-// To:
-import { useFindNavigation } from '../navigation/useNavigation';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+  iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  offlineAccess: true,
+});
 ```
+
+#### 3. Environment Variables
+```env
+GOOGLE_WEB_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=your_ios_client_id.apps.googleusercontent.com
+```
+
+### Apple Sign-In Setup
+
+#### 1. Apple Developer Console
+1. Enable **Sign In with Apple** for your app identifier
+2. Configure service IDs and key IDs
+
+#### 2. Configuration
+```json
+{
+  "expo": {
+    "ios": {
+      "bundleIdentifier": "com.anonymous.OpenMatFinder",
+      "usesAppleSignIn": true
+    }
+  }
+}
+```
+
+**Note:** Apple Sign-In requires physical iOS device for testing.
+
+### Firebase Integration
+
+#### 1. Firebase Project Setup
+1. Create Firebase project
+2. Enable Authentication with Google/Apple providers
+3. Download config files
+
+#### 2. Environment Variables
+```env
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+```
+
+## Project Architecture
+
+### Custom Hooks System
+```
+src/hooks/
+├── useGymActions.ts     # Website, directions, copy, share, favorite
+├── useGymSearch.ts      # Search state and debounced search  
+├── useGymModal.ts       # Modal visibility and share cards
+├── useGymFilters.ts     # Filter state and counts
+└── index.ts             # Exports
+```
+
+### Component Structure
+```
+src/components/
+├── results/             # ResultsScreen sub-components
+├── dashboard/           # DashboardScreen sub-components
+├── common/              # Shared components
+└── index.ts
+```
+
+### Services
+```
+src/services/
+├── github-data.service.ts    # CSV data fetching with cache
+├── search.service.ts         # Search and suggestions
+├── api.service.ts           # RESTful API wrapper
+└── index.ts
+```
+
+## Data Management
+
+### CSV Format
+```csv
+id,name,address,website,distance,matFee,dropInFee,coordinates,last_updated,monday,tuesday,wednesday,thursday,friday,saturday,sunday
+```
+
+### Session Format
+```csv
+"5:00 PM - Gi/NoGi"
+"6:30 PM - 7:30 PM - NoGi"
+"11:00 AM - Gi"
+```
+
+### Adding New Gyms
+1. Edit CSV files in `data/` directory
+2. Follow exact format requirements
+3. Test locally with `npx expo start`
+4. Submit pull request
 
 ## Build & Deployment
 
 ### App Store Information
-- **App Name**: JiuJitsu Finder
-- **Bundle ID**: com.anonymous.OpenMatFinder
-- **Category**: Sports
-- **Price**: Free
-- **Current Version**: 1.3.0 (Build 15)
-- **Status**: ✅ Live on App Store
+- **Bundle ID:** com.anonymous.OpenMatFinder
+- **Current Version:** 1.6.0
+- **Status:** Live on App Store
 
-### Build Process
-1. Update version in `app.json`
-2. Run `npx eas build -p ios --profile production`
-3. Test build on TestFlight
-4. Submit to App Store: `npx eas submit -p ios`
+### Build Commands
+```bash
+# Production build
+npx eas build -p ios --profile production
+
+# Submit to App Store  
+npx eas submit -p ios
+```
+
+## Screenshot Sharing
+
+### Implementation
+The app uses `react-native-view-shot` to create shareable gym cards:
+
+1. **ShareCard Component:** Professional design optimized for social media
+2. **Capture Process:** Off-screen rendering → image capture → native share
+3. **Integration:** Built into custom hooks for consistent behavior
+
+### Usage
+```typescript
+const { handleShareGym } = useGymActions({
+  favorites,
+  toggleFavorite, 
+  shareCardRef,
+});
+```
 
 ## Performance Optimization
 
 ### Current Optimizations
-- **Memoization**: React.memo for expensive components
-- **FlatList Optimization**: Virtualization for large lists
-- **Data Caching**: GitHub data service with 1-hour cache
-- **Pre-loading**: Gym data loaded on app startup
-- **Image Optimization**: Compressed gym logos
-- **Custom Hooks**: Optimized state management with useCallback and useMemo
-- **Component Architecture**: Focused sub-components reduce re-renders
-- **Professional Logging**: Development-only logging reduces production overhead
+- **React.memo:** Prevents unnecessary re-renders
+- **FlatList Virtualization:** Efficient large lists
+- **Data Caching:** 1-hour GitHub data cache
+- **Custom Hooks:** Optimized with useCallback/useMemo
+- **Professional Logging:** Development-only overhead
 
 ### Monitoring
-- Professional logging system for data loading and errors
-- Performance monitoring in development
-- Memory usage tracking for large datasets
-- Custom hook performance tracking
+- Performance tracking in development
+- Memory usage monitoring for large datasets
+- Custom hook performance optimization
 
 ## Troubleshooting
 
 ### Common Issues
-1. **Metro bundler issues**: Run `npx expo start --clear`
-2. **TypeScript errors**: Run `npx tsc --noEmit --skipLibCheck`
-3. **iOS Simulator issues**: Reset simulator and restart Expo
-4. **Data loading failures**: Check GitHub CSV file accessibility
 
-### Debug Mode
-Use the professional logging system for detailed debugging:
+#### Metro Bundler Issues
+```bash
+npx expo start --clear
+```
+
+#### TypeScript Errors  
+```bash
+npx tsc --noEmit --skipLibCheck
+```
+
+#### iOS Device Issues
+1. Ensure Expo Go is installed
+2. Check QR code scanning
+3. Verify network connectivity
+
+#### Data Loading Failures
+1. Check GitHub CSV accessibility
+2. Clear app cache
+3. Verify internet connection
+
+### Debug Logging
 ```typescript
 import { logger } from '../utils';
 
@@ -219,121 +252,41 @@ logger.filter('Filter applied:', filters);
 logger.error('Error occurred:', error);
 ```
 
-The logging system automatically handles development vs production environments.
+## Known Issues
 
-## Custom Hooks Architecture
+### Map View (In Development)
+- **Status:** Compilation errors preventing functionality
+- **Workaround:** Use list view for gym browsing
 
-### Available Hooks
+### Authentication (In Development)  
+- **Status:** UI implemented, backend not connected
+- **Workaround:** App works without authentication
 
-#### `useGymActions`
-Centralizes gym-related actions with proper state management and haptic feedback.
+## Code Quality
 
-```typescript
-import { useGymActions } from '../hooks';
+### TypeScript Standards
+- Use proper interfaces for all data
+- Avoid `any` types
+- Leverage custom hooks for state management
 
-const {
-  copyingGymId,
-  copiedGymId,
-  sharingGymId,
-  handleOpenWebsite,
-  handleOpenDirections,
-  handleCopyGymWithState,
-  handleShareGym,
-  handleToggleFavorite,
-} = useGymActions({
-  favorites,
-  toggleFavorite,
-  shareCardRef,
-});
-```
+### Component Guidelines
+- Create focused, single-responsibility components
+- Use custom hooks for state logic
+- Follow established patterns in `/components/results/` and `/components/dashboard/`
 
-#### `useGymSearch`
-Manages search state, debounced search, and search suggestions.
+### Error Handling
+- Use professional logging system
+- Implement graceful fallbacks
+- Handle network failures appropriately
 
-```typescript
-import { useGymSearch } from '../hooks';
+## Contributing
 
-const {
-  isSearching,
-  searchQuery,
-  searchResults,
-  searchSuggestions,
-  recentSearches,
-  showSuggestions,
-  handleInputChange,
-  handleSelectSuggestion,
-  closeSearch,
-} = useGymSearch({
-  allGyms,
-  onSearchResultsChange: (results) => {
-    // Handle search results
-  },
-});
-```
-
-#### `useGymModal`
-Manages modal visibility and selected gym state.
-
-```typescript
-import { useGymModal } from '../hooks';
-
-const {
-  modalVisible,
-  selectedGym,
-  shareCardGym,
-  shareCardSession,
-  shareCardRef,
-  showGymDetails,
-  handleCloseModal,
-  setShareCardData,
-} = useGymModal({
-  onModalOpen: (gym) => {
-    // Handle modal open
-  },
-});
-```
-
-#### `useGymFilters`
-Manages filter state and provides filtered gym lists.
-
-```typescript
-import { useGymFilters } from '../hooks';
-
-const {
-  activeFilters,
-  sessionCounts,
-  filteredGyms,
-  hasActiveFilters,
-  toggleFilter,
-  handleFreeFilter,
-  resetFilters,
-} = useGymFilters({
-  allGyms,
-  onFiltersChange: (filteredGyms) => {
-    // Handle filtered results
-  },
-});
-```
-
-### Benefits of Custom Hooks
-
-1. **Consistency**: All screens use the same patterns for gym interactions
-2. **Reusability**: Hooks can be used across different screens
-3. **Maintainability**: State logic is centralized and easier to update
-4. **Type Safety**: All hooks are properly typed with TypeScript
-5. **Performance**: Hooks use `useCallback` and `useMemo` for optimization
-6. **Testing**: Hooks can be tested independently of UI components
-
-### Migration Guide
-
-To migrate existing screens to use these hooks:
-
-1. **Replace duplicate state**: Remove local state that's now managed by hooks
-2. **Update imports**: Import hooks from `../hooks`
-3. **Replace handlers**: Use hook-provided handlers instead of local ones
-4. **Update props**: Pass hook state and handlers to child components
-5. **Test functionality**: Ensure all existing functionality still works
+1. **Fork** the repository
+2. **Create feature branch:** `git checkout -b feature/AmazingFeature`
+3. **Use custom hooks** for state management
+4. **Test thoroughly** on iOS device
+5. **Submit pull request** with clear description
 
 ---
 
-[← Back to README](../README.md) | [Technical Details →](TECHNICAL.md) 
+[← Back to README](../README.md) | [Contributing Guide →](CONTRIBUTING.md)
