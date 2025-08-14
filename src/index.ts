@@ -3,7 +3,7 @@
 
 export * from './components';
 export * from './screens';
-export * from './stores';
+
 export * from './services';
 export * from './types';
 export * from './utils';

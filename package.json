@@ -7,7 +7,14 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "ios:pods": "cd ios && pod install && ruby fix-expo-paths.rb",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "clean": "expo start --clear",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "lint": "eslint src/ --ext .ts,.tsx",
+    "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "geocode": "node scripts/geocoding/geocode-city-improved.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
@@ -48,7 +55,15 @@
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "^18.0.0",
     "@types/react": "~19.0.10",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eas-cli": "^0.44.1",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "prettier": "^3.0.0",
     "typescript": "~5.8.3"
   },
   "private": true
