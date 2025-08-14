@@ -43,7 +43,12 @@ export const animations = {
    * @param duration - Animation duration in ms
    * @param delay - Delay before animation starts in ms
    */
-  slideUp: (value: Animated.Value, distance: number = 50, duration: number = 300, delay: number = 0) => {
+  slideUp: (
+    value: Animated.Value,
+    distance: number = 50,
+    duration: number = 300,
+    delay: number = 0
+  ) => {
     return Animated.timing(value, {
       toValue: 0,
       duration,
@@ -75,7 +80,12 @@ export const animations = {
    * @param duration - Animation duration in ms
    * @param delay - Delay before animation starts in ms
    */
-  scale: (value: Animated.Value, toValue: number = 1, duration: number = 300, delay: number = 0) => {
+  scale: (
+    value: Animated.Value,
+    toValue: number = 1,
+    duration: number = 300,
+    delay: number = 0
+  ) => {
     return Animated.timing(value, {
       toValue,
       duration,
@@ -137,8 +147,15 @@ export const animations = {
    * @param animation - Animation function to apply
    * @param staggerDelay - Delay between each item in ms
    */
-  stagger: (values: Animated.Value[], animation: (value: Animated.Value, index: number) => Animated.CompositeAnimation, staggerDelay: number = 50) => {
-    return Animated.stagger(staggerDelay, values.map((value, index) => animation(value, index)));
+  stagger: (
+    values: Animated.Value[],
+    animation: (value: Animated.Value, index: number) => Animated.CompositeAnimation,
+    staggerDelay: number = 50
+  ) => {
+    return Animated.stagger(
+      staggerDelay,
+      values.map((value, index) => animation(value, index))
+    );
   },
 
   /**
@@ -169,4 +186,4 @@ export const animationConfigs = {
   smooth: { duration: 600, easing: Easing.inOut(Easing.cubic) },
 };
 
-export default animations; 
+export default animations;

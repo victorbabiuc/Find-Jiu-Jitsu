@@ -14,12 +14,14 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ index = 0 }) => {
   useEffect(() => {
     // Stagger entrance animation based on index
     const entranceDelay = index * 100;
-    
+
     // Start entrance animations
-    animations.parallel([
-      animations.fadeIn(fadeAnim, 400, entranceDelay),
-      animations.scale(scaleAnim, 1, 400, entranceDelay),
-    ]).start();
+    animations
+      .parallel([
+        animations.fadeIn(fadeAnim, 400, entranceDelay),
+        animations.scale(scaleAnim, 1, 400, entranceDelay),
+      ])
+      .start();
 
     // Start shimmer animation
     const shimmerAnimation = Animated.loop(
@@ -36,7 +38,7 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ index = 0 }) => {
         }),
       ])
     );
-    
+
     shimmerAnimation.start();
 
     return () => {
@@ -50,13 +52,13 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ index = 0 }) => {
   });
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.container,
         {
           opacity: fadeAnim,
           transform: [{ scale: scaleAnim }],
-        }
+        },
       ]}
     >
       <View style={styles.card}>
@@ -64,143 +66,53 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ index = 0 }) => {
         <View style={styles.cardHeader}>
           <View style={styles.logoHeartContainer}>
             {/* Gym Logo Skeleton */}
-            <Animated.View 
-              style={[
-                styles.skeletonLogo,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonLogo, { opacity: shimmerOpacity }]} />
             {/* Gym Name and Address */}
             <View style={styles.textContainer}>
-              <Animated.View 
-                style={[
-                  styles.skeletonGymName,
-                  { opacity: shimmerOpacity }
-                ]} 
-              />
-              <Animated.View 
-                style={[
-                  styles.skeletonAddress,
-                  { opacity: shimmerOpacity }
-                ]} 
-              />
+              <Animated.View style={[styles.skeletonGymName, { opacity: shimmerOpacity }]} />
+              <Animated.View style={[styles.skeletonAddress, { opacity: shimmerOpacity }]} />
             </View>
           </View>
           {/* Heart Button Skeleton */}
-          <Animated.View 
-            style={[
-              styles.skeletonHeartButton,
-              { opacity: shimmerOpacity }
-            ]} 
-          />
+          <Animated.View style={[styles.skeletonHeartButton, { opacity: shimmerOpacity }]} />
         </View>
 
         {/* Session Subtitle Skeleton */}
-        <Animated.View 
-          style={[
-            styles.skeletonSubtitle,
-            { opacity: shimmerOpacity }
-          ]} 
-        />
+        <Animated.View style={[styles.skeletonSubtitle, { opacity: shimmerOpacity }]} />
 
         {/* Sessions Section Skeleton */}
         <View style={styles.sessionsSection}>
           <View style={styles.sessionBlock}>
-            <Animated.View 
-              style={[
-                styles.skeletonDayHeader,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
-            <Animated.View 
-              style={[
-                styles.skeletonTimeRange,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonDayHeader, { opacity: shimmerOpacity }]} />
+            <Animated.View style={[styles.skeletonTimeRange, { opacity: shimmerOpacity }]} />
           </View>
           <View style={styles.sessionBlock}>
-            <Animated.View 
-              style={[
-                styles.skeletonDayHeader,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
-            <Animated.View 
-              style={[
-                styles.skeletonTimeRange,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonDayHeader, { opacity: shimmerOpacity }]} />
+            <Animated.View style={[styles.skeletonTimeRange, { opacity: shimmerOpacity }]} />
           </View>
         </View>
 
         {/* Fees Section Skeleton */}
         <View style={styles.feesSection}>
           <View style={styles.feesHeader}>
-            <Animated.View 
-              style={[
-                styles.skeletonInfoIcon,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
-            <Animated.View 
-              style={[
-                styles.skeletonInfoText,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonInfoIcon, { opacity: shimmerOpacity }]} />
+            <Animated.View style={[styles.skeletonInfoText, { opacity: shimmerOpacity }]} />
           </View>
           <View style={styles.feeItem}>
-            <Animated.View 
-              style={[
-                styles.skeletonFeeLabel,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
-            <Animated.View 
-              style={[
-                styles.skeletonFeeValue,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonFeeLabel, { opacity: shimmerOpacity }]} />
+            <Animated.View style={[styles.skeletonFeeValue, { opacity: shimmerOpacity }]} />
           </View>
           <View style={styles.feeItem}>
-            <Animated.View 
-              style={[
-                styles.skeletonFeeLabel,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
-            <Animated.View 
-              style={[
-                styles.skeletonFeeValue,
-                { opacity: shimmerOpacity }
-              ]} 
-            />
+            <Animated.View style={[styles.skeletonFeeLabel, { opacity: shimmerOpacity }]} />
+            <Animated.View style={[styles.skeletonFeeValue, { opacity: shimmerOpacity }]} />
           </View>
         </View>
 
         {/* Action Buttons Skeleton */}
         <View style={styles.buttonRow}>
-          <Animated.View 
-            style={[
-              styles.skeletonActionButton,
-              { opacity: shimmerOpacity }
-            ]} 
-          />
-          <Animated.View 
-            style={[
-              styles.skeletonActionButton,
-              { opacity: shimmerOpacity }
-            ]} 
-          />
-          <Animated.View 
-            style={[
-              styles.skeletonActionButton,
-              { opacity: shimmerOpacity }
-            ]} 
-          />
+          <Animated.View style={[styles.skeletonActionButton, { opacity: shimmerOpacity }]} />
+          <Animated.View style={[styles.skeletonActionButton, { opacity: shimmerOpacity }]} />
+          <Animated.View style={[styles.skeletonActionButton, { opacity: shimmerOpacity }]} />
         </View>
       </View>
     </Animated.View>
@@ -346,4 +258,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SkeletonCard; 
+export default SkeletonCard;

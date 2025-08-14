@@ -14,12 +14,12 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<OpenMat[]>([]);
   const [isSearchComplete, setIsSearchComplete] = useState(false);
-  
+
   // Smart search state
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  
+
   // Debounce ref
   const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -39,72 +39,81 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
   }, []);
 
   // Perform search with debouncing
-  const performSearch = useCallback(async (query: string) => {
-    logger.search('performSearch called with:', { query });
-    
-    if (!query.trim()) {
-      logger.warn('Empty query, clearing results');
-      setSearchResults([]);
-      setIsSearchComplete(false);
-      return;
-    }
-    
-    logger.start('Starting search, setting isSearching to true');
-    setIsSearching(true);
-    setIsSearchComplete(false);
-    
-    try {
-      // Use smart search service
-      const results = SearchService.searchGyms(query, allGyms);
-      
-      logger.success('Setting search results:', { count: results.length });
-      setSearchResults(results);
-      setIsSearchComplete(true);
-      
-      // Save to recent searches
-      await SearchService.saveRecentSearch(query);
-      
-      // Update recent searches state
-      const updatedRecent = await SearchService.getRecentSearches();
-      setRecentSearches(updatedRecent);
-      
-      // Notify parent if callback provided
-      if (onSearchResultsChange) {
-        onSearchResultsChange(results);
+  const performSearch = useCallback(
+    async (query: string) => {
+      logger.search('performSearch called with:', { query });
+
+      if (!query.trim()) {
+        logger.warn('Empty query, clearing results');
+        setSearchResults([]);
+        setIsSearchComplete(false);
+        return;
       }
-    } catch (error) {
-      logger.error('Error searching gyms:', error);
-      logger.warn('Error case - clearing search results');
-      setSearchResults([]);
-      setIsSearchComplete(true);
-    } finally {
-      logger.finish('Search complete, setting isSearching to false');
-      setIsSearching(false);
-    }
-  }, [allGyms, onSearchResultsChange]);
+
+      logger.start('Starting search, setting isSearching to true');
+      setIsSearching(true);
+      setIsSearchComplete(false);
+
+      try {
+        // Use smart search service
+        const results = SearchService.searchGyms(query, allGyms);
+
+        logger.success('Setting search results:', { count: results.length });
+        setSearchResults(results);
+        setIsSearchComplete(true);
+
+        // Save to recent searches
+        await SearchService.saveRecentSearch(query);
+
+        // Update recent searches state
+        const updatedRecent = await SearchService.getRecentSearches();
+        setRecentSearches(updatedRecent);
+
+        // Notify parent if callback provided
+        if (onSearchResultsChange) {
+          onSearchResultsChange(results);
+        }
+      } catch (error) {
+        logger.error('Error searching gyms:', error);
+        logger.warn('Error case - clearing search results');
+        setSearchResults([]);
+        setIsSearchComplete(true);
+      } finally {
+        logger.finish('Search complete, setting isSearching to false');
+        setIsSearching(false);
+      }
+    },
+    [allGyms, onSearchResultsChange]
+  );
 
   // Debounced search input handler
-  const handleInputChange = useCallback((text: string) => {
-    setSearchQuery(text);
-    setShowSuggestions(false);
-    
-    // Clear previous timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    
-    // Set new timeout for debounced search
-    debounceTimeoutRef.current = setTimeout(() => {
-      performSearch(text);
-    }, 300); // 300ms debounce
-  }, [performSearch]);
+  const handleInputChange = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      setShowSuggestions(false);
+
+      // Clear previous timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      // Set new timeout for debounced search
+      debounceTimeoutRef.current = setTimeout(() => {
+        performSearch(text);
+      }, 300); // 300ms debounce
+    },
+    [performSearch]
+  );
 
   // Handle suggestion selection
-  const handleSelectSuggestion = useCallback((suggestion: string) => {
-    setSearchQuery(suggestion);
-    setShowSuggestions(false);
-    performSearch(suggestion);
-  }, [performSearch]);
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      setSearchQuery(suggestion);
+      setShowSuggestions(false);
+      performSearch(suggestion);
+    },
+    [performSearch]
+  );
 
   // Clear recent searches
   const handleClearRecent = useCallback(async () => {
@@ -125,7 +134,7 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
     setSearchResults([]);
     setIsSearchComplete(false);
     setShowSuggestions(false);
-    
+
     // Clear any pending debounce
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -158,16 +167,19 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
   }, [searchQuery]);
 
   // Generate search suggestions based on query
-  const generateSuggestions = useCallback((query: string) => {
-    if (query.length < 2) return [];
-    
-    const suggestions = allGyms
-      .map(gym => gym.name)
-      .filter(name => name.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 5); // Limit to 5 suggestions
-    
-    setSearchSuggestions(suggestions);
-  }, [allGyms]);
+  const generateSuggestions = useCallback(
+    (query: string) => {
+      if (query.length < 2) return [];
+
+      const suggestions = allGyms
+        .map(gym => gym.name)
+        .filter(name => name.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 5); // Limit to 5 suggestions
+
+      setSearchSuggestions(suggestions);
+    },
+    [allGyms]
+  );
 
   // Update suggestions when query changes
   useEffect(() => {
@@ -196,7 +208,7 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
     searchSuggestions,
     recentSearches,
     showSuggestions,
-    
+
     // Actions
     handleInputChange,
     handleSelectSuggestion,
@@ -208,4 +220,4 @@ export const useGymSearch = ({ allGyms, onSearchResultsChange }: UseGymSearchPro
     performSearch,
     loadRecentSearches,
   };
-}; 
+};

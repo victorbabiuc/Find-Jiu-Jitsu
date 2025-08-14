@@ -18,28 +18,19 @@ const ScreenshotShareExample: React.FC<ScreenshotShareExampleProps> = ({ gym, se
       await captureAndShareCard(cardRef, gym, session);
     } catch (error) {
       console.error('Error sharing screenshot:', error);
-      Alert.alert(
-        'Sharing Error',
-        'Failed to create and share the image. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Sharing Error', 'Failed to create and share the image. Please try again.', [
+        { text: 'OK' },
+      ]);
     }
   };
 
   return (
     <View style={styles.container}>
       {/* Invisible ShareCard rendered off-screen */}
-      <ShareCard 
-        ref={cardRef}
-        gym={gym}
-        session={session}
-      />
+      <ShareCard ref={cardRef} gym={gym} session={session} />
 
       {/* Share Button */}
-      <TouchableOpacity 
-        style={styles.shareButton}
-        onPress={handleScreenshotShare}
-      >
+      <TouchableOpacity style={styles.shareButton} onPress={handleScreenshotShare}>
         <Ionicons name="camera" size={24} color="#FFFFFF" />
         <Text style={styles.shareButtonText}>Share as Image</Text>
       </TouchableOpacity>
@@ -73,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScreenshotShareExample; 
+export default ScreenshotShareExample;

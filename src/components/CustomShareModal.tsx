@@ -115,8 +115,11 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
   }, [visible]);
 
   const captureImage = async () => {
-    console.log('Attempting to capture image, shareCardRef.current:', shareCardRef.current ? 'exists' : 'null');
-    
+    console.log(
+      'Attempting to capture image, shareCardRef.current:',
+      shareCardRef.current ? 'exists' : 'null'
+    );
+
     if (!shareCardRef.current) {
       console.log('ShareCard ref is null, retrying in 500ms...');
       setTimeout(() => {
@@ -124,7 +127,7 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
       }, 500);
       return;
     }
-    
+
     setIsCapturing(true);
     try {
       console.log('Capturing image...');
@@ -262,27 +265,18 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
   };
 
   console.log('CustomShareModal rendering, visible:', visible, 'gym:', gym?.name);
-  
+
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
+      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity
           activeOpacity={1}
-          onPress={(e) => e.stopPropagation()}
+          onPress={e => e.stopPropagation()}
           style={[styles.modalContent, { backgroundColor: theme.surface }]}
         >
           {/* Handle bar for swipe down gesture */}
           <View style={styles.handleBar} />
-          
+
           {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Ionicons name="close" size={24} color={theme.text.primary} />
@@ -290,9 +284,7 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text.primary }]}>
-              Share Session
-            </Text>
+            <Text style={[styles.title, { color: theme.text.primary }]}>Share Session</Text>
             <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
               Share this open mat session with your training partners
             </Text>
@@ -304,59 +296,63 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
               Card Style
             </Text>
             <View style={styles.stylePickerButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
-                  styles.styleButton, 
+                  styles.styleButton,
                   cardStyle === 'classic' && styles.styleButtonActive,
-                  { borderColor: theme.border }
+                  { borderColor: theme.border },
                 ]}
                 onPress={() => setCardStyle('classic')}
               >
-                                 <Text style={[
-                   styles.styleButtonText, 
-                   { color: cardStyle === 'classic' ? '#3B82F6' : theme.text.primary }
-                 ]}>
-                   Classic
-                 </Text>
+                <Text
+                  style={[
+                    styles.styleButtonText,
+                    { color: cardStyle === 'classic' ? '#3B82F6' : theme.text.primary },
+                  ]}
+                >
+                  Classic
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
-                  styles.styleButton, 
+                  styles.styleButton,
                   cardStyle === 'modern' && styles.styleButtonActive,
-                  { borderColor: theme.border }
+                  { borderColor: theme.border },
                 ]}
                 onPress={() => setCardStyle('modern')}
               >
-                                 <Text style={[
-                   styles.styleButtonText, 
-                   { color: cardStyle === 'modern' ? '#3B82F6' : theme.text.primary }
-                 ]}>
-                   Modern
-                 </Text>
+                <Text
+                  style={[
+                    styles.styleButtonText,
+                    { color: cardStyle === 'modern' ? '#3B82F6' : theme.text.primary },
+                  ]}
+                >
+                  Modern
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
-                  styles.styleButton, 
+                  styles.styleButton,
                   cardStyle === 'dark' && styles.styleButtonActive,
-                  { borderColor: theme.border }
+                  { borderColor: theme.border },
                 ]}
                 onPress={() => setCardStyle('dark')}
               >
-                                 <Text style={[
-                   styles.styleButtonText, 
-                   { color: cardStyle === 'dark' ? '#3B82F6' : theme.text.primary }
-                 ]}>
-                   Dark
-                 </Text>
+                <Text
+                  style={[
+                    styles.styleButtonText,
+                    { color: cardStyle === 'dark' ? '#3B82F6' : theme.text.primary },
+                  ]}
+                >
+                  Dark
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Preview Card Section */}
           <View style={styles.previewSection}>
-            <Text style={[styles.previewLabel, { color: theme.text.secondary }]}>
-              Preview
-            </Text>
+            <Text style={[styles.previewLabel, { color: theme.text.secondary }]}>Preview</Text>
             <View style={styles.previewCard}>
               {/* Loading indicator while capturing */}
               {isCapturing && (
@@ -367,42 +363,59 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
                   </Text>
                 </View>
               )}
-              
-                        {/* Mini preview of the ShareCard */}
-          <View style={styles.previewCardContent}>
-            <View style={styles.previewGymInfo}>
-              <View style={styles.previewLogo}>
-                {/* Use actual gym logo if available, otherwise show initials */}
-                {gym && (String(gym.id || '').includes('10th-planet')) ? (
-                  <Image source={require('../../assets/logos/10th-planet-austin.png')} style={styles.previewLogoImage} />
-                ) : gym && (String(gym.id || '').includes('stjj')) ? (
-                  <Image source={require('../../assets/logos/STJJ.png')} style={styles.previewLogoImage} />
-                ) : gym && (String(gym.id || '').includes('gracie-tampa-south')) ? (
-                  <Image source={require('../../assets/logos/gracie-tampa-south.png')} style={styles.previewLogoImage} />
-                ) : gym && (String(gym.id || '').includes('tmt')) ? (
-                  <Image source={require('../../assets/logos/TMT.png')} style={styles.previewLogoImage} />
-                ) : (
-                  <Text style={styles.previewLogoText}>
-                    {gym.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
-                  </Text>
-                )}
+
+              {/* Mini preview of the ShareCard */}
+              <View style={styles.previewCardContent}>
+                <View style={styles.previewGymInfo}>
+                  <View style={styles.previewLogo}>
+                    {/* Use actual gym logo if available, otherwise show initials */}
+                    {gym && String(gym.id || '').includes('10th-planet') ? (
+                      <Image
+                        source={require('../../assets/logos/10th-planet-austin.png')}
+                        style={styles.previewLogoImage}
+                      />
+                    ) : gym && String(gym.id || '').includes('stjj') ? (
+                      <Image
+                        source={require('../../assets/logos/STJJ.png')}
+                        style={styles.previewLogoImage}
+                      />
+                    ) : gym && String(gym.id || '').includes('gracie-tampa-south') ? (
+                      <Image
+                        source={require('../../assets/logos/gracie-tampa-south.png')}
+                        style={styles.previewLogoImage}
+                      />
+                    ) : gym && String(gym.id || '').includes('tmt') ? (
+                      <Image
+                        source={require('../../assets/logos/TMT.png')}
+                        style={styles.previewLogoImage}
+                      />
+                    ) : (
+                      <Text style={styles.previewLogoText}>
+                        {gym.name
+                          .split(' ')
+                          .map(word => word[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.previewText}>
+                    <Text style={[styles.previewGymName, { color: theme.text.primary }]}>
+                      {gym.name}
+                    </Text>
+                    <Text style={[styles.previewSession, { color: theme.text.secondary }]}>
+                      {session?.day} • {session?.time}
+                    </Text>
+                    <Text style={[styles.previewStyle, { color: theme.text.secondary }]}>
+                      Style: {cardStyle.charAt(0).toUpperCase() + cardStyle.slice(1)}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.previewAppIcon}>
+                  <Ionicons name="fitness" size={16} color={theme.text.secondary} />
+                </View>
               </View>
-              <View style={styles.previewText}>
-                <Text style={[styles.previewGymName, { color: theme.text.primary }]}>
-                  {gym.name}
-                </Text>
-                <Text style={[styles.previewSession, { color: theme.text.secondary }]}>
-                  {session?.day} • {session?.time}
-                </Text>
-                <Text style={[styles.previewStyle, { color: theme.text.secondary }]}>
-                  Style: {cardStyle.charAt(0).toUpperCase() + cardStyle.slice(1)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.previewAppIcon}>
-              <Ionicons name="fitness" size={16} color={theme.text.secondary} />
-            </View>
-          </View>
             </View>
           </View>
 
@@ -412,13 +425,10 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
               Share to
             </Text>
             <View style={styles.shareOptionsGrid}>
-              {shareOptions.map((option) => (
+              {shareOptions.map(option => (
                 <TouchableOpacity
                   key={option.id}
-                  style={[
-                    styles.shareOption,
-                    isCapturing && styles.disabledShareOption,
-                  ]}
+                  style={[styles.shareOption, isCapturing && styles.disabledShareOption]}
                   onPress={() => handleShareOption(option.id)}
                   disabled={isCapturing}
                 >
@@ -435,11 +445,13 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
                       color={option.id === 'tiktok' ? '#FFFFFF' : '#FFFFFF'}
                     />
                   </View>
-                  <Text style={[
-                    styles.shareOptionText, 
-                    { color: theme.text.primary },
-                    isCapturing && styles.disabledShareOptionText,
-                  ]}>
+                  <Text
+                    style={[
+                      styles.shareOptionText,
+                      { color: theme.text.primary },
+                      isCapturing && styles.disabledShareOptionText,
+                    ]}
+                  >
                     {option.name}
                   </Text>
                 </TouchableOpacity>
@@ -457,7 +469,7 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
         if (gym && session) {
           return (
             <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
-              <ShareCard 
+              <ShareCard
                 ref={shareCardRef}
                 gym={gym}
                 session={session}
@@ -693,4 +705,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomShareModal; 
+export default CustomShareModal;

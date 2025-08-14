@@ -23,35 +23,28 @@ export const captureAndShareCard = async (
 ) => {
   try {
     // Default options for Instagram story size
-    const {
-      format = 'png',
-      quality = 1,
-      width = 1080,
-      height = 1920
-    } = options;
+    const { format = 'png', quality = 1, width = 1080, height = 1920 } = options;
 
     // Capture the component as an image
     const uri = await captureRef(cardRef, {
       format,
       quality,
       width,
-      height
+      height,
     });
 
     // Share the image
     await Share.share({
       url: uri,
-      message: `Check out this open mat session at ${gymData.name}! 🥋\n\n${sessionData.day} at ${sessionData.time}\n\nFind more sessions with JiuJitsu Finder!`
+      message: `Check out this open mat session at ${gymData.name}! 🥋\n\n${sessionData.day} at ${sessionData.time}\n\nFind more sessions with JiuJitsu Finder!`,
     });
 
     // Screenshot captured and shared successfully
   } catch (error) {
     console.error('❌ Error capturing and sharing screenshot:', error);
-    Alert.alert(
-      'Sharing Error',
-      'Failed to capture and share the image. Please try again.',
-      [{ text: 'OK' }]
-    );
+    Alert.alert('Sharing Error', 'Failed to capture and share the image. Please try again.', [
+      { text: 'OK' },
+    ]);
   }
 };
 
@@ -76,7 +69,7 @@ export const captureCardAsImage = async (
       format = 'png',
       quality = 0.9, // Slightly reduced quality for better performance
       width = 1080,
-      height = 1920
+      height = 1920,
     } = options;
 
     // Ensure ref exists before capturing
@@ -99,4 +92,4 @@ export const captureCardAsImage = async (
     console.error('❌ Error capturing screenshot:', error);
     throw error;
   }
-}; 
+};

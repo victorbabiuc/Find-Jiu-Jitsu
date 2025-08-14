@@ -22,4 +22,4 @@ export const getFavorites = async (userId: string): Promise<number[]> => {
     logger.error('FavoritesService: Error getting local favorites:', error);
     return [];
   }
-}; 
+};

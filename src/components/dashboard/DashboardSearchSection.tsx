@@ -64,55 +64,60 @@ const DashboardSearchSection: React.FC<DashboardSearchSectionProps> = ({
       {/* Search Backdrop - only when search is active */}
       {(isSearching || searchResults.length > 0) && (
         <TouchableWithoutFeedback onPress={onCloseSearch}>
-          <View 
-            style={styles.searchBackdrop} 
-            pointerEvents={(searchResults.length > 0 || modalVisible) ? "box-none" : "auto"}
+          <View
+            style={styles.searchBackdrop}
+            pointerEvents={searchResults.length > 0 || modalVisible ? 'box-none' : 'auto'}
           />
         </TouchableWithoutFeedback>
       )}
-      
+
       {/* Search/Add City Card */}
       <View style={styles.searchSection}>
         {/* Search Button - Always rendered, hidden when searching */}
         <TouchableOpacity
           style={[
-            styles.cityCard, 
+            styles.cityCard,
             { backgroundColor: theme.surface },
-            isSearching && { 
-              opacity: 0, 
-              pointerEvents: 'none', 
+            isSearching && {
+              opacity: 0,
+              pointerEvents: 'none',
               position: 'absolute',
-              zIndex: -1 
-            }
+              zIndex: -1,
+            },
           ]}
           onPress={onSearchButtonPress}
         >
           <View style={styles.cityCardContent}>
             <Ionicons name="search" size={24} color={theme.text.secondary} />
             <View style={styles.cityCardText}>
-              <Text style={[styles.cityCardTitle, { color: theme.text.primary }]}>
-                Search gyms
-              </Text>
+              <Text style={[styles.cityCardTitle, { color: theme.text.primary }]}>Search gyms</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={theme.text.secondary} />
           </View>
         </TouchableOpacity>
-        
+
         {/* Search Input - Always rendered, hidden when not searching */}
-        <View 
+        <View
           style={[
-            styles.searchContainer, 
+            styles.searchContainer,
             { backgroundColor: theme.surface },
-            !isSearching && searchResults.length === 0 && !searchQuery.trim() && { 
-              opacity: 0, 
-              pointerEvents: 'none', 
-              position: 'absolute',
-              zIndex: -1 
-            }
+            !isSearching &&
+              searchResults.length === 0 &&
+              !searchQuery.trim() && {
+                opacity: 0,
+                pointerEvents: 'none',
+                position: 'absolute',
+                zIndex: -1,
+              },
           ]}
         >
           <View style={styles.searchInputContainer}>
-            <Ionicons name="search" size={20} color={theme.text.secondary} style={styles.searchIcon} />
+            <Ionicons
+              name="search"
+              size={20}
+              color={theme.text.secondary}
+              style={styles.searchIcon}
+            />
             <TextInput
               ref={searchInputRef}
               style={[styles.searchInput, { color: theme.text.primary }]}
@@ -125,14 +130,11 @@ const DashboardSearchSection: React.FC<DashboardSearchSectionProps> = ({
               onSubmitEditing={onSubmitEditing}
               returnKeyType="search"
             />
-            <TouchableOpacity 
-              style={styles.closeSearchButton}
-              onPress={onCloseSearch}
-            >
+            <TouchableOpacity style={styles.closeSearchButton} onPress={onCloseSearch}>
               <Ionicons name="close" size={20} color={theme.text.secondary} />
             </TouchableOpacity>
           </View>
-          
+
           {/* Search suggestions */}
           <SearchSuggestions
             query={searchQuery}
@@ -143,21 +145,18 @@ const DashboardSearchSection: React.FC<DashboardSearchSectionProps> = ({
             onClearRecent={onClearRecent}
             visible={showSuggestions && !searchResults.length}
           />
-          
+
           {/* Search results list */}
           {searchResults.length > 0 && (
             <View style={styles.searchResultsContainer}>
               {searchResults.map((gym, index) => (
-                <TouchableOpacity 
-                  key={`gym-${index}`}
-                  onPress={() => onGymPress(gym)}
-                >
+                <TouchableOpacity key={`gym-${index}`} onPress={() => onGymPress(gym)}>
                   <GymSearchResult gym={gym} />
                 </TouchableOpacity>
               ))}
             </View>
           )}
-          
+
           {/* Skeleton loading for search */}
           {isSearching && searchQuery.trim() && searchResults.length === 0 && (
             <View style={styles.searchResultsContainer}>
@@ -268,4 +267,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DashboardSearchSection; 
+export default DashboardSearchSection;

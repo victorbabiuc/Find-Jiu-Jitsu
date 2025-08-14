@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import appIcon from '../../../assets/icon.png';
 
@@ -33,16 +26,13 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
 
   return (
     <Animated.View style={[styles.header, { opacity: headerAnim }]}>
-      <TouchableOpacity
-        onPress={onNavigateHome}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity onPress={onNavigateHome} activeOpacity={0.7}>
         <Image source={appIcon} style={styles.headerLogo} />
       </TouchableOpacity>
       <View style={styles.headerTextContainer}>
-                       <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
+        <Text style={[styles.headerTitle, { color: theme.text.primary }]}>JiuJitsu Finder</Text>
         <Text style={styles.locationContext}>{getGymCountText(filteredGymsLength, location)}</Text>
-        <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}> 
+        <Text style={[styles.headerSubtitle, { color: theme.text.secondary }]}>
           {dateSelection && `${getDateSelectionDisplay(dateSelection)}`}
         </Text>
       </View>
@@ -86,4 +76,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResultsHeader; 
+export default ResultsHeader;

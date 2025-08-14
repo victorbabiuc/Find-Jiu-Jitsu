@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { 
-  View, 
-  Text, 
-  SafeAreaView, 
-  ScrollView, 
-  TouchableOpacity, 
-  TouchableWithoutFeedback
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useApp } from '../context';
 import { useFindNavigation } from '../navigation/useNavigation';
@@ -21,47 +21,57 @@ interface DateCellProps {
   onPress: (date: Date) => void;
 }
 
-const DateCell = React.memo(({ day, isSelected, isToday, onPress }: DateCellProps) => {
-  if (!day) {
-    return <View style={{ flex: 1 }} />;
+const DateCell = React.memo(
+  ({ day, isSelected, isToday, onPress }: DateCellProps) => {
+    if (!day) {
+      return <View style={{ flex: 1 }} />;
+    }
+
+    return (
+      <TouchableWithoutFeedback
+        onPress={() => {
+          haptics.light(); // Light haptic for date selection
+          onPress(day);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 24,
+            backgroundColor: isSelected
+              ? '#E5E7EB' // Darker gray background for selected dates
+              : '#F5F5F5',
+            minHeight: 48,
+            minWidth: 48,
+            borderWidth: isToday && !isSelected ? 2 : isSelected ? 1 : 0,
+            borderColor:
+              isToday && !isSelected ? '#6B7280' : isSelected ? '#9CA3AF' : 'transparent',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              color: isSelected ? '#111827' : '#1F2937',
+              fontWeight: isToday || isSelected ? 'bold' : 'normal',
+            }}
+          >
+            {day.getDate()}
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if these specific props change
+    return (
+      prevProps.day?.getTime() === nextProps.day?.getTime() &&
+      prevProps.isSelected === nextProps.isSelected &&
+      prevProps.isToday === nextProps.isToday
+    );
   }
-  
-  return (
-    <TouchableWithoutFeedback onPress={() => {
-      haptics.light(); // Light haptic for date selection
-      onPress(day);
-    }}>
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 24,
-        backgroundColor: isSelected 
-          ? '#E5E7EB' // Darker gray background for selected dates
-          : '#F5F5F5',
-        minHeight: 48,
-        minWidth: 48,
-        borderWidth: (isToday && !isSelected) ? 2 : isSelected ? 1 : 0,
-        borderColor: (isToday && !isSelected) ? '#6B7280' : isSelected ? '#9CA3AF' : 'transparent'
-      }}>
-        <Text style={{
-          fontSize: 16,
-          color: isSelected ? '#111827' : '#1F2937',
-          fontWeight: (isToday || isSelected) ? 'bold' : 'normal',
-        }}>
-          {day.getDate()}
-        </Text>
-      </View>
-    </TouchableWithoutFeedback>
-  );
-}, (prevProps, nextProps) => {
-  // Only re-render if these specific props change
-  return (
-    prevProps.day?.getTime() === nextProps.day?.getTime() &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.isToday === nextProps.isToday
-  );
-});
+);
 
 const TimeSelectionScreen: React.FC = () => {
   const { userBelt, selectedLocation } = useApp();
@@ -93,9 +103,11 @@ const TimeSelectionScreen: React.FC = () => {
   // Helper functions
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   const isDateSelected = (date: Date) => {
@@ -107,7 +119,7 @@ const TimeSelectionScreen: React.FC = () => {
     setSelectedDates(prev => {
       const dateStr = date.toISOString().split('T')[0];
       const exists = prev.some(d => d.toISOString().split('T')[0] === dateStr);
-      
+
       if (exists) {
         return prev.filter(d => d.toISOString().split('T')[0] !== dateStr);
       } else {
@@ -156,33 +168,33 @@ const TimeSelectionScreen: React.FC = () => {
       case 'weekend':
         // Get current day of week
         const currentDay = today.getDay();
-        
+
         // Calculate days until Friday (5), Saturday (6), Sunday (0)
         const daysUntilFriday = (5 - currentDay + 7) % 7 || 7;
         const daysUntilSaturday = (6 - currentDay + 7) % 7 || 7;
         const daysUntilSunday = (0 - currentDay + 7) % 7 || 7;
-        
+
         const friday = new Date(today);
         friday.setDate(today.getDate() + daysUntilFriday);
-        
+
         const saturday = new Date(today);
         saturday.setDate(today.getDate() + daysUntilSaturday);
-        
+
         const sunday = new Date(today);
         sunday.setDate(today.getDate() + daysUntilSunday);
-        
+
         dates = [friday, saturday, sunday];
         break;
     }
 
     setSelectedDates(dates);
-    
+
     // Automatically trigger search after selecting quick action dates
     setTimeout(() => {
       navigation.navigate('Results', {
         location: selectedLocation,
         dateSelection: 'custom',
-        dates: dates.map(date => date.toISOString())
+        dates: dates.map(date => date.toISOString()),
       });
     }, 100); // Small delay to ensure state is updated
   };
@@ -199,17 +211,18 @@ const TimeSelectionScreen: React.FC = () => {
       // Show some feedback that dates need to be selected
       return;
     }
-    
+
     haptics.success(); // Success haptic for search action
     setHasSearched(true);
-    
+
     // Navigate to results with selected dates
     navigation.navigate('Results', {
       location: selectedLocation,
       dateSelection: selectedDates.length > 0 ? 'custom' : 'today',
-      dates: selectedDates.length > 0 
-        ? selectedDates.map(date => date.toISOString())
-        : [new Date().toISOString()]
+      dates:
+        selectedDates.length > 0
+          ? selectedDates.map(date => date.toISOString())
+          : [new Date().toISOString()],
     });
   };
 
@@ -230,13 +243,15 @@ const TimeSelectionScreen: React.FC = () => {
 
     return (
       <View key={monthName} style={{ marginBottom: 20 }}>
-        <Text style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          color: '#1F2937',
-          marginBottom: 16,
-          textAlign: 'center'
-        }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: '#1F2937',
+            marginBottom: 16,
+            textAlign: 'center',
+          }}
+        >
           {monthName}
         </Text>
 
@@ -244,11 +259,13 @@ const TimeSelectionScreen: React.FC = () => {
         <View style={{ flexDirection: 'row', marginBottom: 8 }}>
           {weekdays.map(day => (
             <View key={day} style={{ flex: 1, alignItems: 'center' }}>
-                             <Text style={{
-                 fontSize: 12,
-                 fontWeight: '600',
-                 color: '#6B7280'
-               }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: '#6B7280',
+                }}
+              >
                 {day}
               </Text>
             </View>
@@ -274,56 +291,66 @@ const TimeSelectionScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-      <ScrollView 
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 6 }}>
-          <Text style={{
-            fontSize: 28,
-            fontWeight: '700',
-            color: '#111827',
-            marginBottom: 8,
-            textAlign: 'center',
-            alignSelf: 'center',
-            width: '100%'
-          }}>
+          <Text
+            style={{
+              fontSize: 28,
+              fontWeight: '700',
+              color: '#111827',
+              marginBottom: 8,
+              textAlign: 'center',
+              alignSelf: 'center',
+              width: '100%',
+            }}
+          >
             Select Dates
           </Text>
-          
-          <Text style={{
-            fontSize: 16,
-            color: '#6B7280',
-            marginBottom: 16,
-            textAlign: 'center',
-            alignSelf: 'center',
-            width: '100%'
-          }}>
+
+          <Text
+            style={{
+              fontSize: 16,
+              color: '#6B7280',
+              marginBottom: 16,
+              textAlign: 'center',
+              alignSelf: 'center',
+              width: '100%',
+            }}
+          >
             {selectedLocation}
           </Text>
 
           {/* Header separator */}
-          <View style={{
-            height: 1,
-            backgroundColor: '#E5E7EB',
-            marginBottom: 6
-          }} />
+          <View
+            style={{
+              height: 1,
+              backgroundColor: '#E5E7EB',
+              marginBottom: 6,
+            }}
+          />
         </View>
 
         {/* Button Container - Wrapper for both rows */}
-        <View style={{ 
-          flexDirection: 'column',
-          paddingHorizontal: 20,
-          marginBottom: 4
-        }}>
+        <View
+          style={{
+            flexDirection: 'column',
+            paddingHorizontal: 20,
+            marginBottom: 4,
+          }}
+        >
           {/* Row 1: Today, Tomorrow, Weekend */}
-          <View style={{ 
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 12
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
             <TouchableOpacity
               style={{
                 paddingHorizontal: 10,
@@ -340,15 +367,19 @@ const TimeSelectionScreen: React.FC = () => {
               }}
               onPress={() => handleQuickSelect('today')}
             >
-              <Text style={{ 
-                fontSize: 12, 
-                color: '#374151', 
-                fontWeight: '600', 
-                textAlign: 'center',
-                includeFontPadding: false,
-              }}>Today</Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#374151',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  includeFontPadding: false,
+                }}
+              >
+                Today
+              </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={{
                 paddingHorizontal: 10,
@@ -365,15 +396,19 @@ const TimeSelectionScreen: React.FC = () => {
               }}
               onPress={() => handleQuickSelect('tomorrow')}
             >
-              <Text style={{ 
-                fontSize: 12, 
-                color: '#374151', 
-                fontWeight: '600', 
-                textAlign: 'center',
-                includeFontPadding: false,
-              }}>Tomorrow</Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#374151',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  includeFontPadding: false,
+                }}
+              >
+                Tomorrow
+              </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={{
                 paddingHorizontal: 10,
@@ -390,31 +425,43 @@ const TimeSelectionScreen: React.FC = () => {
               }}
               onPress={() => handleQuickSelect('weekend')}
             >
-              <Text style={{ 
-                fontSize: 12, 
-                color: '#374151', 
-                fontWeight: '600', 
-                textAlign: 'center',
-                includeFontPadding: false,
-              }}>Weekend</Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#374151',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  includeFontPadding: false,
+                }}
+              >
+                Weekend
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Row 2: Dynamic Button */}
-          <View style={{ 
-            flexDirection: 'row',
-            width: '100%'
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              width: '100%',
+            }}
+          >
             <TouchableOpacity
               style={{
                 paddingHorizontal: 14,
                 paddingVertical: 8,
-                backgroundColor: hasSearched ? '#F3F4F6' : 
-                               selectedDates.length > 0 ? '#4B5563' : '#E5E7EB',
+                backgroundColor: hasSearched
+                  ? '#F3F4F6'
+                  : selectedDates.length > 0
+                    ? '#4B5563'
+                    : '#E5E7EB',
                 borderRadius: 12,
                 borderWidth: 1,
-                borderColor: hasSearched ? '#E0E0E0' : 
-                            selectedDates.length > 0 ? '#4B5563' : '#E0E0E0',
+                borderColor: hasSearched
+                  ? '#E0E0E0'
+                  : selectedDates.length > 0
+                    ? '#4B5563'
+                    : '#E0E0E0',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flex: 1,
@@ -423,35 +470,41 @@ const TimeSelectionScreen: React.FC = () => {
               onPress={handleDynamicButtonPress}
               disabled={selectedDates.length === 0}
             >
-              <Text style={{ 
-                fontSize: 13, 
-                color: hasSearched ? '#6B7280' : 
-                       selectedDates.length > 0 ? 'white' : '#9CA3AF', 
-                fontWeight: '600',
-                textAlign: 'center',
-                includeFontPadding: false,
-              }}>
-                {hasSearched ? 'Clear & Search Again' : 
-                 selectedDates.length > 0 ? 'Search' : 'Select dates'}
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: hasSearched ? '#6B7280' : selectedDates.length > 0 ? 'white' : '#9CA3AF',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  includeFontPadding: false,
+                }}
+              >
+                {hasSearched
+                  ? 'Clear & Search Again'
+                  : selectedDates.length > 0
+                    ? 'Search'
+                    : 'Select dates'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Calendar separator */}
-        <View style={{
-          height: 1,
-          backgroundColor: '#E5E7EB',
-          marginTop: 4,
-          marginBottom: 8,
-          marginHorizontal: 20
-        }} />
+        <View
+          style={{
+            height: 1,
+            backgroundColor: '#E5E7EB',
+            marginTop: 4,
+            marginBottom: 8,
+            marginHorizontal: 20,
+          }}
+        />
 
         {/* Calendar Section */}
         <View style={{ paddingHorizontal: 20 }}>
           {/* Reusable Calendar Month Component */}
           {renderCalendarMonth(currentDate)}
-          
+
           {/* Next month */}
           {(() => {
             const nextMonth = new Date(currentDate);
@@ -474,8 +527,6 @@ const TimeSelectionScreen: React.FC = () => {
           <View style={{ flex: 1, minHeight: 200 }} />
         </TouchableOpacity>
       </ScrollView>
-
-
     </SafeAreaView>
   );
 };

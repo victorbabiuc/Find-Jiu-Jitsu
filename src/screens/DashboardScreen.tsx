@@ -19,15 +19,12 @@ import { SafeAreaView as SafeAreaViewRN } from 'react-native-safe-area-context';
 import { OpenMat } from '../types';
 import { Toast, ContactFooter } from '../components';
 
-
 import appIcon from '../../assets/icon.png'; // <-- Import app icon
 
 import { Ionicons } from '@expo/vector-icons';
 import { githubDataService } from '../services';
 
 const { width } = Dimensions.get('window');
-
-
 
 // TODO: v2.0 - Replace with user's home gym info
 
@@ -36,34 +33,30 @@ const DashboardScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userBelt, selectedLocation, setSelectedLocation, favorites, toggleFavorite } = useApp();
   const navigation = useMainTabNavigation();
-  
-  const beltColor = beltColors[userBelt];
-  
-  const { showTransitionalLoading } = useLoading();
-  
 
-  
+  const beltColor = beltColors[userBelt];
+
+  const { showTransitionalLoading } = useLoading();
+
   // Animation values
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const contentSlideAnim = useRef(new Animated.Value(30)).current;
   // Heart button animation values - temporarily disabled for debugging
   // const heartScaleAnim = useRef(new Animated.Value(1)).current;
   // const heartColorAnim = useRef(new Animated.Value(0)).current;
-  
+
   // Gym count state
   const [tampaGymCount, setTampaGymCount] = useState(18);
   const [austinGymCount, setAustinGymCount] = useState(30);
   const [miamiGymCount, setMiamiGymCount] = useState(13);
   const [stpeteGymCount, setStPeteGymCount] = useState(3);
   const [isLoadingCounts, setIsLoadingCounts] = useState(true);
-  
+
   // Toast state
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  
 
-  
   // Screen entrance animation
   useEffect(() => {
     const runEntranceAnimation = () => {
@@ -78,8 +71,6 @@ const DashboardScreen: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-
-
   // Load gym counts and all gym data on component mount
   useEffect(() => {
     const loadGymData = async () => {
@@ -88,17 +79,15 @@ const DashboardScreen: React.FC = () => {
           githubDataService.getGymData('tampa'),
           githubDataService.getGymData('austin'),
           githubDataService.getGymData('miami'),
-          githubDataService.getGymData('stpete')
+          githubDataService.getGymData('stpete'),
         ]);
-        
 
-        
         // Count unique gyms by name (same logic as ResultsScreen grouping)
         const tampaUnique = new Set(tampaGyms.map(gym => gym.name)).size;
         const austinUnique = new Set(austinGyms.map(gym => gym.name)).size;
         const miamiUnique = new Set(miamiGyms.map(gym => gym.name)).size;
         const stpeteUnique = new Set(stpeteGyms.map(gym => gym.name)).size;
-        
+
         setTampaGymCount(tampaUnique);
         setAustinGymCount(austinUnique);
         setMiamiGymCount(miamiUnique);
@@ -110,11 +99,9 @@ const DashboardScreen: React.FC = () => {
         setIsLoadingCounts(false);
       }
     };
-    
+
     loadGymData();
   }, []);
-
-
 
   const handleQuickToday = () => {
     haptics.medium(); // Medium haptic for navigation action
@@ -123,219 +110,258 @@ const DashboardScreen: React.FC = () => {
 
   return (
     <>
-      <Animated.View style={{ 
-        flex: 1, 
-        opacity: screenFadeAnim,
-        transform: [{ translateY: contentSlideAnim }]
-      }}>
-        <ScrollView 
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: screenFadeAnim,
+          transform: [{ translateY: contentSlideAnim }],
+        }}
+      >
+        <ScrollView
           style={[styles.container, { backgroundColor: '#FFFFFF' }]}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-      {/* Welcome Section */}
-      <SafeAreaViewRN edges={['top']}>
-        <View style={{ backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
-          <View style={styles.headerLogoContainer}>
-            <Image source={appIcon} style={styles.headerLogo} />
+          {/* Welcome Section */}
+          <SafeAreaViewRN edges={['top']}>
+            <View
+              style={{
+                backgroundColor: '#FFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 20,
+                paddingTop: 16,
+                paddingBottom: 12,
+                borderBottomWidth: 1,
+                borderBottomColor: '#E5E5E5',
+              }}
+            >
+              <View style={styles.headerLogoContainer}>
+                <Image source={appIcon} style={styles.headerLogo} />
+              </View>
+              <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>
+                Find Your Next Roll
+              </Text>
+            </View>
+          </SafeAreaViewRN>
+
+          {/* User Authentication Status */}
+          {isAuthenticated && (
+            <View style={styles.userSection}>
+              <Text style={styles.welcomeText}>Welcome back!</Text>
+              <Text style={styles.userEmail}>{user?.email}</Text>
+              <View style={styles.userActions}>
+                <TouchableOpacity
+                  onPress={() => {
+                    haptics.medium(); // Medium haptic for sign out action
+                    signOut();
+                  }}
+                  style={styles.signOutButton}
+                >
+                  <Text style={styles.signOutText}>Sign Out</Text>
+                </TouchableOpacity>
+                <View style={styles.syncStatus}>
+                  <Text style={styles.syncText}>🔄 Favorites synced to cloud</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* City Selection */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
+              Where do you want to train?
+            </Text>
+
+            {/* Available Cities */}
+            <View style={styles.citiesContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.cityCard,
+                  { backgroundColor: theme.surface },
+                  selectedLocation === 'Austin' && { backgroundColor: selectionColor },
+                ]}
+                onPress={() => {
+                  haptics.medium(); // Medium haptic for city selection
+                  setSelectedLocation('Austin');
+                  navigation.navigate('Find', { screen: 'TimeSelection' });
+                }}
+              >
+                <View style={styles.cityCardContent}>
+                  <Text style={styles.cityEmoji}>🤠</Text>
+                  <View style={styles.cityCardText}>
+                    <Text
+                      style={[
+                        styles.cityCardTitle,
+                        { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.primary },
+                      ]}
+                    >
+                      Austin, TX
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cityCardSubtitle,
+                        { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary },
+                      ]}
+                    >
+                      {isLoadingCounts ? 'Loading...' : `${austinGymCount} gyms available`}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.cityCard,
+                  { backgroundColor: theme.surface },
+                  selectedLocation === 'Miami' && { backgroundColor: selectionColor },
+                ]}
+                onPress={() => {
+                  haptics.medium(); // Medium haptic for city selection
+                  setSelectedLocation('Miami');
+                  navigation.navigate('Find', { screen: 'TimeSelection' });
+                }}
+              >
+                <View style={styles.cityCardContent}>
+                  <Text style={styles.cityEmoji}>🌴</Text>
+                  <View style={styles.cityCardText}>
+                    <Text
+                      style={[
+                        styles.cityCardTitle,
+                        { color: selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.primary },
+                      ]}
+                    >
+                      Miami, FL
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cityCardSubtitle,
+                        { color: selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.secondary },
+                      ]}
+                    >
+                      {isLoadingCounts ? 'Loading...' : `${miamiGymCount} gyms available`}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.secondary}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.cityCard,
+                  { backgroundColor: theme.surface },
+                  selectedLocation === 'St. Petersburg' && { backgroundColor: selectionColor },
+                ]}
+                onPress={() => {
+                  haptics.medium(); // Medium haptic for city selection
+                  setSelectedLocation('St. Petersburg');
+                  navigation.navigate('Find', { screen: 'TimeSelection' });
+                }}
+              >
+                <View style={styles.cityCardContent}>
+                  <Text style={styles.cityEmoji}>🌊</Text>
+                  <View style={styles.cityCardText}>
+                    <Text
+                      style={[
+                        styles.cityCardTitle,
+                        {
+                          color:
+                            selectedLocation === 'St. Petersburg' ? '#FFFFFF' : theme.text.primary,
+                        },
+                      ]}
+                    >
+                      St. Petersburg, FL
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cityCardSubtitle,
+                        {
+                          color:
+                            selectedLocation === 'St. Petersburg'
+                              ? '#FFFFFF'
+                              : theme.text.secondary,
+                        },
+                      ]}
+                    >
+                      {isLoadingCounts ? 'Loading...' : `${stpeteGymCount} gyms available`}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={selectedLocation === 'St. Petersburg' ? '#FFFFFF' : theme.text.secondary}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.cityCard,
+                  { backgroundColor: theme.surface },
+                  selectedLocation === 'Tampa' && { backgroundColor: selectionColor },
+                ]}
+                onPress={() => {
+                  haptics.medium(); // Medium haptic for city selection
+                  setSelectedLocation('Tampa');
+                  navigation.navigate('Find', { screen: 'TimeSelection' });
+                }}
+              >
+                <View style={styles.cityCardContent}>
+                  <Text style={styles.cityEmoji}>☀️</Text>
+                  <View style={styles.cityCardText}>
+                    <Text
+                      style={[
+                        styles.cityCardTitle,
+                        { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.primary },
+                      ]}
+                    >
+                      Tampa, FL
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cityCardSubtitle,
+                        { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary },
+                      ]}
+                    >
+                      {isLoadingCounts ? 'Loading...' : `${tampaGymCount} gyms available`}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Find Your Next Roll</Text>
-        </View>
-      </SafeAreaViewRN>
 
-      {/* User Authentication Status */}
-      {isAuthenticated && (
-        <View style={styles.userSection}>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.userEmail}>{user?.email}</Text>
-          <View style={styles.userActions}>
-            <TouchableOpacity onPress={() => {
-              haptics.medium(); // Medium haptic for sign out action
-              signOut();
-            }} style={styles.signOutButton}>
-              <Text style={styles.signOutText}>Sign Out</Text>
-            </TouchableOpacity>
-            <View style={styles.syncStatus}>
-              <Text style={styles.syncText}>🔄 Favorites synced to cloud</Text>
-            </View>
-          </View>
-        </View>
-      )}
+          {/* More Cities Coming Soon */}
 
-      {/* City Selection */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-          Where do you want to train?
-        </Text>
-        
+          {/* Bottom Spacing */}
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+      </Animated.View>
 
-        
-        {/* Available Cities */}
-        <View style={styles.citiesContainer}>
-          <TouchableOpacity
-            style={[
-              styles.cityCard,
-              { backgroundColor: theme.surface },
-              selectedLocation === 'Austin' && { backgroundColor: selectionColor }
-            ]}
-            onPress={() => {
-              haptics.medium(); // Medium haptic for city selection
-              setSelectedLocation('Austin');
-              navigation.navigate('Find', { screen: 'TimeSelection' });
-            }}
-          >
-            <View style={styles.cityCardContent}>
-              <Text style={styles.cityEmoji}>🤠</Text>
-              <View style={styles.cityCardText}>
-                <Text style={[
-                  styles.cityCardTitle,
-                  { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.primary }
-                ]}>
-                  Austin, TX
-                </Text>
-                <Text style={[
-                  styles.cityCardSubtitle,
-                  { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary }
-                ]}>
-                  {isLoadingCounts ? 'Loading...' : `${austinGymCount} gyms available`}
-                </Text>
-              </View>
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary} 
-              />
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.cityCard,
-              { backgroundColor: theme.surface },
-              selectedLocation === 'Miami' && { backgroundColor: selectionColor }
-            ]}
-            onPress={() => {
-              haptics.medium(); // Medium haptic for city selection
-              setSelectedLocation('Miami');
-              navigation.navigate('Find', { screen: 'TimeSelection' });
-            }}
-          >
-            <View style={styles.cityCardContent}>
-              <Text style={styles.cityEmoji}>🌴</Text>
-              <View style={styles.cityCardText}>
-                <Text style={[
-                  styles.cityCardTitle,
-                  { color: selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.primary }
-                ]}>
-                  Miami, FL
-                </Text>
-                <Text style={[
-                  styles.cityCardSubtitle,
-                  { color: selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.secondary }
-                ]}>
-                  {isLoadingCounts ? 'Loading...' : `${miamiGymCount} gyms available`}
-                </Text>
-              </View>
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={selectedLocation === 'Miami' ? '#FFFFFF' : theme.text.secondary} 
-              />
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.cityCard,
-              { backgroundColor: theme.surface },
-              selectedLocation === 'St. Petersburg' && { backgroundColor: selectionColor }
-            ]}
-            onPress={() => {
-              haptics.medium(); // Medium haptic for city selection
-              setSelectedLocation('St. Petersburg');
-              navigation.navigate('Find', { screen: 'TimeSelection' });
-            }}
-          >
-            <View style={styles.cityCardContent}>
-              <Text style={styles.cityEmoji}>🌊</Text>
-              <View style={styles.cityCardText}>
-                <Text style={[
-                  styles.cityCardTitle,
-                  { color: selectedLocation === 'St. Petersburg' ? '#FFFFFF' : theme.text.primary }
-                ]}>
-                  St. Petersburg, FL
-                </Text>
-                <Text style={[
-                  styles.cityCardSubtitle,
-                  { color: selectedLocation === 'St. Petersburg' ? '#FFFFFF' : theme.text.secondary }
-                ]}>
-                  {isLoadingCounts ? 'Loading...' : `${stpeteGymCount} gyms available`}
-                </Text>
-              </View>
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={selectedLocation === 'St. Petersburg' ? '#FFFFFF' : theme.text.secondary} 
-              />
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.cityCard,
-              { backgroundColor: theme.surface },
-              selectedLocation === 'Tampa' && { backgroundColor: selectionColor }
-            ]}
-            onPress={() => {
-              haptics.medium(); // Medium haptic for city selection
-              setSelectedLocation('Tampa');
-              navigation.navigate('Find', { screen: 'TimeSelection' });
-            }}
-          >
-            <View style={styles.cityCardContent}>
-              <Text style={styles.cityEmoji}>☀️</Text>
-              <View style={styles.cityCardText}>
-                <Text style={[
-                  styles.cityCardTitle,
-                  { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.primary }
-                ]}>
-                  Tampa, FL
-                </Text>
-                <Text style={[
-                  styles.cityCardSubtitle,
-                  { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary }
-                ]}>
-                  {isLoadingCounts ? 'Loading...' : `${tampaGymCount} gyms available`}
-                </Text>
-              </View>
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary} 
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Toast Notification */}
+      <Toast
+        visible={showToast}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setShowToast(false)}
+      />
 
-      {/* More Cities Coming Soon */}
-
-
-      {/* Bottom Spacing */}
-      <View style={styles.bottomSpacing} />
-    </ScrollView>
-        </Animated.View>
-    
-    {/* Toast Notification */}
-    <Toast
-      visible={showToast}
-      message={toastMessage}
-      type={toastType}
-      onHide={() => setShowToast(false)}
-    />
-
-    {/* Contact Footer */}
-    <ContactFooter />
+      {/* Contact Footer */}
+      <ContactFooter />
     </>
   );
 };
@@ -452,7 +478,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 500,
   },
-
 
   heartButton: {
     padding: 8,
@@ -1037,7 +1062,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E7EB',
     borderRadius: 10,
   },
-
 });
 
-export default DashboardScreen; 
+export default DashboardScreen;

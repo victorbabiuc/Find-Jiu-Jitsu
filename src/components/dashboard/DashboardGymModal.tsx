@@ -1,15 +1,15 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { OpenMat, OpenMatSession } from '../../types';
-import { formatTimeRange, getSessionTypeWithIcon, formatDate, openWebsite, openDirections, haptics } from '../../utils';
+import {
+  formatTimeRange,
+  getSessionTypeWithIcon,
+  formatDate,
+  openWebsite,
+  openDirections,
+  haptics,
+} from '../../utils';
 import stjjLogo from '../../../assets/logos/STJJ.png';
 import tenthPlanetLogo from '../../../assets/logos/10th-planet-austin.png';
 
@@ -35,30 +35,24 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
   onShareGym,
 }) => {
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity 
-        style={styles.modalOverlay} 
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <TouchableOpacity 
-          activeOpacity={1} 
-          onPress={(e) => e.stopPropagation()}
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
+      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={e => e.stopPropagation()}
           style={styles.modalCard}
         >
           {/* Close button */}
-          <TouchableOpacity style={styles.modalCloseButton} onPress={() => {
-            haptics.light(); // Light haptic for modal close
-            onClose();
-          }}>
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => {
+              haptics.light(); // Light haptic for modal close
+              onClose();
+            }}
+          >
             <Ionicons name="close" size={18} color="#111518" />
           </TouchableOpacity>
-          
+
           {/* Gym header with logo */}
           <View style={styles.cardHeader}>
             <View style={styles.gymNameContainer}>
@@ -72,16 +66,21 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
               ) : (
                 <View style={styles.avatarCircle}>
                   <Text style={styles.avatarText}>
-                    {gym.name.split(' ').map((word: string) => word[0]).join('').slice(0, 2).toUpperCase()}
+                    {gym.name
+                      .split(' ')
+                      .map((word: string) => word[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()}
                   </Text>
                 </View>
               )}
             </View>
           </View>
-          
+
           {/* Address */}
           <Text style={styles.gymAddress}>{gym.address}</Text>
-          
+
           {/* Open Mat Sessions */}
           {gym.openMats && gym.openMats.length > 0 && (
             <View style={styles.sessionsSection}>
@@ -90,18 +89,14 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
                 <View key={index} style={styles.sessionBlock}>
                   <View style={styles.sessionHeader}>
                     <Text style={styles.sessionDay}>{session.day}</Text>
-                    <Text style={styles.sessionType}>
-                      {getSessionTypeWithIcon(session.type)}
-                    </Text>
+                    <Text style={styles.sessionType}>{getSessionTypeWithIcon(session.type)}</Text>
                   </View>
-                  <Text style={styles.sessionTime}>
-                    {formatTimeRange(session.time)}
-                  </Text>
+                  <Text style={styles.sessionTime}>{formatTimeRange(session.time)}</Text>
                 </View>
               ))}
             </View>
           )}
-          
+
           {/* Fees section */}
           <View style={styles.feesSection}>
             <Text style={styles.feesTitle}>Fees</Text>
@@ -114,7 +109,11 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
             <View style={styles.feeItem}>
               <Text style={styles.feeLabel}>Class Drop in - </Text>
               <Text style={styles.feeValue}>
-                {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
+                {typeof gym.dropInFee === 'number'
+                  ? gym.dropInFee === 0
+                    ? 'Free'
+                    : `$${gym.dropInFee}`
+                  : '?/unknown'}
               </Text>
             </View>
           </View>
@@ -125,21 +124,23 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
               Last updated: {gym.lastUpdated ? formatDate(gym.lastUpdated) : 'Unknown'}
             </Text>
           </View>
-          
+
           {/* Action buttons */}
           <View style={styles.unifiedButtonBar}>
             <TouchableOpacity style={styles.iconButton} onPress={() => onHeartPress(gym)}>
-              <Text style={[
-                styles.iconText, 
-                styles.heartIcon,
-                { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' }
-              ]}>
+              <Text
+                style={[
+                  styles.iconText,
+                  styles.heartIcon,
+                  { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' },
+                ]}
+              >
                 {favorites.has(gym.id) ? '♥' : '♡'}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.iconButton} 
+
+            <TouchableOpacity
+              style={styles.iconButton}
               onPress={() => onCopyGym(gym)}
               disabled={copiedGymId === gym.id}
             >
@@ -149,35 +150,49 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
                 <Ionicons name="copy-outline" size={22} color="#60798A" />
               )}
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.iconButton, (!gym.website || gym.website.trim() === '') && styles.disabledIconButton]}
+
+            <TouchableOpacity
+              style={[
+                styles.iconButton,
+                (!gym.website || gym.website.trim() === '') && styles.disabledIconButton,
+              ]}
               onPress={() => gym.website && openWebsite(gym.website)}
               disabled={!gym.website || gym.website.trim() === ''}
             >
-              <Ionicons 
-                name="globe-outline" 
-                size={22} 
-                color={(!gym.website || gym.website.trim() === '') ? '#9CA3AF' : '#111518'} 
+              <Ionicons
+                name="globe-outline"
+                size={22}
+                color={!gym.website || gym.website.trim() === '' ? '#9CA3AF' : '#111518'}
               />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.iconButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledIconButton]}
+
+            <TouchableOpacity
+              style={[
+                styles.iconButton,
+                (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') &&
+                  styles.disabledIconButton,
+              ]}
               onPress={() => openDirections(gym.address)}
               disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
             >
-              <Ionicons 
-                name="location-outline" 
-                size={22} 
-                color={(!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') ? '#9CA3AF' : '#111518'} 
+              <Ionicons
+                name="location-outline"
+                size={22}
+                color={
+                  !gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'
+                    ? '#9CA3AF'
+                    : '#111518'
+                }
               />
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.iconButton} onPress={() => {
-              haptics.light(); // Light haptic for share button
-              onShareGym(gym);
-            }}>
+
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => {
+                haptics.light(); // Light haptic for share button
+                onShareGym(gym);
+              }}
+            >
               <Ionicons name="share-outline" size={22} color="#111518" />
             </TouchableOpacity>
           </View>
@@ -368,4 +383,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DashboardGymModal; 
+export default DashboardGymModal;

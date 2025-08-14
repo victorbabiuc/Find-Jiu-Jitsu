@@ -17,10 +17,10 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Discovering open mat sessions...");
+  const [loadingMessage, setLoadingMessage] = useState('Discovering open mat sessions...');
   const [loadingDuration, setLoadingDuration] = useState(2000);
   const [isNavigationLoading, setIsNavigationLoading] = useState(false);
-  
+
   // Use ref to track loading state without causing re-renders
   const isLoadingRef = useRef(false);
 
@@ -84,18 +84,20 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, []);
 
   return (
-    <LoadingContext.Provider value={{ 
-      isLoading, 
-      loadingMessage, 
-      loadingDuration,
-      isNavigationLoading,
-      showLoading, 
-      hideLoading,
-      showTransitionalLoading,
-      hideTransitionalLoading,
-      showNavigationLoading,
-      hideNavigationLoading
-    }}>
+    <LoadingContext.Provider
+      value={{
+        isLoading,
+        loadingMessage,
+        loadingDuration,
+        isNavigationLoading,
+        showLoading,
+        hideLoading,
+        showTransitionalLoading,
+        hideTransitionalLoading,
+        showNavigationLoading,
+        hideNavigationLoading,
+      }}
+    >
       {children}
     </LoadingContext.Provider>
   );
@@ -107,4 +109,4 @@ export const useLoading = () => {
     throw new Error('useLoading must be used within a LoadingProvider');
   }
   return context;
-}; 
+};

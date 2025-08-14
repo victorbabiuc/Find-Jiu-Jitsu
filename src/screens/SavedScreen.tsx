@@ -34,19 +34,19 @@ const SavedScreen: React.FC = () => {
   const { showTransitionalLoading } = useLoading();
   const navigation = useMainTabNavigation();
   const beltColor = beltColors[userBelt];
-  
+
   // State for saved gyms data
   const [savedGyms, setSavedGyms] = useState<OpenMat[]>([]);
 
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Modal state
   const [selectedGym, setSelectedGym] = useState<OpenMat | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   // Gym logo state
   const [gymLogos, setGymLogos] = useState<Record<string, string>>({});
-  
+
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
   const listAnim = useRef(new Animated.Value(0)).current;
@@ -75,10 +75,11 @@ const SavedScreen: React.FC = () => {
   useEffect(() => {
     const runEntranceAnimations = async () => {
       // Stagger the animations for a smooth entrance
-      animations.stagger(
-        [headerAnim, listAnim],
-        (value, index) => animations.fadeIn(value, 400, index * 100)
-      ).start();
+      animations
+        .stagger([headerAnim, listAnim], (value, index) =>
+          animations.fadeIn(value, 400, index * 100)
+        )
+        .start();
     };
 
     runEntranceAnimations();
@@ -88,13 +89,13 @@ const SavedScreen: React.FC = () => {
   useEffect(() => {
     const loadGymLogos = async () => {
       const logoUrls: Record<string, string> = {};
-      
+
       for (const gym of savedGyms) {
         // Skip gyms that already have hardcoded logos
         if (gym.id.includes('10th-planet') || gym.id.includes('stjj')) {
           continue;
         }
-        
+
         try {
           const logoUrl = await gymLogoService.getGymLogo(gym.id, gym.name, gym.website);
           if (logoUrl) {
@@ -104,7 +105,7 @@ const SavedScreen: React.FC = () => {
           // Logo loading failed silently
         }
       }
-      
+
       setGymLogos(logoUrls);
     };
 
@@ -127,20 +128,22 @@ const SavedScreen: React.FC = () => {
 
   const handleHeartPress = (gym: OpenMat) => {
     const isFavorited = favorites.has(gym.id);
-    
+
     // Haptic feedback
     if (isFavorited) {
       haptics.light(); // Light haptic for unfavoriting
     } else {
       haptics.success(); // Success haptic for favoriting
     }
-    
+
     // Heart button animation
-    animations.sequence([
-      animations.scale(heartScaleAnim, 1.3, 150),
-      animations.scale(heartScaleAnim, 1, 200),
-    ]).start();
-    
+    animations
+      .sequence([
+        animations.scale(heartScaleAnim, 1.3, 150),
+        animations.scale(heartScaleAnim, 1, 200),
+      ])
+      .start();
+
     // Color transition animation - temporarily disabled
     // const targetColor = isFavorited ? 0 : 1;
     // Animated.timing(heartColorAnim, {
@@ -148,7 +151,7 @@ const SavedScreen: React.FC = () => {
     //   duration: 300,
     //   useNativeDriver: false,
     // }).start();
-    
+
     // Call the original handler
     toggleFavorite(gym.id);
   };
@@ -188,116 +191,131 @@ const SavedScreen: React.FC = () => {
     );
   };
 
-
-
   const formatOpenMats = (openMats: OpenMatSession[]) => {
     return openMats.map(mat => `${mat.day} ${mat.time}`).join(', ');
   };
 
-
-
-
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header */}
-      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }, { opacity: headerAnim }]}>
-        <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Saved Gyms</Text>
+      <Animated.View
+        style={[
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 12,
+          },
+          { opacity: headerAnim },
+        ]}
+      >
+        <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>
+          Saved Gyms
+        </Text>
       </Animated.View>
 
       {/* Content */}
       <Animated.View style={{ flex: 1, opacity: listAnim }}>
         {savedGyms.length === 0 ? (
-        // Empty state
-        <View style={styles.emptyContainer}>
-          <Ionicons 
-            name="heart-outline" 
-            size={64} 
-            color={theme.text.secondary} 
-            style={styles.emptyIcon}
-          />
-          <Text style={[styles.emptyText, { color: theme.text.primary }]}>No saved gyms yet</Text>
-          <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
-            Heart gyms you like to save them here
-          </Text>
-
-        </View>
-      ) : (
-        // Saved Gyms List
-        <FlatList
-          data={savedGyms}
-          keyExtractor={(gym) => gym.id}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={true}
-          bounces={true}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={['#10B981']}
-              tintColor="#10B981"
-              title="Pull to refresh"
-              titleColor="#60798A"
+          // Empty state
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="heart-outline"
+              size={64}
+              color={theme.text.secondary}
+              style={styles.emptyIcon}
             />
-          }
-          renderItem={({ item: gym }) => (
-            <TouchableOpacity
-              style={[styles.card, { backgroundColor: theme.surface, borderLeftColor: beltColor.primary }]}
-              activeOpacity={0.85}
-              onPress={() => handleGymPress(gym)}
-            >
-              {/* Logo/Initials */}
-              {gym.id.includes('10th-planet') ? (
-                <Image source={tenthPlanetLogo} style={styles.logoCircle} />
-              ) : gym.id.includes('stjj') ? (
-                <Image source={stjjLogo} style={styles.logoCircle} />
-              ) : gymLogos[gym.id] ? (
-                <Image source={{ uri: gymLogos[gym.id] }} style={styles.logoCircle} />
-              ) : (
-                <LinearGradient
-                  colors={[beltColor.primary, beltColor.secondary]}
-                  style={styles.logoCircle}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
-                    {gymLogoService.getInitials(gym.name)}
+            <Text style={[styles.emptyText, { color: theme.text.primary }]}>No saved gyms yet</Text>
+            <Text style={[styles.emptySubtext, { color: theme.text.secondary }]}>
+              Heart gyms you like to save them here
+            </Text>
+          </View>
+        ) : (
+          // Saved Gyms List
+          <FlatList
+            data={savedGyms}
+            keyExtractor={gym => gym.id}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={true}
+            bounces={true}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={['#10B981']}
+                tintColor="#10B981"
+                title="Pull to refresh"
+                titleColor="#60798A"
+              />
+            }
+            renderItem={({ item: gym }) => (
+              <TouchableOpacity
+                style={[
+                  styles.card,
+                  { backgroundColor: theme.surface, borderLeftColor: beltColor.primary },
+                ]}
+                activeOpacity={0.85}
+                onPress={() => handleGymPress(gym)}
+              >
+                {/* Logo/Initials */}
+                {gym.id.includes('10th-planet') ? (
+                  <Image source={tenthPlanetLogo} style={styles.logoCircle} />
+                ) : gym.id.includes('stjj') ? (
+                  <Image source={stjjLogo} style={styles.logoCircle} />
+                ) : gymLogos[gym.id] ? (
+                  <Image source={{ uri: gymLogos[gym.id] }} style={styles.logoCircle} />
+                ) : (
+                  <LinearGradient
+                    colors={[beltColor.primary, beltColor.secondary]}
+                    style={styles.logoCircle}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={[styles.logoText, { color: beltColor.textOnColor }]}>
+                      {gymLogoService.getInitials(gym.name)}
+                    </Text>
+                  </LinearGradient>
+                )}
+
+                {/* Card Content */}
+                <View style={styles.cardContent}>
+                  <View style={styles.cardHeaderRow}>
+                    <Text style={[styles.gymName, { color: theme.text.primary }]} numberOfLines={1}>
+                      {gym.name}
+                    </Text>
+                    <View style={styles.ratingRow}>
+                      <Text style={styles.star}>📍</Text>
+                      <Text style={[styles.ratingText, { color: theme.text.secondary }]}>
+                        {gym.distance} mi
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    style={[styles.timeText, { color: theme.text.secondary }]}
+                    numberOfLines={1}
+                  >
+                    {formatOpenMats(gym.openMats)}
                   </Text>
-                </LinearGradient>
-              )}
-              
-              {/* Card Content */}
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeaderRow}>
-                  <Text style={[styles.gymName, { color: theme.text.primary }]} numberOfLines={1}>{gym.name}</Text>
-                  <View style={styles.ratingRow}>
-                    <Text style={styles.star}>📍</Text>
-                    <Text style={[styles.ratingText, { color: theme.text.secondary }]}>{gym.distance} mi</Text>
+                  <View style={styles.cardFooter}>
+                    {getPriceDisplay(gym.matFee)}
+                    <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
+                      <TouchableOpacity
+                        style={styles.heartButton}
+                        onPress={() => handleHeartPress(gym)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="heart" size={20} color="#EF4444" />
+                      </TouchableOpacity>
+                    </Animated.View>
                   </View>
                 </View>
-                <Text style={[styles.timeText, { color: theme.text.secondary }]} numberOfLines={1}>{formatOpenMats(gym.openMats)}</Text>
-                <View style={styles.cardFooter}>
-                  {getPriceDisplay(gym.matFee)}
-                  <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
-                    <TouchableOpacity
-                      style={styles.heartButton}
-                      onPress={() => handleHeartPress(gym)}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons 
-                        name="heart" 
-                        size={20} 
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
-                  </Animated.View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-        </Animated.View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </Animated.View>
 
       {/* Gym Details Modal */}
       {selectedGym && (
@@ -312,7 +330,6 @@ const SavedScreen: React.FC = () => {
 
       {/* Contact Footer */}
       <ContactFooter />
-
     </SafeAreaView>
   );
 };
@@ -451,4 +468,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SavedScreen; 
+export default SavedScreen;

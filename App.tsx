@@ -48,7 +48,7 @@ const GymDataPreloader: React.FC = () => {
         console.log('✅ Gym data pre-loaded and cached');
       }).catch(error => {
         console.error('❌ Failed to pre-load gym data:', error);
-        // Non-critical error, app continues
+        // Non-critical error, app continues working
       });
     }
   }, [authLoading]);

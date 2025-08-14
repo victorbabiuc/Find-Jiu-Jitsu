@@ -145,7 +145,7 @@ const ProfileDetailsScreen: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         />
-        
+
         <View style={styles.content}>
           <View style={styles.signInPrompt}>
             <Ionicons name="person-circle-outline" size={80} color={theme.text.secondary} />
@@ -153,15 +153,14 @@ const ProfileDetailsScreen: React.FC = () => {
               Sign in to create profile
             </Text>
             <Text style={[styles.signInSubtitle, { color: theme.text.secondary }]}>
-              Create your profile to personalize your experience and sync your preferences across devices.
+              Create your profile to personalize your experience and sync your preferences across
+              devices.
             </Text>
             <TouchableOpacity
               style={[styles.signInButton, { backgroundColor: '#3B82F6' }]}
               onPress={() => navigation.navigate('Login' as never)}
             >
-              <Text style={[styles.signInButtonText, { color: '#FFFFFF' }]}>
-                Sign In
-              </Text>
+              <Text style={[styles.signInButtonText, { color: '#FFFFFF' }]}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -181,15 +180,10 @@ const ProfileDetailsScreen: React.FC = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={theme.text.primary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text.primary }]}>
-          Profile Details
-        </Text>
+        <Text style={[styles.headerTitle, { color: theme.text.primary }]}>Profile Details</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -210,15 +204,17 @@ const ProfileDetailsScreen: React.FC = () => {
             <Text style={[styles.userName, { color: beltColor.textOnColor }]}>
               {user?.displayName || 'User'}
             </Text>
-            <Text style={[styles.userEmail, { color: beltColor.textOnColor }]}>
-              {user?.email}
-            </Text>
+            <Text style={[styles.userEmail, { color: beltColor.textOnColor }]}>{user?.email}</Text>
           </View>
         </View>
       </LinearGradient>
 
       {/* Form Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} pointerEvents="box-none">
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        pointerEvents="box-none"
+      >
         {/* Backdrop overlay for dropdowns - rendered BEFORE dropdowns for proper touch handling */}
         {(showBeltDropdown || showGymDropdown) && (
           <TouchableOpacity
@@ -230,40 +226,46 @@ const ProfileDetailsScreen: React.FC = () => {
         <View style={styles.formContainer}>
           {/* Belt Selection */}
           <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-              Belt Level
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>Belt Level</Text>
             <View style={styles.dropdownContainer} pointerEvents="box-none">
               <TouchableOpacity
-                style={[styles.dropdownButton, { 
-                  backgroundColor: theme.surface,
-                  borderColor: theme.border
-                }]}
+                style={[
+                  styles.dropdownButton,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
+                  },
+                ]}
                 activeOpacity={0.8}
                 onPress={() => setShowBeltDropdown(!showBeltDropdown)}
               >
                 <View style={styles.dropdownContent}>
-                  <View style={[styles.beltIndicator, { backgroundColor: beltColors[selectedBelt].primary }]} />
+                  <View
+                    style={[
+                      styles.beltIndicator,
+                      { backgroundColor: beltColors[selectedBelt].primary },
+                    ]}
+                  />
                   <Text style={[styles.dropdownText, { color: theme.text.primary }]}>
                     {beltOptions.find(b => b.value === selectedBelt)?.label}
                   </Text>
                 </View>
-                <Ionicons 
-                  name={showBeltDropdown ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color={theme.text.secondary} 
+                <Ionicons
+                  name={showBeltDropdown ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={theme.text.secondary}
                 />
               </TouchableOpacity>
 
               {/* Belt Dropdown */}
               {showBeltDropdown && (
                 <View style={[styles.dropdown, { backgroundColor: theme.surface }]}>
-                  {beltOptions.map((option) => (
+                  {beltOptions.map(option => (
                     <TouchableOpacity
                       key={option.value}
                       style={[
                         styles.dropdownItem,
-                        selectedBelt === option.value && { backgroundColor: beltColor.surface }
+                        selectedBelt === option.value && { backgroundColor: beltColor.surface },
                       ]}
                       activeOpacity={0.7}
                       onPress={() => handleBeltSelect(option.value)}
@@ -281,15 +283,16 @@ const ProfileDetailsScreen: React.FC = () => {
 
           {/* Years Training */}
           <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-              Years Training
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>Years Training</Text>
             <TextInput
-              style={[styles.textInput, { 
-                backgroundColor: theme.surface,
-                color: theme.text.primary,
-                borderColor: theme.border
-              }]}
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: theme.surface,
+                  color: theme.text.primary,
+                  borderColor: theme.border,
+                },
+              ]}
               value={yearsTraining}
               onChangeText={handleYearsTrainingChange}
               placeholder="Enter years (0-50)"
@@ -301,15 +304,16 @@ const ProfileDetailsScreen: React.FC = () => {
 
           {/* Home Gym Selection */}
           <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
-              Home Gym
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>Home Gym</Text>
             <View style={styles.dropdownContainer} pointerEvents="box-none">
               <TouchableOpacity
-                style={[styles.dropdownButton, { 
-                  backgroundColor: theme.surface,
-                  borderColor: theme.border
-                }]}
+                style={[
+                  styles.dropdownButton,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
+                  },
+                ]}
                 activeOpacity={0.8}
                 onPress={() => setShowGymDropdown(!showGymDropdown)}
               >
@@ -318,10 +322,10 @@ const ProfileDetailsScreen: React.FC = () => {
                     {selectedHomeGym || 'Select your home gym'}
                   </Text>
                 </View>
-                <Ionicons 
-                  name={showGymDropdown ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color={theme.text.secondary} 
+                <Ionicons
+                  name={showGymDropdown ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={theme.text.secondary}
                 />
               </TouchableOpacity>
 
@@ -337,12 +341,12 @@ const ProfileDetailsScreen: React.FC = () => {
                       No home gym
                     </Text>
                   </TouchableOpacity>
-                  {availableGyms.map((gym) => (
+                  {availableGyms.map(gym => (
                     <TouchableOpacity
                       key={gym.id}
                       style={[
                         styles.dropdownItem,
-                        selectedHomeGym === gym.name && { backgroundColor: beltColor.surface }
+                        selectedHomeGym === gym.name && { backgroundColor: beltColor.surface },
                       ]}
                       activeOpacity={0.7}
                       onPress={() => handleGymSelect(gym.name)}
@@ -363,27 +367,27 @@ const ProfileDetailsScreen: React.FC = () => {
               Training Preference
             </Text>
             <View style={styles.preferenceContainer}>
-              {giPreferenceOptions.map((option) => (
+              {giPreferenceOptions.map(option => (
                 <TouchableOpacity
                   key={option.value}
                   style={[
                     styles.preferenceButton,
-                    { 
+                    {
                       backgroundColor: theme.surface,
-                      borderColor: theme.border
+                      borderColor: theme.border,
                     },
-                    giPreference === option.value && { backgroundColor: '#3B82F6' }
+                    giPreference === option.value && { backgroundColor: '#3B82F6' },
                   ]}
                   onPress={() => setGiPreference(option.value)}
                 >
-                  <Text style={[
-                    styles.preferenceText,
-                    { 
-                      color: giPreference === option.value 
-                        ? '#FFFFFF' 
-                        : theme.text.primary 
-                    }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.preferenceText,
+                      {
+                        color: giPreference === option.value ? '#FFFFFF' : theme.text.primary,
+                      },
+                    ]}
+                  >
                     {option.label}
                   </Text>
                 </TouchableOpacity>
@@ -396,7 +400,7 @@ const ProfileDetailsScreen: React.FC = () => {
             style={[
               styles.saveButton,
               { backgroundColor: '#374151' },
-              isSaving && { opacity: 0.7 }
+              isSaving && { opacity: 0.7 },
             ]}
             onPress={handleSaveProfile}
             disabled={isSaving}
@@ -617,4 +621,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileDetailsScreen; 
+export default ProfileDetailsScreen;

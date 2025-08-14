@@ -18,7 +18,7 @@ export const formatTimeRange = (sessionTime: string): string => {
       // Handle special case like "12-2pm" where first part is missing period
       let startTime = parts[0];
       const endTime = parts[1];
-      
+
       // If start time doesn't have AM/PM but end time does, infer from end time
       if (!startTime.match(/(am|pm)$/i) && endTime.match(/(am|pm)$/i)) {
         const endPeriodMatch = endTime.match(/(am|pm)$/i);
@@ -27,15 +27,15 @@ export const formatTimeRange = (sessionTime: string): string => {
           startTime = startTime + endPeriod;
         }
       }
-      
+
       return formatTimeRangeSmart(startTime, endTime);
     }
   }
-  
+
   // It's a single time, add 1 hour
   const formattedStart = formatSingleTime(sessionTime);
   const endTime = addOneHour(sessionTime);
-  
+
   return formatTimeRangeSmart(formattedStart, endTime);
 };
 
@@ -46,15 +46,15 @@ export const formatTimeRangeSmart = (startTime: string, endTime: string): string
   // Parse both times to extract hour, minute, and period
   const startParsed = parseTime(startTime);
   const endParsed = parseTime(endTime);
-  
+
   if (!startParsed || !endParsed) {
     // Fallback to original formatting
     return `${startTime} - ${endTime}`;
   }
-  
+
   const { hour: startHour, minute: startMinute, period: startPeriod } = startParsed;
   const { hour: endHour, minute: endMinute, period: endPeriod } = endParsed;
-  
+
   // Check if both times have the same period (AM/PM)
   if (startPeriod === endPeriod) {
     // Same period - use compact format
@@ -74,27 +74,27 @@ export const formatTimeRangeSmart = (startTime: string, endTime: string): string
  */
 export const parseTime = (time: string) => {
   const cleanTime = time.trim();
-  
+
   // Match patterns like "11am", "6pm", "11AM", "6PM" (case insensitive)
   const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/i);
   if (simpleMatch) {
     return {
       hour: parseInt(simpleMatch[1]),
       minute: 0,
-      period: simpleMatch[2].toUpperCase()
+      period: simpleMatch[2].toUpperCase(),
     };
   }
-  
+
   // Match patterns like "5:00 PM", "11:30 AM", "6:30pm", "12:00pm" (case insensitive)
   const detailedMatch = cleanTime.match(/^(\d+):(\d+)\s*(am|pm)$/i);
   if (detailedMatch) {
     return {
       hour: parseInt(detailedMatch[1]),
       minute: parseInt(detailedMatch[2]),
-      period: detailedMatch[3].toUpperCase()
+      period: detailedMatch[3].toUpperCase(),
     };
   }
-  
+
   return null;
 };
 
@@ -116,10 +116,12 @@ export const formatHourMinute = (hour: number, minute: number): string => {
 export const formatSingleTime = (time: string): string => {
   // Handle various time formats and standardize them
   const cleanTime = time.trim().toLowerCase();
-  
+
   // Handle formats like "11am", "6pm", "5:00 PM", etc.
-  let hour, minute = '00', period;
-  
+  let hour,
+    minute = '00',
+    period;
+
   // Match patterns like "11am", "6pm"
   const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
   if (simpleMatch) {
@@ -137,7 +139,7 @@ export const formatSingleTime = (time: string): string => {
       return time;
     }
   }
-  
+
   // Format consistently
   return `${hour}:${minute} ${period}`;
 };
@@ -148,9 +150,11 @@ export const formatSingleTime = (time: string): string => {
 export const addOneHour = (time: string): string => {
   // Parse the time and add 1 hour
   const cleanTime = time.trim().toLowerCase();
-  
-  let hour, minute = '00', period;
-  
+
+  let hour,
+    minute = '00',
+    period;
+
   // Match patterns like "11am", "6pm"
   const simpleMatch = cleanTime.match(/^(\d+)(am|pm)$/);
   if (simpleMatch) {
@@ -168,16 +172,16 @@ export const addOneHour = (time: string): string => {
       return time;
     }
   }
-  
+
   // Add 1 hour
   hour += 1;
-  
+
   // Handle 12-hour format
   if (hour === 13) hour = 1;
   if (hour === 12) {
     return `12:${minute} ${period === 'AM' ? 'PM' : 'AM'}`;
   }
-  
+
   return `${hour}:${minute} ${period}`;
 };
 
@@ -222,7 +226,7 @@ export const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   } catch (error) {
     return 'Unknown';
@@ -253,10 +257,10 @@ export const openDirections = (address: string): void => {
  */
 export const handleCopyGym = async (gym: OpenMat): Promise<void> => {
   haptics.light(); // Light haptic for button press
-  
+
   try {
     const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
-    
+
     const copyText = `I'm going to this open mat.
 Come train with me! 🥋
 
@@ -271,7 +275,7 @@ Find more open mats 👇
 https://bit.ly/40DjTlM`;
 
     await Clipboard.setStringAsync(copyText);
-    
+
     haptics.success(); // Success haptic for successful copy
   } catch (error) {
     haptics.error();
@@ -285,15 +289,15 @@ https://bit.ly/40DjTlM`;
  */
 export const formatOpenMats = (openMats: OpenMatSession[]): string => {
   if (!openMats || openMats.length === 0) return 'No sessions';
-  
-  const sessions = openMats.slice(0, 3).map(session => 
-    `${session.day} ${formatTimeRange(session.time)}`
-  );
-  
+
+  const sessions = openMats
+    .slice(0, 3)
+    .map(session => `${session.day} ${formatTimeRange(session.time)}`);
+
   if (openMats.length > 3) {
     sessions.push(`+${openMats.length - 3} more`);
   }
-  
+
   return sessions.join(' • ');
 };
 
@@ -302,8 +306,11 @@ export const formatOpenMats = (openMats: OpenMatSession[]): string => {
  */
 export const formatSessionsList = (openMats: OpenMatSession[]): string => {
   if (!openMats || openMats.length === 0) return 'No sessions available';
-  
-  return openMats.map(session => 
-    `${session.day}: ${formatTimeRange(session.time)} (${getSessionTypeWithIcon(session.type)})`
-  ).join('\n');
-}; 
+
+  return openMats
+    .map(
+      session =>
+        `${session.day}: ${formatTimeRange(session.time)} (${getSessionTypeWithIcon(session.type)})`
+    )
+    .join('\n');
+};

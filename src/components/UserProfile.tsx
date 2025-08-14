@@ -26,55 +26,53 @@ export const UserProfile: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.profileSection}>
         <Text style={styles.title}>User Profile</Text>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>Email:</Text>
           <Text style={styles.value}>{user?.email || 'Not provided'}</Text>
         </View>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>Display Name:</Text>
           <Text style={styles.value}>{user?.displayName || 'Not provided'}</Text>
         </View>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>User ID:</Text>
           <Text style={styles.value}>{user?.uid || 'Not available'}</Text>
         </View>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>Email Verified:</Text>
           <Text style={styles.value}>{user?.emailVerified ? 'Yes' : 'No'}</Text>
         </View>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>Account Created:</Text>
           <Text style={styles.value}>
-            {user?.metadata?.creationTime 
+            {user?.metadata?.creationTime
               ? new Date(user.metadata.creationTime).toLocaleDateString()
-              : 'Not available'
-            }
+              : 'Not available'}
           </Text>
         </View>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.label}>Last Sign In:</Text>
           <Text style={styles.value}>
-            {user?.metadata?.lastSignInTime 
+            {user?.metadata?.lastSignInTime
               ? new Date(user.metadata.lastSignInTime).toLocaleDateString()
-              : 'Not available'
-            }
+              : 'Not available'}
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.actionsSection}>
-        <SignOutButton 
+        <SignOutButton
           variant="danger"
           onSuccess={() => {
             Alert.alert('Signed Out', 'You have been successfully signed out.');
           }}
-          onError={(error) => {
+          onError={error => {
             Alert.alert('Error', 'Failed to sign out. Please try again.');
           }}
         />
@@ -144,4 +142,4 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 50,
   },
-}); 
+});

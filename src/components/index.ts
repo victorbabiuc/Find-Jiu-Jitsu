@@ -11,4 +11,4 @@ export { default as ShareCard } from './ShareCard';
 export { default as SkeletonCard } from './SkeletonCard';
 export { default as SearchSuggestions } from './SearchSuggestions';
 export { default as CustomShareModal } from './CustomShareModal';
-export { default as ContactFooter } from './ContactFooter'; 
+export { default as ContactFooter } from './ContactFooter';

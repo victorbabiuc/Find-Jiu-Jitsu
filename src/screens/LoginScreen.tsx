@@ -26,24 +26,30 @@ const LoginScreen = () => {
   const { signInWithGoogle, signInWithApple, loading } = useAuth();
   const navigation = useRootNavigation();
   const { showLoading } = useLoading();
-  
+
   // Belt progression state
   const [currentBeltIndex, setCurrentBeltIndex] = useState(0);
 
   const currentBeltColor = beltColors[userBelt];
-  const beltTypes: Array<'white' | 'blue' | 'purple' | 'brown' | 'black'> = ['white', 'blue', 'purple', 'brown', 'black'];
+  const beltTypes: Array<'white' | 'blue' | 'purple' | 'brown' | 'black'> = [
+    'white',
+    'blue',
+    'purple',
+    'brown',
+    'black',
+  ];
 
   // Belt progression animation (without auto-navigation)
   useEffect(() => {
     const beltProgression = () => {
       setCurrentBeltIndex(prev => {
         const nextIndex = prev + 1;
-        
+
         // Stop at the last belt, don't auto-navigate
         if (nextIndex >= beltTypes.length) {
           return beltTypes.length - 1; // Stay at the last belt
         }
-        
+
         return nextIndex;
       });
     };
@@ -100,15 +106,10 @@ const LoginScreen = () => {
         {/* Header Section */}
         <View style={styles.header}>
           {/* App Logo */}
-          <Image 
-            source={require('../../assets/icon.png')}
-            style={styles.appLogo}
-          />
-          
+          <Image source={require('../../assets/icon.png')} style={styles.appLogo} />
+
           {/* Title */}
-          <Text style={[styles.title, { color: theme.text.primary }]}>
-            JIUJITSU FINDER
-          </Text>
+          <Text style={[styles.title, { color: theme.text.primary }]}>JIUJITSU FINDER</Text>
           <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
             Your Training Companion
           </Text>
@@ -128,7 +129,7 @@ const LoginScreen = () => {
                   onPress={handleAppleSignIn}
                 />
               )}
-              
+
               <TouchableOpacity
                 onPress={handleGoogleSignIn}
                 disabled={loading}
@@ -165,10 +166,10 @@ const LoginScreen = () => {
         {beltTypes.map((beltType, index) => {
           const beltColor = beltColors[beltType];
           const isActive = index <= currentBeltIndex;
-          
+
           // Special handling for white belt for better visibility
           const isWhiteBeltInLightMode = beltType === 'white';
-          
+
           return (
             <View
               key={beltType}
@@ -180,12 +181,14 @@ const LoginScreen = () => {
                   // Add border for white belt for better visibility
                   ...(isWhiteBeltInLightMode && {
                     borderWidth: 1.5,
-                    borderColor: '#9CA3AF',  // More visible gray
+                    borderColor: '#9CA3AF', // More visible gray
                   }),
-                  transform: [{
-                    scale: isActive && index === currentBeltIndex ? 1.1 : 1
-                  }]
-                }
+                  transform: [
+                    {
+                      scale: isActive && index === currentBeltIndex ? 1.1 : 1,
+                    },
+                  ],
+                },
               ]}
             />
           );
@@ -347,4 +350,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen; 
+export default LoginScreen;

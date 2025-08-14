@@ -45,7 +45,7 @@ class InstagramShareService {
     return {
       imageUri,
       gym,
-      session
+      session,
     };
   }
 
@@ -57,8 +57,8 @@ class InstagramShareService {
    * @returns Promise<boolean> - True if sharing was successful
    */
   async shareToInstagramStories(
-    imageUri: string, 
-    gym: OpenMat, 
+    imageUri: string,
+    gym: OpenMat,
     session: OpenMatSession
   ): Promise<boolean> {
     try {
@@ -77,7 +77,7 @@ class InstagramShareService {
 
       // Open Instagram Stories
       const opened = await Linking.openURL(instagramUrl);
-      
+
       if (opened) {
         logger.info('Successfully opened Instagram Stories for sharing');
         return true;
@@ -85,7 +85,6 @@ class InstagramShareService {
         logger.error('Failed to open Instagram Stories');
         return false;
       }
-
     } catch (error) {
       logger.error('Error sharing to Instagram Stories:', error);
       return false;
@@ -105,13 +104,13 @@ class InstagramShareService {
 
     // Build URL parameters
     const params = new URLSearchParams();
-    
+
     // Add the image URI
     params.append('source_image', imageUri);
-    
+
     // Add the message text
     params.append('interactive_asset_uri', message);
-    
+
     // Add background color (optional)
     params.append('background_color', '#000000');
 
@@ -125,10 +124,16 @@ class InstagramShareService {
    * @returns string - Formatted message
    */
   private createShareMessage(gym: OpenMat, session: OpenMatSession): string {
-    const sessionType = session.type === 'gi' ? 'Gi' : 
-                       session.type === 'nogi' ? 'No-Gi' : 
-                       session.type === 'both' ? 'Gi & No-Gi' : 
-                       session.type === 'mma' ? 'MMA' : session.type;
+    const sessionType =
+      session.type === 'gi'
+        ? 'Gi'
+        : session.type === 'nogi'
+          ? 'No-Gi'
+          : session.type === 'both'
+            ? 'Gi & No-Gi'
+            : session.type === 'mma'
+              ? 'MMA'
+              : session.type;
 
     const time = session.time || 'TBD';
     const day = session.day || 'TBD';
@@ -172,6 +177,8 @@ class InstagramShareService {
 const instagramShareService = new InstagramShareService();
 
 // Export the main function and service instance
-export const shareToInstagramStories = instagramShareService.shareToInstagramStories.bind(instagramShareService);
-export const isInstagramInstalled = instagramShareService.isInstagramInstalled.bind(instagramShareService);
-export default instagramShareService; 
+export const shareToInstagramStories =
+  instagramShareService.shareToInstagramStories.bind(instagramShareService);
+export const isInstagramInstalled =
+  instagramShareService.isInstagramInstalled.bind(instagramShareService);
+export default instagramShareService;

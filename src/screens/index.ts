@@ -9,4 +9,4 @@ export { default as ResultsScreen } from './ResultsScreen';
 export { default as SavedScreen } from './SavedScreen';
 export { default as ProfileScreen } from './ProfileScreen';
 export { default as ProfileDetailsScreen } from './ProfileDetailsScreen';
-export { default as TransitionalLoadingScreen } from './TransitionalLoadingScreen'; 
+export { default as TransitionalLoadingScreen } from './TransitionalLoadingScreen';

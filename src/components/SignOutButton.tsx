@@ -9,10 +9,10 @@ interface SignOutButtonProps {
   variant?: 'primary' | 'secondary' | 'danger';
 }
 
-export const SignOutButton: React.FC<SignOutButtonProps> = ({ 
-  onSuccess, 
+export const SignOutButton: React.FC<SignOutButtonProps> = ({
+  onSuccess,
   onError,
-  variant = 'secondary'
+  variant = 'secondary',
 }) => {
   const { signOut, loading, user } = useAuth();
 
@@ -32,8 +32,8 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({
             try {
               await signOut();
               onSuccess?.();
-                } catch (error) {
-      logger.error('Sign out failed:', error);
+            } catch (error) {
+              logger.error('Sign out failed:', error);
               Alert.alert('Sign Out Failed', 'Unable to sign out. Please try again.');
               onError?.(error as Error);
             }
@@ -120,4 +120,4 @@ const styles = StyleSheet.create({
   textDisabled: {
     color: '#8E8E93',
   },
-}); 
+});

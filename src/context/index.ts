@@ -4,4 +4,4 @@
 export { AppProvider, useApp } from './AppContext';
 export { ThemeProvider, useTheme } from './ThemeContext';
 export { AuthProvider, useAuth } from './AuthContext';
-export { LoadingProvider, useLoading } from './LoadingContext'; 
+export { LoadingProvider, useLoading } from './LoadingContext';

@@ -21,7 +21,7 @@ export type MainTabParamList = {
 export type FindStackParamList = {
   Location: undefined;
   TimeSelection: undefined;
-  Results: { 
+  Results: {
     location: string;
     dateSelection?: string;
     dates?: string[];
@@ -37,11 +37,20 @@ export type FindStackParamList = {
 export type ScreenName = ViewType;
 
 // Navigation Props for screens
-export type RootStackNavigationProp = import('@react-navigation/stack').StackNavigationProp<RootStackParamList>;
-export type MainTabNavigationProp = import('@react-navigation/bottom-tabs').BottomTabNavigationProp<MainTabParamList>;
-export type FindStackNavigationProp = import('@react-navigation/stack').StackNavigationProp<FindStackParamList>;
+export type RootStackNavigationProp =
+  import('@react-navigation/stack').StackNavigationProp<RootStackParamList>;
+export type MainTabNavigationProp =
+  import('@react-navigation/bottom-tabs').BottomTabNavigationProp<MainTabParamList>;
+export type FindStackNavigationProp =
+  import('@react-navigation/stack').StackNavigationProp<FindStackParamList>;
 
 // Route Props for screens
-export type RootStackRouteProp<T extends keyof RootStackParamList> = RouteProp<RootStackParamList, T>;
+export type RootStackRouteProp<T extends keyof RootStackParamList> = RouteProp<
+  RootStackParamList,
+  T
+>;
 export type MainTabRouteProp<T extends keyof MainTabParamList> = RouteProp<MainTabParamList, T>;
-export type FindStackRouteProp<T extends keyof FindStackParamList> = RouteProp<FindStackParamList, T>; 
+export type FindStackRouteProp<T extends keyof FindStackParamList> = RouteProp<
+  FindStackParamList,
+  T
+>;

@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { haptics } from '../utils';
@@ -127,15 +121,13 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
     <View style={styles.container}>
       {renderHeader()}
       <View style={styles.list}>
-        {data.length > 0 ? (
-          data.map((item, index) => (
-            <React.Fragment key={`${query.length >= 2 ? 'suggestion' : 'recent'}-${index}`}>
-              {renderItem({ item, index })}
-            </React.Fragment>
-          ))
-        ) : (
-          renderEmpty()
-        )}
+        {data.length > 0
+          ? data.map((item, index) => (
+              <React.Fragment key={`${query.length >= 2 ? 'suggestion' : 'recent'}-${index}`}>
+                {renderItem({ item, index })}
+              </React.Fragment>
+            ))
+          : renderEmpty()}
       </View>
     </View>
   );
@@ -211,4 +203,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchSuggestions; 
+export default SearchSuggestions;
