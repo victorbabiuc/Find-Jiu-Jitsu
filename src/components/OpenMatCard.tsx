@@ -79,7 +79,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
         (displayAddress && displayAddress.trim() !== '' ? `📍 ${displayAddress}\n` : '') +
         (gym.website ? `🌐 ${gym.website.replace(/^https?:\/\//, '')}\n` : '') +
         (sessionInfo ? `${sessionInfo}\n` : '') +
-        `💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}\n\n` +
+        `💵 Open mat: ${gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}\n\n` +
         `${inviteMessage}\n\n` +
         `📱 Get the app:\nhttps://bit.ly/40DjTlM`;
       
@@ -167,7 +167,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       const copyText = `🥋 ${gym.name} - Open Mat
 ${sessionInfo}
 👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
-💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}
+💵 Open mat: ${gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
 📍 ${gym.address}
 🏃 I'm going, come train with me!
 📱 Get the app: https://bit.ly/40DjTlM`;
@@ -313,14 +313,14 @@ ${sessionInfo}
         </View>
         <View style={styles.feeItem}>
           <Text style={styles.feeLabel}>Open mat - </Text>
-          <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}> {/* Green if free */}
-            {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
+          <Text style={[styles.feeValue, gym.matFee && gym.matFee > 0 && { color: '#111518' }]}>
+              {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
           </Text>
         </View>
         <View style={styles.feeItem}>
           <Text style={styles.feeLabel}>Class Drop in - </Text>
           <Text style={styles.feeValue}>
-            {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
+            {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
           </Text>
         </View>
       </View>

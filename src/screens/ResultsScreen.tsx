@@ -504,22 +504,14 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   const getFeeDisplay = (matFee: number, dropInFee?: number) => {
     // Open Mat Fee logic
-    const openMatText = matFee === 0 ? "Open Mat - Free" :
-                       matFee > 0 ? `Open Mat - $${matFee}` :
-                       "Open Mat - ?";
+    const openMatText = matFee && matFee > 0 ? `Open Mat - $${matFee}` : "Open Mat - ?";
     
-    const openMatColor = matFee === 0 ? '#10B981' :
-                        matFee > 0 ? '#111518' :
-                        '#9CA3AF';
+    const openMatColor = matFee && matFee > 0 ? '#111518' : '#9CA3AF';
     
     // Drop in Fee logic
-    const dropInText = dropInFee === 0 ? "Drop in - Free" :
-                      dropInFee && dropInFee > 0 ? `Drop in - $${dropInFee}` :
-                      "Drop in - ?";
+    const dropInText = dropInFee && dropInFee > 0 ? `Drop in - $${dropInFee}` : "Drop in - ?";
     
-    const dropInColor = dropInFee === 0 ? '#10B981' :
-                       dropInFee && dropInFee > 0 ? '#111518' :
-                       '#9CA3AF';
+    const dropInColor = dropInFee && dropInFee > 0 ? '#111518' : '#9CA3AF';
     
     return (
       <View style={styles.feeContainer}>

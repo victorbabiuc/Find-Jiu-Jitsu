@@ -299,10 +299,10 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Pricing</Text>
               <Text style={{ marginBottom: 5 }}>
-                Open Mat: {gym.matFee === 0 ? 'Free' : `$${gym.matFee}`}
+                Open Mat: {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
               </Text>
               <Text>
-                Drop-in Class: {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : 'Contact gym'}
+                Drop-in Class: {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
               </Text>
             </View>
           </ScrollView>

@@ -181,14 +181,14 @@ const ResultsGymCard: React.FC<ResultsGymCardProps> = memo(({
           </View>
           <View style={styles.feeItem}>
             <Text style={styles.feeLabel}>Open mat - </Text>
-            <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}>
-              {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
+            <Text style={[styles.feeValue, gym.matFee && gym.matFee > 0 && { color: '#111518' }]}>
+              {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
             </Text>
           </View>
           <View style={styles.feeItem}>
             <Text style={styles.feeLabel}>Class Drop in - </Text>
             <Text style={styles.feeValue}>
-              {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
+              {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
             </Text>
           </View>
         </View>

@@ -107,5 +107,5 @@ Need a new city? See our [Contributing Guide](docs/CONTRIBUTING.md).
 MIT License - Built with ❤️ for the Jiu Jitsu community
 
 ---
-**Contact**: glootieapp@gmail.com | **Version**: 1.3.0 | **Architecture**: Refactored v2.0
+**Contact**: glootieapp@gmail.com | **Version**: 1.6.0 | **Architecture**: Refactored v2.0
 

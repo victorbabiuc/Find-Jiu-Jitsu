@@ -121,7 +121,18 @@ class GitHubDataService {
       console.log(`[DEBUG] Fetching fresh data for ${normalizedLocation}`);
       const csvData = await this.fetchCSVFromGitHub(normalizedLocation);
       console.log(`[DEBUG] CSV data length: ${csvData.length} characters`);
-      const parsedData = this.parseCSVToOpenMats(csvData, normalizedLocation);
+      
+      // Get GitHub commit date as fallback for last_updated
+      let fallbackDate: string | undefined;
+      try {
+        fallbackDate = await this.getGitHubFileCommitDate(normalizedLocation);
+        console.log(`[DEBUG] GitHub commit date for ${normalizedLocation}: ${fallbackDate || 'not available'}`);
+      } catch (error) {
+        console.log(`[DEBUG] Failed to get GitHub commit date for ${normalizedLocation}, continuing without fallback:`, error);
+        fallbackDate = undefined;
+      }
+      
+      const parsedData = this.parseCSVToOpenMats(csvData, normalizedLocation, fallbackDate);
       console.log(`[DEBUG] Parsed ${parsedData.length} gyms for ${normalizedLocation}`);
       
       // Cache the new data
@@ -253,25 +264,33 @@ class GitHubDataService {
   }
 
   /**
-   * Parse CSV data into OpenMat objects
+   * Parse CSV data into OpenMat objects with hybrid last-updated system
+   * 
+   * Hybrid System:
+   * 1. First priority: Use CSV last_updated field if valid (YYYY-MM-DD format)
+   * 2. Fallback: Use GitHub file commit date if CSV date is empty/invalid
+   * 3. Final fallback: undefined (shows as "Unknown" in UI)
+   * 
    * @param csvData - Raw CSV string
+   * @param location - Location for format detection
+   * @param fallbackDate - Fallback date from GitHub commit (ISO string)
    * @returns OpenMat[] - Array of parsed gym data
    */
-  private parseCSVToOpenMats(csvData: string, location?: string): OpenMat[] {
+  private parseCSVToOpenMats(csvData: string, location?: string, fallbackDate?: string): OpenMat[] {
     console.log(`[DEBUG] parseCSVToOpenMats called for location: ${location}`);
     
             // Use new format for St Pete, Austin, Miami, and Tampa, old format for other cities
         if (location === 'stpete' || location === 'austin' || location === 'miami' || location === 'tampa') {
           console.log(`[DEBUG] Using new format parser for ${location}`);
-          return this.parseCSVToOpenMatsNewFormat(csvData);
+          return this.parseCSVToOpenMatsNewFormat(csvData, fallbackDate);
         }
     
     // Use old format for all other cities
     console.log('[DEBUG] Using old format parser for other cities');
-    return this.parseCSVToOpenMatsOldFormat(csvData);
+    return this.parseCSVToOpenMatsOldFormat(csvData, fallbackDate);
   }
 
-  private parseCSVToOpenMatsOldFormat(csvData: string): OpenMat[] {
+  private parseCSVToOpenMatsOldFormat(csvData: string, fallbackDate?: string): OpenMat[] {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
     
@@ -300,7 +319,7 @@ class GitHubDataService {
         sessionTime: values[headers.indexOf('sessionTime')] || '',
         sessionType: values[headers.indexOf('sessionType')] || 'both',
         coordinates: values[headers.indexOf('coordinates')] || undefined,
-        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined
+        lastUpdated: values[headers.indexOf('last_updated')] || undefined
       };
       
 
@@ -332,7 +351,17 @@ class GitHubDataService {
           matFee: parseInt(row.matFee) || 0,
           dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
           coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
-          lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
+          lastUpdated: (() => {
+            const csvDate = this.parseLastUpdatedDate(row.lastUpdated);
+            if (csvDate) {
+              return csvDate;
+            }
+            if (fallbackDate) {
+              console.log(`[DEBUG] Using fallback date for ${row.name}: ${fallbackDate}`);
+              return fallbackDate;
+            }
+            return undefined;
+          })(),
           openMats: []
         };
         
@@ -361,7 +390,8 @@ class GitHubDataService {
     console.log('[DEBUG] Old format CSV parsing completed:', { 
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
-      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length })),
+      fallbackDate: fallbackDate || 'none'
     });
     
     // Check for duplicate IDs
@@ -423,7 +453,7 @@ class GitHubDataService {
    * @param csvData - Raw CSV data string
    * @returns OpenMat[] - Array of gym data
    */
-  private parseCSVToOpenMatsNewFormat(csvData: string): OpenMat[] {
+  private parseCSVToOpenMatsNewFormat(csvData: string, fallbackDate?: string): OpenMat[] {
     console.log('[DEBUG] parseCSVToOpenMatsNewFormat called');
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
@@ -449,7 +479,7 @@ class GitHubDataService {
         matFee: values[headers.indexOf('matFee')] || '0',
         dropInFee: values[headers.indexOf('dropInFee')] || '',
         coordinates: values[headers.indexOf('coordinates')] || undefined,
-        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined,
+        lastUpdated: values[headers.indexOf('last_updated')] || undefined,
         monday: values[headers.indexOf('monday')] || undefined,
         tuesday: values[headers.indexOf('tuesday')] || undefined,
         wednesday: values[headers.indexOf('wednesday')] || undefined,
@@ -481,7 +511,17 @@ class GitHubDataService {
         matFee: parseInt(row.matFee) || 0,
         dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
         coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
-        lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
+        lastUpdated: (() => {
+          const csvDate = this.parseLastUpdatedDate(row.lastUpdated);
+          if (csvDate) {
+            return csvDate;
+          }
+          if (fallbackDate) {
+            console.log(`[DEBUG] Using fallback date for ${row.name}: ${fallbackDate}`);
+            return fallbackDate;
+          }
+          return undefined;
+        })(),
         openMats: []
       };
       
@@ -520,7 +560,8 @@ class GitHubDataService {
     console.log('[DEBUG] New format CSV parsing completed:', { 
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
-      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length })),
+      fallbackDate: fallbackDate || 'none'
     });
     
     console.log('[DEBUG] All St Pete gyms:', sortedGyms.map(g => ({ name: g.name, sessions: g.openMats.length, coordinates: g.coordinates })));
@@ -621,6 +662,63 @@ class GitHubDataService {
       return date.toISOString();
     } catch (e) {
       logger.warn(`Could not parse lastUpdated date: ${lastUpdated}`, { error: e });
+      return undefined;
+    }
+  }
+
+  /**
+   * Get the last commit date for a CSV file from GitHub API
+   * @param location - The location to get commit date for
+   * @returns Promise<string | undefined> - ISO date string or undefined if failed
+   */
+  private async getGitHubFileCommitDate(location: string): Promise<string | undefined> {
+    try {
+      // Extract file path from CSV URL
+      const csvUrl = this.CSV_URLS[location as keyof typeof this.CSV_URLS];
+      if (!csvUrl) {
+        logger.warn(`No CSV URL configured for location: ${location}`);
+        return undefined;
+      }
+
+      // Extract path from URL like: https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv
+      const pathMatch = csvUrl.match(/\/main\/(.+)$/);
+      if (!pathMatch) {
+        logger.warn(`Could not extract file path from CSV URL: ${csvUrl}`);
+        return undefined;
+      }
+
+      const filePath = pathMatch[1];
+      const apiUrl = `https://api.github.com/repos/victorbabiuc/JiuJitsu-Finder/commits?path=${encodeURIComponent(filePath)}&per_page=1`;
+
+      logger.info(`Fetching commit date for ${location} from GitHub API: ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'JiuJitsu-Finder-App'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          logger.warn(`GitHub API rate limited for ${location}, skipping commit date fetch`);
+        } else {
+          logger.warn(`GitHub API error for ${location}: ${response.status} ${response.statusText}`);
+        }
+        return undefined;
+      }
+
+      const commits = await response.json();
+      if (Array.isArray(commits) && commits.length > 0) {
+        const commitDate = commits[0].commit.author.date;
+        logger.info(`Got commit date for ${location}: ${commitDate}`);
+        return commitDate;
+      }
+
+      logger.warn(`No commits found for ${location}`);
+      return undefined;
+    } catch (error) {
+      console.log(`[INFO] GitHub commit date unavailable for ${location} - continuing without fallback`);
       return undefined;
     }
   }
