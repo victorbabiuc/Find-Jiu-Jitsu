@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,11 @@ import {
   StyleSheet,
   Modal,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { OpenMat, OpenMatSession } from '../../types';
-import { formatTimeRange, getSessionTypeWithIcon, formatDate, openWebsite, openDirections, haptics } from '../../utils';
+import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger, isPositiveFee, isFreeFee, formatFeeDisplay, getFeeColor } from '../../utils';
 import stjjLogo from '../../../assets/logos/STJJ.png';
 import tenthPlanetLogo from '../../../assets/logos/10th-planet-austin.png';
 
@@ -34,6 +35,10 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
   onCopyGym,
   onShareGym,
 }) => {
+  // Logo loading states
+  const [logoLoading, setLogoLoading] = useState(true);
+  const [logoError, setLogoError] = useState(false);
+
   return (
     <Modal
       visible={visible}
@@ -65,10 +70,29 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
               <Text style={styles.gymName}>{gym.name}</Text>
             </View>
             <View style={styles.logoContainer}>
+              {logoLoading && !logoError && (
+                <ActivityIndicator 
+                  style={styles.logoLoader}
+                  size="small" 
+                  color="#6366F1"
+                />
+              )}
               {gym.id.includes('stjj') ? (
-                <Image source={stjjLogo} style={styles.gymLogo} />
+                <Image 
+                  source={stjjLogo} 
+                  style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+                  onLoadStart={() => setLogoLoading(true)}
+                  onLoadEnd={() => setLogoLoading(false)}
+                  onError={() => { setLogoLoading(false); setLogoError(true); }}
+                />
               ) : gym.id.includes('10th-planet') ? (
-                <Image source={tenthPlanetLogo} style={styles.gymLogo} />
+                <Image 
+                  source={tenthPlanetLogo} 
+                  style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+                  onLoadStart={() => setLogoLoading(true)}
+                  onLoadEnd={() => setLogoLoading(false)}
+                  onError={() => { setLogoLoading(false); setLogoError(true); }}
+                />
               ) : (
                 <View style={styles.avatarCircle}>
                   <Text style={styles.avatarText}>
@@ -107,14 +131,14 @@ const DashboardGymModal: React.FC<DashboardGymModalProps> = ({
             <Text style={styles.feesTitle}>Fees</Text>
             <View style={styles.feeItem}>
               <Text style={styles.feeLabel}>Open mat - </Text>
-              <Text style={[styles.feeValue, gym.matFee && gym.matFee > 0 && { color: '#111518' }]}>
-                {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
+              <Text style={[styles.feeValue, { color: getFeeColor(gym.matFee) }]}>
+                {formatFeeDisplay(gym.matFee)}
               </Text>
             </View>
             <View style={styles.feeItem}>
               <Text style={styles.feeLabel}>Class Drop in - </Text>
-              <Text style={styles.feeValue}>
-                {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
+              <Text style={[styles.feeValue, { color: getFeeColor(gym.dropInFee) }]}>
+                {formatFeeDisplay(gym.dropInFee)}
               </Text>
             </View>
           </View>
@@ -245,11 +269,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative', // Added for loading indicator positioning
   },
   gymLogo: {
     width: 32,
     height: 32,
     borderRadius: 16,
+  },
+  logoLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoLoading: {
+    opacity: 0.5,
   },
   avatarCircle: {
     width: 32,

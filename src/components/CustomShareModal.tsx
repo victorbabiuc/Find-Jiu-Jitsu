@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Modal,
-  Dimensions,
-  ScrollView,
-  ActivityIndicator,
+  StyleSheet,
   Alert,
+  Linking,
+  Share,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Share, Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { captureCardAsImage } from '../utils/screenshot';
 import { OpenMat, OpenMatSession } from '../types';
-import { useTheme } from '../context/ThemeContext';
+import { captureCardAsImage } from '../utils/screenshot';
+import { shareToInstagramStories } from '../services/instagramShare';
 import ShareCard from './ShareCard';
+import { useTheme } from '../context/ThemeContext';
 
 interface CustomShareModalProps {
   visible: boolean;
@@ -182,16 +184,19 @@ const CustomShareModal: React.FC<CustomShareModalProps> = ({
     try {
       switch (optionId) {
         case 'instagram':
-          const instagramInstalled = await checkAppInstalled('instagram://story-camera');
-          if (instagramInstalled) {
-            await Linking.openURL('instagram://story-camera');
-            Alert.alert(
-              'Instagram Stories',
-              'Instagram has opened! Add the image from your camera roll to share your training session.',
-              [{ text: 'OK' }]
-            );
+          if (capturedImageUri) {
+            try {
+              const success = await shareToInstagramStories(capturedImageUri, gym, session);
+              if (success) {
+                // Instagram service handles all the user feedback
+                console.log('Instagram sharing successful');
+              }
+            } catch (error) {
+              console.error('Instagram sharing error:', error);
+              Alert.alert('Instagram Error', 'Failed to share to Instagram Stories. Please try again.');
+            }
           } else {
-            Alert.alert('Instagram not installed', 'Please install Instagram to share to Stories');
+            Alert.alert('No Image', 'Please wait for the image to be captured before sharing.');
           }
           break;
 

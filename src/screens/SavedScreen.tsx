@@ -11,6 +11,7 @@ import {
   Image,
   RefreshControl,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +20,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useLoading } from '../context/LoadingContext';
 import { useMainTabNavigation } from '../navigation/useNavigation';
-import { beltColors, haptics, animations } from '../utils';
+import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger, isPositiveFee, isFreeFee, formatFeeDisplay, getFeeColor } from '../utils';
 import { OpenMat, OpenMatSession } from '../types';
 import { GymDetailsModal, ContactFooter } from '../components';
 import { apiService, gymLogoService } from '../services';
@@ -46,6 +47,10 @@ const SavedScreen: React.FC = () => {
   
   // Gym logo state
   const [gymLogos, setGymLogos] = useState<Record<string, string>>({});
+  
+  // Logo loading states
+  const [logoLoadingStates, setLogoLoadingStates] = useState<Record<string, boolean>>({});
+  const [logoErrorStates, setLogoErrorStates] = useState<Record<string, boolean>>({});
   
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -171,8 +176,8 @@ const SavedScreen: React.FC = () => {
     }
   };
 
-  const getPriceDisplay = (matFee: number) => {
-    if (matFee === 0) {
+  const getPriceDisplay = (matFee: number | string) => {
+    if (isFreeFee(matFee)) {
       return (
         <View style={styles.priceRow}>
           <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
@@ -182,8 +187,8 @@ const SavedScreen: React.FC = () => {
     }
     return (
       <View style={styles.priceRow}>
-        <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-        <Text style={[styles.priceText, { color: '#10B981' }]}>${matFee}</Text>
+        <View style={[styles.dot, { backgroundColor: getFeeColor(matFee) }]} />
+        <Text style={[styles.priceText, { color: getFeeColor(matFee) }]}>{formatFeeDisplay(matFee)}</Text>
       </View>
     );
   };
@@ -247,24 +252,60 @@ const SavedScreen: React.FC = () => {
               onPress={() => handleGymPress(gym)}
             >
               {/* Logo/Initials */}
-              {gym.id.includes('10th-planet') ? (
-                <Image source={tenthPlanetLogo} style={styles.logoCircle} />
-              ) : gym.id.includes('stjj') ? (
-                <Image source={stjjLogo} style={styles.logoCircle} />
-              ) : gymLogos[gym.id] ? (
-                <Image source={{ uri: gymLogos[gym.id] }} style={styles.logoCircle} />
-              ) : (
-                <LinearGradient
-                  colors={[beltColor.primary, beltColor.secondary]}
-                  style={styles.logoCircle}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
-                    {gymLogoService.getInitials(gym.name)}
-                  </Text>
-                </LinearGradient>
-              )}
+              <View style={styles.logoContainer}>
+                {logoLoadingStates[gym.id] && !logoErrorStates[gym.id] && (
+                  <ActivityIndicator 
+                    style={styles.logoLoader}
+                    size="small" 
+                    color="#6366F1"
+                  />
+                )}
+                {gym.id.includes('10th-planet') ? (
+                  <Image 
+                    source={tenthPlanetLogo} 
+                    style={[styles.logoCircle, logoLoadingStates[gym.id] && styles.logoLoading]}
+                    onLoadStart={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: true }))}
+                    onLoadEnd={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false }))}
+                    onError={() => { 
+                      setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false })); 
+                      setLogoErrorStates(prev => ({ ...prev, [gym.id]: true })); 
+                    }}
+                  />
+                ) : gym.id.includes('stjj') ? (
+                  <Image 
+                    source={stjjLogo} 
+                    style={[styles.logoCircle, logoLoadingStates[gym.id] && styles.logoLoading]}
+                    onLoadStart={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: true }))}
+                    onLoadEnd={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false }))}
+                    onError={() => { 
+                      setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false })); 
+                      setLogoErrorStates(prev => ({ ...prev, [gym.id]: true })); 
+                    }}
+                  />
+                ) : gymLogos[gym.id] ? (
+                  <Image 
+                    source={{ uri: gymLogos[gym.id] }} 
+                    style={[styles.logoCircle, logoLoadingStates[gym.id] && styles.logoLoading]}
+                    onLoadStart={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: true }))}
+                    onLoadEnd={() => setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false }))}
+                    onError={() => { 
+                      setLogoLoadingStates(prev => ({ ...prev, [gym.id]: false })); 
+                      setLogoErrorStates(prev => ({ ...prev, [gym.id]: true })); 
+                    }}
+                  />
+                ) : (
+                  <LinearGradient
+                    colors={[beltColor.primary, beltColor.secondary]}
+                    style={styles.logoCircle}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={[styles.logoText, { color: beltColor.textOnColor }]}> 
+                      {gymLogoService.getInitials(gym.name)}
+                    </Text>
+                  </LinearGradient>
+                )}
+              </View>
               
               {/* Card Content */}
               <View style={styles.cardContent}>
@@ -378,13 +419,31 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  logoCircle: {
+  logoContainer: {
     width: 50,
     height: 50,
-    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+  },
+  logoCircle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 25,
+  },
+  logoLoading: {
+    opacity: 0.5,
+  },
+  logoLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoText: {
     fontSize: 16,

@@ -307,3 +307,78 @@ export const formatSessionsList = (openMats: OpenMatSession[]): string => {
     `${session.day}: ${formatTimeRange(session.time)} (${getSessionTypeWithIcon(session.type)})`
   ).join('\n');
 }; 
+
+/**
+ * Check if a fee value represents a positive number
+ * @param fee - Fee value (number or string)
+ * @returns boolean - True if fee is a positive number
+ */
+export const isPositiveFee = (fee: number | string | undefined): boolean => {
+  if (typeof fee === 'number') {
+    return fee > 0;
+  }
+  if (typeof fee === 'string') {
+    const numFee = parseFloat(fee);
+    return !isNaN(numFee) && numFee > 0;
+  }
+  return false;
+};
+
+/**
+ * Check if a fee value represents "free"
+ * @param fee - Fee value (number or string)
+ * @returns boolean - True if fee represents free
+ */
+export const isFreeFee = (fee: number | string | undefined): boolean => {
+  if (typeof fee === 'string') {
+    return fee.toLowerCase() === 'free';
+  }
+  return false;
+};
+
+/**
+ * Get the numeric value of a fee, or 0 if not a valid number
+ * @param fee - Fee value (number or string)
+ * @returns number - Numeric fee value or 0
+ */
+export const getNumericFee = (fee: number | string | undefined): number => {
+  if (typeof fee === 'number') {
+    return fee;
+  }
+  if (typeof fee === 'string') {
+    const numFee = parseFloat(fee);
+    return !isNaN(numFee) ? numFee : 0;
+  }
+  return 0;
+};
+
+/**
+ * Format fee display text
+ * @param fee - Fee value (number or string)
+ * @returns string - Formatted fee text
+ */
+export const formatFeeDisplay = (fee: number | string | undefined): string => {
+  if (isFreeFee(fee)) {
+    return 'Free';
+  }
+  if (isPositiveFee(fee)) {
+    const numFee = getNumericFee(fee);
+    return `$${numFee}`;
+  }
+  return '?';
+};
+
+/**
+ * Get fee display color
+ * @param fee - Fee value (number or string)
+ * @returns string - Color hex code
+ */
+export const getFeeColor = (fee: number | string | undefined): string => {
+  if (isFreeFee(fee)) {
+    return '#10B981'; // Green for free
+  }
+  if (isPositiveFee(fee)) {
+    return '#111518'; // Dark for paid
+  }
+  return '#9CA3AF'; // Gray for unknown
+}; 

@@ -1,0 +1,53 @@
+JiuJitsu Finder - Website Validation Report
+Generated: 8/14/2025, 11:58:53 PM
+
+SUMMARY:
+  Total websites checked: 119
+  Active websites: 81
+  Broken websites: 4
+  Errors: 34
+
+BROKEN WEBSITES:
+  ❌ Gracie Barra Kendall (miami-graciebarra-kendall): https://graciebarra.com - HTTP 403
+  ❌ Gracie Barra South Miami (miami-graciebarra-southmiami): https://graciebarra.com - HTTP 403
+  ❌ Wolfpack Jiu Jitsu (miami-wolfpackjiujitsu): https://wolfpackjiujitsu.com - HTTP 403
+  ❌ Tampa Jiu Jitsu (tampa-tjj-1): https://www.tampajiujitsu.com - HTTP 403
+
+WEBSITES WITH ERRORS:
+  ⚠️  Coopers (austin-coopers): https://coopersjiujitsu.com - Domain not found
+  ⚠️  Gracie Barra Aventura (miami-graciebarra-aventura): https://gbayventura.com - Domain not found
+  ⚠️  Arena Combat Sports (miami-arenacombatsports): https://arenacombatsports.com - write EPROTO 80EF9C4CF87F0000:error:0A000410:SSL routines:ssl3_read_bytes:sslv3 alert handshake failure:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1605:SSL alert number 40
+
+  ⚠️  Young Tigers Foundation (miami-youngtigers): https://youngtigersfoundation.org - Domain not found
+  ⚠️  South Florida Jiu Jitsu (miami-southfloridajiujitsu): https://southfloridajiujitsu.com - Domain not found
+  ⚠️  BJJ Center Miami (miami-bjjcenter): https://bjjcentermiami.com - Domain not found
+  ⚠️  Elite Martial Arts (miami-elitemartialarts): https://elitemartialarts.com - Hostname/IP does not match certificate's altnames: Host: elitemartialarts.com. is not in the cert's altnames: DNS:ns2.perfectdomain.com
+  ⚠️  Miami Grappling Academy (miami-miamigrapplingacademy): https://miamigrapplingacademy.com - Domain not found
+  ⚠️  Iron Lions BJJ (miami-ironlionsbjj): https://ironlionsbjj.com - Domain not found
+  ⚠️  Cesar Gracie Jiu Jitsu (miami-cesargracie): https://cesargracie.com - SSL certificate expired
+  ⚠️  Miami Combat Academy (miami-miamicombatacademy): https://miamicombatacademy.com - Domain not found
+  ⚠️  Trillo Jiujitsu Academy (miami-trillojiujitsu): https://trillobjj.com - Domain not found
+  ⚠️  Everyone Jiu-Jitsu Miami (miami-everyonejiujitsu): https://everyonejiujitsu.com - Domain not found
+  ⚠️  Beach Martial Arts (miami-beachmartialarts): https://beachmartialarts.com - Domain not found
+  ⚠️  Gama Filho Martial Arts (miami-gamafilho): https://gfmartialarts.com - Domain not found
+  ⚠️  Marcus Aurelio Jiu-Jitsu Academy (miami-marcusaurelio): https://marcusaureliobjj.com - Domain not found
+  ⚠️  American Top Team of West Kendall (miami-att-westkendall): https://americantopteamkendall.com - Domain not found
+  ⚠️  Gracie Barra North Miami (miami-graciebarra-northmiami): https://gbnorthmiami.com - Domain not found
+  ⚠️  Gracie Barra West Kendall (miami-graciebarra-westkendall): https://gbwestkendall.com - Connection refused
+  ⚠️  Gracie Barra Coral Gables (miami-graciebarra-coralgables): https://gbcoralgables.com - Domain not found
+  ⚠️  Zen Jiu Jitsu Miami (miami-zenjiujitsu): https://zenjiujitsumiami.com - Domain not found
+  ⚠️  Nightmare BJJ Kendall (miami-nightmarebjj): https://nightmarebjj.com - Domain not found
+  ⚠️  Satori Jiu Jitsu (miami-satorijiujitsu): https://satorijiujitsu.com - Request timeout
+  ⚠️  SBG Miami (miami-sbgmiami): https://sbgmiami.com - Domain not found
+  ⚠️  Fusion X-Cel Performance (miami-fusionxcel): https://fusionx-cel.com - Domain not found
+  ⚠️  Bushido Miami Martial Arts (miami-bushidomiami): https://bushidomiamimartialarts.com - Domain not found
+  ⚠️  Valor Martial Arts Miami (miami-valormartialarts): https://valormartialartsmiami.com - Domain not found
+  ⚠️  Champions Martial Arts Kendall (miami-championsmartialarts): https://championsmartialartskendall.com - Domain not found
+  ⚠️  Total Martial Arts Academy (miami-totalmartialarts): https://totalmartialartsacademy.com - Domain not found
+  ⚠️  Global Premier Martial Arts (miami-globalpremiermartialarts): https://globalpremiermartialarts.com - Domain not found
+  ⚠️  Brazilian Top Team Miami (miami-braziliantopteam): https://bttmiami.com - Domain not found
+  ⚠️  Blackhouse MMA Miami (miami-blackhousemma-doral): https://blackhousemiami.com - read ECONNRESET
+  ⚠️  ATT Kendall (miami-att-kendall): https://attkendall.com - Domain not found
+  ⚠️  The Cage MMA Kendall (miami-thecagemma): https://thecagemmakendall.com - Domain not found
+
+ACTIVE WEBSITES: 81

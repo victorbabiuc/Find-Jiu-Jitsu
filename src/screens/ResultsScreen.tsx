@@ -1142,14 +1142,14 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
 
   // Helper function to format fee display
   const formatFeeDisplay = (fee: any): { text: string; color: string } => {
-    if (fee === 0) {
-      return { text: 'Free', color: '#10B981' };
-    } else if (typeof fee === 'number' && fee > 0) {
+    if (fee && fee > 0) {
       return { text: `$${fee}`, color: '#111518' };
     } else if (fee === 'Contact' || fee === 'contact') {
       return { text: 'Contact gym', color: '#F59E0B' };
+    } else if (fee === 'free' || fee === 'Free' || fee === 'FREE') {
+      return { text: 'Free', color: '#10B981' }; // ✅ Actually free
     } else {
-      return { text: 'Contact gym', color: '#9CA3AF' };
+      return { text: '?', color: '#9CA3AF' }; // ❓ Unknown
     }
   };
 
@@ -1239,7 +1239,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
             height: 1920
           });
           
-          // Share using native iOS share sheet
+          // Go directly to iOS native share sheet (like Spotify)
           await Share.share({
             url: imageUri,
             message: `Check out this open mat session at ${gym.name}! 🥋\n\n${firstSession.day} at ${firstSession.time}\n\nFind more sessions with JiuJitsu Finder!`
@@ -1289,6 +1289,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
     shareScaleAnim: Animated.Value;
     index: number;
   }) => {
+
+    // Logo loading states
+    const [logoLoading, setLogoLoading] = useState(true);
+    const [logoError, setLogoError] = useState(false);
 
     // Subtle button animation - native iOS feel
     const animateButtonPress = (animValue: Animated.Value) => {
@@ -1389,12 +1393,37 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
           
           {/* Right side - Logo */}
           <View style={styles.logoContainer}>
+            {logoLoading && !logoError && (
+              <ActivityIndicator 
+                style={styles.logoLoader}
+                size="small" 
+                color="#6366F1"
+              />
+            )}
             {gym.id.includes('10th-planet') ? (
-              <Image source={tenthPlanetLogo} style={styles.gymLogo} />
+              <Image 
+                source={tenthPlanetLogo} 
+                style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+                onLoadStart={() => setLogoLoading(true)}
+                onLoadEnd={() => setLogoLoading(false)}
+                onError={() => { setLogoLoading(false); setLogoError(true); }}
+              />
             ) : gym.id.includes('stjj') ? (
-              <Image source={stjjLogo} style={styles.gymLogo} />
+              <Image 
+                source={stjjLogo} 
+                style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+                onLoadStart={() => setLogoLoading(true)}
+                onLoadEnd={() => setLogoLoading(false)}
+                onError={() => { setLogoLoading(false); setLogoError(true); }}
+              />
             ) : false ? (
-              <Image source={{ uri: gymLogos[gym.id] }} style={styles.gymLogo} />
+              <Image 
+                source={{ uri: gymLogos[gym.id] }} 
+                style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+                onLoadStart={() => setLogoLoading(true)}
+                onLoadEnd={() => setLogoLoading(false)}
+                onError={() => { setLogoLoading(false); setLogoError(true); }}
+              />
             ) : (
               <View style={styles.avatarCircle}>
                 <Text style={styles.avatarText}>
@@ -1590,7 +1619,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ route }) => {
         <Animated.View style={[styles.locationPickerSection, { opacity: headerAnim }]}>
           <TouchableOpacity style={styles.locationPickerButton} activeOpacity={0.7} onPress={handleLocationPickerPress}>
             <Ionicons name="location" size={16} color="#60798A" />
-            <Text style={styles.locationPickerText} numberOfLines={1} ellipsizeMode='tail'>Near: {getLocationDisplayName(location)} ▼</Text>
+            <Text style={styles.locationPickerText} numberOfLines={1} ellipsizeMode='tail'>Near: {displayLocationText} ▼</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -3024,6 +3053,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9CA3AF',
     fontStyle: 'italic',
+  },
+
+  logoLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoLoading: {
+    opacity: 0.5,
   },
 
 });

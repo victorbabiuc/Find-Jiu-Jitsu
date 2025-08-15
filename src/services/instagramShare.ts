@@ -1,4 +1,5 @@
-import { Linking, Platform } from 'react-native';
+import { Linking, Platform, Alert } from 'react-native';
+import * as MediaLibrary from 'expo-media-library';
 import { OpenMat, OpenMatSession } from '../types';
 import { logger } from '../utils/logger';
 
@@ -11,9 +12,14 @@ interface InstagramShareData {
 /**
  * Instagram Sharing Service
  * Handles Instagram-specific sharing logic for Instagram Stories
+ * 
+ * Modern iOS Approach:
+ * 1. Save image to camera roll first
+ * 2. Open Instagram Stories camera with instagram://story-camera
+ * 3. User selects saved image from camera roll
  */
 class InstagramShareService {
-  private readonly INSTAGRAM_STORIES_URL = 'instagram-stories://share';
+  private readonly INSTAGRAM_STORIES_URL = 'instagram://story-camera';
   private readonly INSTAGRAM_APP_URL = 'instagram://app';
 
   /**
@@ -35,6 +41,36 @@ class InstagramShareService {
   }
 
   /**
+   * Request camera roll permissions
+   * @returns Promise<boolean> - True if permission granted
+   */
+  private async requestCameraRollPermission(): Promise<boolean> {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      return status === 'granted';
+    } catch (error) {
+      logger.error('Error requesting camera roll permission:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Save image to camera roll
+   * @param imageUri - URI of the image to save
+   * @returns Promise<string> - Asset ID of saved image
+   */
+  private async saveImageToCameraRoll(imageUri: string): Promise<string> {
+    try {
+      const asset = await MediaLibrary.createAssetAsync(imageUri);
+      logger.info('Image saved to camera roll:', asset.id);
+      return asset.id;
+    } catch (error) {
+      logger.error('Error saving image to camera roll:', error);
+      throw new Error('Failed to save image to camera roll');
+    }
+  }
+
+  /**
    * Prepare share data for Instagram Stories
    * @param imageUri - URI of the image to share
    * @param gym - Gym data
@@ -50,7 +86,7 @@ class InstagramShareService {
   }
 
   /**
-   * Share to Instagram Stories
+   * Share to Instagram Stories using modern iOS approach
    * @param imageUri - URI of the image to share
    * @param gym - Gym data
    * @param session - Session data
@@ -66,20 +102,42 @@ class InstagramShareService {
       const isInstalled = await this.isInstagramInstalled();
       if (!isInstalled) {
         logger.warn('Instagram is not installed on this device');
+        Alert.alert(
+          'Instagram Not Installed',
+          'Please install Instagram to share to Stories',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Install Instagram', onPress: () => this.promptInstallInstagram() }
+          ]
+        );
         return false;
       }
 
-      // Prepare the share data
-      const shareData = this.prepareShareData(imageUri, gym, session);
+      // Request camera roll permission
+      const hasPermission = await this.requestCameraRollPermission();
+      if (!hasPermission) {
+        logger.warn('Camera roll permission denied');
+        Alert.alert(
+          'Permission Required',
+          'Camera roll access is needed to share to Instagram Stories',
+          [{ text: 'OK' }]
+        );
+        return false;
+      }
 
-      // Create Instagram Stories URL with parameters
-      const instagramUrl = this.buildInstagramStoriesUrl(shareData);
+      // Save image to camera roll first (required for modern Instagram)
+      await this.saveImageToCameraRoll(imageUri);
 
-      // Open Instagram Stories
-      const opened = await Linking.openURL(instagramUrl);
+      // Open Instagram Stories camera
+      const opened = await Linking.openURL(this.INSTAGRAM_STORIES_URL);
       
       if (opened) {
         logger.info('Successfully opened Instagram Stories for sharing');
+        Alert.alert(
+          'Instagram Stories Opened!',
+          'Your image has been saved to camera roll. Select it from your camera roll to add to your story!',
+          [{ text: 'OK' }]
+        );
         return true;
       } else {
         logger.error('Failed to open Instagram Stories');
@@ -88,34 +146,13 @@ class InstagramShareService {
 
     } catch (error) {
       logger.error('Error sharing to Instagram Stories:', error);
+      Alert.alert(
+        'Sharing Error',
+        'Failed to share to Instagram Stories. Please try again.',
+        [{ text: 'OK' }]
+      );
       return false;
     }
-  }
-
-  /**
-   * Build Instagram Stories URL with parameters
-   * @param shareData - Prepared share data
-   * @returns string - Instagram Stories URL
-   */
-  private buildInstagramStoriesUrl(shareData: InstagramShareData): string {
-    const { imageUri, gym, session } = shareData;
-
-    // Create the message text
-    const message = this.createShareMessage(gym, session);
-
-    // Build URL parameters
-    const params = new URLSearchParams();
-    
-    // Add the image URI
-    params.append('source_image', imageUri);
-    
-    // Add the message text
-    params.append('interactive_asset_uri', message);
-    
-    // Add background color (optional)
-    params.append('background_color', '#000000');
-
-    return `${this.INSTAGRAM_STORIES_URL}?${params.toString()}`;
   }
 
   /**

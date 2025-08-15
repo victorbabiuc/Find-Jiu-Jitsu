@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { OpenMat } from '../types';
-import { haptics, animations } from '../utils';
+import { beltColors, selectionColor, haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger, isPositiveFee, isFreeFee, formatFeeDisplay, getFeeColor } from '../utils';
 
 const { height } = Dimensions.get('window');
 
@@ -299,10 +299,10 @@ const GymDetailsModal: React.FC<GymDetailsModalProps> = ({
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Pricing</Text>
               <Text style={{ marginBottom: 5 }}>
-                Open Mat: {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
+                Open Mat: {formatFeeDisplay(gym.matFee)}
               </Text>
               <Text>
-                Drop-in Class: {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
+                Drop-in Class: {formatFeeDisplay(gym.dropInFee)}
               </Text>
             </View>
           </ScrollView>

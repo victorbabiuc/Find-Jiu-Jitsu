@@ -29,8 +29,8 @@ export interface User {
     address: string;
     distance: number;
     openMats: OpenMatSession[];
-    matFee: number;
-    dropInFee?: number; // Optional field for drop-in class fees
+    matFee: number | string; // Allow numbers or strings like 'free'
+    dropInFee?: number | string; // Optional field for drop-in class fees, allow numbers or strings like 'free'
     website?: string; // Optional website URL
     instructor?: string; // Optional instructor name
     goingUsers?: User[]; // Optional array of users attending

@@ -38,7 +38,7 @@ export const captureAndShareCard = async (
       height
     });
 
-    // Share the image
+    // Go directly to iOS native share sheet (like Spotify)
     await Share.share({
       url: uri,
       message: `Check out this open mat session at ${gymData.name}! 🥋\n\n${sessionData.day} at ${sessionData.time}\n\nFind more sessions with JiuJitsu Finder!`

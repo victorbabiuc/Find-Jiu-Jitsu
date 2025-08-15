@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, ActivityIndicator, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
 import stjjLogo from '../../assets/logos/STJJ.png';
 import { ShareCard, Toast } from './index';
 import { captureAndShareCard } from '../utils/screenshot';
-import { haptics, animations } from '../utils';
+import { haptics, animations, formatTimeRange, formatSingleTime, addOneHour, getSessionTypeWithIcon, getMatTypeDisplay, formatDate, openWebsite, openDirections, handleCopyGym, formatOpenMats, formatSessionsList, logger, isPositiveFee, isFreeFee, formatFeeDisplay, getFeeColor } from '../utils';
 import { useTheme } from '../context/ThemeContext';
 import { OpenMat, OpenMatSession } from '../types';
 
@@ -38,13 +38,16 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
 }) => {
   const cardRef = useRef<View>(null);
   const { theme } = useTheme();
-  const [showShareOptions, setShowShareOptions] = useState(false);
   const [includeImGoing, setIncludeImGoing] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  
+  // Logo loading states
+  const [logoLoading, setLogoLoading] = useState(true);
+  const [logoError, setLogoError] = useState(false);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -77,11 +80,11 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       
       const shareText = `${gym.name}\n` +
         (displayAddress && displayAddress.trim() !== '' ? `📍 ${displayAddress}\n` : '') +
-        (gym.website ? `🌐 ${gym.website.replace(/^https?:\/\//, '')}\n` : '') +
-        (sessionInfo ? `${sessionInfo}\n` : '') +
-        `💵 Open mat: ${gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}\n\n` +
-        `${inviteMessage}\n\n` +
-        `📱 Get the app:\nhttps://bit.ly/40DjTlM`;
+                  (gym.website ? `🌐 ${gym.website.replace(/^https?:\/\//, '')}\n` : '') +
+          (sessionInfo ? `${sessionInfo}\n` : '') +
+          `💵 Open mat: ${formatFeeDisplay(gym.matFee)}\n\n` +
+          `${inviteMessage}\n\n` +
+          `📱 Get the app:\nhttps://bit.ly/40DjTlM`;
       
       Share.share({
         message: shareText,
@@ -119,10 +122,6 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
     } finally {
       setIsSharing(false);
     }
-  };
-
-  const handleShareOptions = () => {
-    setShowShareOptions(true);
   };
 
   const handleHeartPress = () => {
@@ -165,11 +164,11 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       const sessionInfo = firstSession ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}` : '';
       
       const copyText = `🥋 ${gym.name} - Open Mat
-${sessionInfo}
-👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
-💵 Open mat: ${gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
-📍 ${gym.address}
-🏃 I'm going, come train with me!
+  ${sessionInfo}
+  👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
+  💵 Open mat: ${formatFeeDisplay(gym.matFee)}
+  📍 ${gym.address}
+  🏃 I'm going, come train with me!
 📱 Get the app: https://bit.ly/40DjTlM`;
 
       await Clipboard.setStringAsync(copyText);
@@ -244,15 +243,36 @@ ${sessionInfo}
       >
       {/* Header: Logo/Avatar + Gym Name + Heart */}
       <View style={styles.cardHeader}>
-        {gym.id.includes('10th-planet') ? (
-          <Image source={tenthPlanetLogo} style={styles.gymLogo} />
-        ) : gym.id.includes('stjj') ? (
-          <Image source={stjjLogo} style={styles.gymLogo} />
-        ) : (
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{getInitials(gym.name)}</Text>
-          </View>
-        )}
+        <View style={styles.logoContainer}>
+          {logoLoading && !logoError && (
+            <ActivityIndicator 
+              style={styles.logoLoader}
+              size="small" 
+              color="#6366F1"
+            />
+          )}
+          {gym.id.includes('10th-planet') ? (
+            <Image 
+              source={tenthPlanetLogo} 
+              style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+              onLoadStart={() => setLogoLoading(true)}
+              onLoadEnd={() => setLogoLoading(false)}
+              onError={() => { setLogoLoading(false); setLogoError(true); }}
+            />
+          ) : gym.id.includes('stjj') ? (
+            <Image 
+              source={stjjLogo} 
+              style={[styles.gymLogo, logoLoading && styles.logoLoading]}
+              onLoadStart={() => setLogoLoading(true)}
+              onLoadEnd={() => setLogoLoading(false)}
+              onError={() => { setLogoLoading(false); setLogoError(true); }}
+            />
+          ) : (
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>{getInitials(gym.name)}</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.gymName}>{gym.name}</Text>
         <View style={styles.logoHeartContainer}>
           <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
@@ -313,15 +333,15 @@ ${sessionInfo}
         </View>
         <View style={styles.feeItem}>
           <Text style={styles.feeLabel}>Open mat - </Text>
-          <Text style={[styles.feeValue, gym.matFee && gym.matFee > 0 && { color: '#111518' }]}>
-              {gym.matFee && gym.matFee > 0 ? `$${gym.matFee}` : '?'}
-          </Text>
+                      <Text style={[styles.feeValue, { color: getFeeColor(gym.matFee) }]}>
+              {formatFeeDisplay(gym.matFee)}
+            </Text>
         </View>
         <View style={styles.feeItem}>
           <Text style={styles.feeLabel}>Class Drop in - </Text>
-          <Text style={styles.feeValue}>
-            {gym.dropInFee && gym.dropInFee > 0 ? `$${gym.dropInFee}` : '?'}
-          </Text>
+                      <Text style={[styles.feeValue, { color: getFeeColor(gym.dropInFee) }]}>
+              {formatFeeDisplay(gym.dropInFee)}
+            </Text>
         </View>
       </View>
 
@@ -355,7 +375,7 @@ ${sessionInfo}
           style={[styles.actionButton, isSharing && styles.disabledButton]}
           onPress={() => {
             haptics.light(); // Light haptic for share button
-            handleShareOptions();
+            handleScreenshotShare();
           }}
           disabled={isSharing}
         >
@@ -367,129 +387,6 @@ ${sessionInfo}
         </TouchableOpacity>
       </View>
       </View>
-
-      {/* Share Options Modal - Moved outside TouchableOpacity */}
-      <Modal
-        visible={showShareOptions}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowShareOptions(false)}
-      >
-        <TouchableOpacity 
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}
-          activeOpacity={1}
-          onPress={() => setShowShareOptions(false)}
-        >
-          <View style={{
-            backgroundColor: theme.surface,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            paddingHorizontal: 20,
-            paddingTop: 20,
-            paddingBottom: 40,
-          }}>
-            <Text style={{ 
-              fontSize: 20, 
-              fontWeight: 'bold', 
-              marginBottom: 20, 
-              color: theme.text.primary,
-              textAlign: 'center'
-            }}>
-              Share Open Mat
-            </Text>
-            
-            {/* I'm Going Toggle */}
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              marginBottom: 20,
-              paddingHorizontal: 10
-            }}>
-              <Text style={{ 
-                fontSize: 16, 
-                color: theme.text.primary,
-                flex: 1
-              }}>
-                Say "I'm going"?
-              </Text>
-              <TouchableOpacity
-                style={{
-                  width: 50,
-                  height: 30,
-                  backgroundColor: includeImGoing ? '#007AFF' : '#ccc',
-                  borderRadius: 15,
-                  justifyContent: 'center',
-                  alignItems: includeImGoing ? 'flex-end' : 'flex-start',
-                  paddingHorizontal: 2
-                }}
-                onPress={() => setIncludeImGoing(!includeImGoing)}
-              >
-                <View style={{
-                  width: 26,
-                  height: 26,
-                  backgroundColor: 'white',
-                  borderRadius: 13,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 1,
-                  elevation: 2
-                }} />
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity
-              style={{ 
-                padding: 16, 
-                backgroundColor: theme.surfaceHover, 
-                borderRadius: 12, 
-                marginBottom: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onPress={() => {
-                setShowShareOptions(false);
-                handleShare(); // Existing text share
-              }}
-            >
-              <Text style={{ fontSize: 18, color: theme.text.primary }}>📝 Share as Text</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={{ 
-                padding: 16, 
-                backgroundColor: theme.surfaceHover, 
-                borderRadius: 12, 
-                marginBottom: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onPress={() => {
-                setShowShareOptions(false);
-                handleScreenshotShare(); // Image share function
-              }}
-            >
-              <Text style={{ fontSize: 18, color: theme.text.primary }}>📸 Share as Image</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={{ padding: 16, marginTop: 8 }}
-              onPress={() => setShowShareOptions(false)}
-            >
-              <Text style={{ 
-                fontSize: 16, 
-                color: theme.text.secondary, 
-                textAlign: 'center' 
-              }}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
       
       {/* Toast Notification */}
       <Toast
@@ -533,6 +430,23 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     resizeMode: 'contain',
     marginRight: 10,
+  },
+  logoLoading: {
+    opacity: 0.5,
+  },
+  logoLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    position: 'relative',
+    width: 36,
+    height: 36,
   },
   avatarCircle: {
     width: 36,

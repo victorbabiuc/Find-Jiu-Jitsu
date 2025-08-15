@@ -25,4 +25,5 @@ export {
 } from './gymUtils';
 
 // Logging utilities
-export { logger } from './logger'; 
+export { logger } from './logger';
+export { isPositiveFee, isFreeFee, getNumericFee, formatFeeDisplay, getFeeColor } from './gymUtils'; 

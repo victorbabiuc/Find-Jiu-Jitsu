@@ -1,0 +1,721 @@
+JiuJitsu Finder - CSV Auto-Fix Report
+Generated: 8/15/2025, 12:41:31 AM
+
+SUMMARY:
+  Total files processed: 4
+  Total fixes applied: 88
+  Errors encountered: 0
+
+FIXES BY FIELD:
+  website: 87 fixes
+    - Gracie Barra Kendall: "graciebarra.com" → "https://graciebarra.com"
+    - Gracie Barra Aventura: "gbayventura.com" → "https://gbayventura.com"
+    - Gracie Barra South Miami: "graciebarra.com" → "https://graciebarra.com"
+
+  dropInFee: 80 fixes
+    - Gracie Barra Kendall: "Contact" → "?"
+    - Gracie Barra Aventura: "Contact" → "?"
+    - Gracie Barra South Miami: "Contact" → "?"
+
+  matFee: 63 fixes
+    - Gracie Barra South Miami: "Contact" → "?"
+    - Rilion Gracie Jiu-Jitsu Doral: "Contact" → "?"
+    - Valente Brothers Jiu-Jitsu Coral Gables: "Contact" → "?"
+
+DETAILED FIXES:
+  1. Gracie Barra Kendall (miami-gyms.csv:2)
+     website: "graciebarra.com" → "https://graciebarra.com"
+
+  2. Gracie Barra Kendall (miami-gyms.csv:2)
+     dropInFee: "Contact" → "?"
+
+  3. Gracie Barra Aventura (miami-gyms.csv:3)
+     website: "gbayventura.com" → "https://gbayventura.com"
+
+  4. Gracie Barra Aventura (miami-gyms.csv:3)
+     dropInFee: "Contact" → "?"
+
+  5. Gracie Barra South Miami (miami-gyms.csv:4)
+     website: "graciebarra.com" → "https://graciebarra.com"
+
+  6. Gracie Barra South Miami (miami-gyms.csv:4)
+     matFee: "Contact" → "?"
+
+  7. Gracie Barra South Miami (miami-gyms.csv:4)
+     dropInFee: "Contact" → "?"
+
+  8. Rilion Gracie Jiu-Jitsu Miami Lakes (miami-gyms.csv:5)
+     website: "riliongraciemiamilakes.com" → "https://riliongraciemiamilakes.com"
+
+  9. Rilion Gracie Jiu-Jitsu Miami Lakes (miami-gyms.csv:5)
+     dropInFee: "Contact" → "?"
+
+  10. Rilion Gracie Jiu-Jitsu Doral (miami-gyms.csv:6)
+     website: "riliongracie.com" → "https://riliongracie.com"
+
+  11. Rilion Gracie Jiu-Jitsu Doral (miami-gyms.csv:6)
+     matFee: "Contact" → "?"
+
+  12. Rilion Gracie Jiu-Jitsu Doral (miami-gyms.csv:6)
+     dropInFee: "Contact" → "?"
+
+  13. American Top Team Coconut Creek (miami-gyms.csv:7)
+     website: "americantopteam.com" → "https://americantopteam.com"
+
+  14. American Top Team Coconut Creek (miami-gyms.csv:7)
+     dropInFee: "Contact" → "?"
+
+  15. American Top Team Aventura/NMB (miami-gyms.csv:8)
+     website: "attaventuranmb.com" → "https://attaventuranmb.com"
+
+  16. American Top Team Aventura/NMB (miami-gyms.csv:8)
+     dropInFee: "Contact" → "?"
+
+  17. 10th Planet Miami (miami-gyms.csv:9)
+     website: "10thplanetmiami.com" → "https://10thplanetmiami.com"
+
+  18. 10th Planet Miami (miami-gyms.csv:9)
+     dropInFee: "Contact" → "?"
+
+  19. Valente Brothers Jiu-Jitsu Coral Gables (miami-gyms.csv:10)
+     website: "goldbjj.com" → "https://goldbjj.com"
+
+  20. Valente Brothers Jiu-Jitsu Coral Gables (miami-gyms.csv:10)
+     matFee: "Contact" → "?"
+
+  21. Valente Brothers Jiu-Jitsu Coral Gables (miami-gyms.csv:10)
+     dropInFee: "Contact" → "?"
+
+  22. Carlson Gracie Miami (miami-gyms.csv:11)
+     website: "carlsongraciemiami.com" → "https://carlsongraciemiami.com"
+
+  23. Carlson Gracie Miami (miami-gyms.csv:11)
+     dropInFee: "Contact" → "?"
+
+  24. Lira Jiu Jitsu (miami-gyms.csv:12)
+     website: "lirajiujitsu.com" → "https://lirajiujitsu.com"
+
+  25. Lira Jiu Jitsu (miami-gyms.csv:12)
+     matFee: "Contact" → "?"
+
+  26. Lira Jiu Jitsu (miami-gyms.csv:12)
+     dropInFee: "Contact" → "?"
+
+  27. Fight Sports Club Miami (miami-gyms.csv:13)
+     website: "fightsports.com" → "https://fightsports.com"
+
+  28. MMA MASTERS (miami-gyms.csv:14)
+     website: "mmamasters.com" → "https://mmamasters.com"
+
+  29. MMA MASTERS (miami-gyms.csv:14)
+     matFee: "Contact" → "?"
+
+  30. MMA MASTERS (miami-gyms.csv:14)
+     dropInFee: "Contact" → "?"
+
+  31. Mario Sperry Jiu Jitsu (miami-gyms.csv:15)
+     website: "mariosperry.com" → "https://mariosperry.com"
+
+  32. Mario Sperry Jiu Jitsu (miami-gyms.csv:15)
+     matFee: "Contact" → "?"
+
+  33. Mario Sperry Jiu Jitsu (miami-gyms.csv:15)
+     dropInFee: "Contact" → "?"
+
+  34. Atos Miami (miami-gyms.csv:16)
+     website: "atosmiami.com" → "https://atosmiami.com"
+
+  35. Atos Miami (miami-gyms.csv:16)
+     dropInFee: "Contact" → "?"
+
+  36. Renzo Gracie Doral (miami-gyms.csv:17)
+     website: "renzogracie.com" → "https://renzogracie.com"
+
+  37. Renzo Gracie Doral (miami-gyms.csv:17)
+     matFee: "Contact" → "?"
+
+  38. Renzo Gracie Doral (miami-gyms.csv:17)
+     dropInFee: "Contact" → "?"
+
+  39. Miami Jiu Jitsu Team (miami-gyms.csv:18)
+     website: "miamijiujitsuteam.com" → "https://miamijiujitsuteam.com"
+
+  40. Miami Jiu Jitsu Team (miami-gyms.csv:18)
+     dropInFee: "Contact" → "?"
+
+  41. Ground Game Theory Jiu Jitsu (miami-gyms.csv:19)
+     website: "groundgametheory.com" → "https://groundgametheory.com"
+
+  42. Ground Game Theory Jiu Jitsu (miami-gyms.csv:19)
+     dropInFee: "Contact" → "?"
+
+  43. Evolution Mixed Martial Arts (miami-gyms.csv:20)
+     website: "evolutionmma.com" → "https://evolutionmma.com"
+
+  44. Evolution Mixed Martial Arts (miami-gyms.csv:20)
+     matFee: "Contact" → "?"
+
+  45. Evolution Mixed Martial Arts (miami-gyms.csv:20)
+     dropInFee: "Contact" → "?"
+
+  46. Freestyle Fighting Academy (miami-gyms.csv:21)
+     website: "freestylefightingacademy.com" → "https://freestylefightingacademy.com"
+
+  47. Freestyle Fighting Academy (miami-gyms.csv:21)
+     matFee: "Contact" → "?"
+
+  48. Freestyle Fighting Academy (miami-gyms.csv:21)
+     dropInFee: "Contact" → "?"
+
+  49. Arena Combat Sports (miami-gyms.csv:22)
+     website: "arenacombatsports.com" → "https://arenacombatsports.com"
+
+  50. Arena Combat Sports (miami-gyms.csv:22)
+     matFee: "Contact" → "?"
+
+  51. Arena Combat Sports (miami-gyms.csv:22)
+     dropInFee: "Contact" → "?"
+
+  52. Young Tigers Foundation (miami-gyms.csv:23)
+     website: "youngtigersfoundation.org" → "https://youngtigersfoundation.org"
+
+  53. Young Tigers Foundation (miami-gyms.csv:23)
+     matFee: "Contact" → "?"
+
+  54. Young Tigers Foundation (miami-gyms.csv:23)
+     dropInFee: "Contact" → "?"
+
+  55. GOAT Shed Academy (miami-gyms.csv:24)
+     website: "goatshedacademy.com" → "https://goatshedacademy.com"
+
+  56. GOAT Shed Academy (miami-gyms.csv:24)
+     matFee: "Contact" → "?"
+
+  57. GOAT Shed Academy (miami-gyms.csv:24)
+     dropInFee: "Contact" → "?"
+
+  58. Rock M.M.A. (miami-gyms.csv:25)
+     website: "rockmma.com" → "https://rockmma.com"
+
+  59. Rock M.M.A. (miami-gyms.csv:25)
+     matFee: "Contact" → "?"
+
+  60. Rock M.M.A. (miami-gyms.csv:25)
+     dropInFee: "Contact" → "?"
+
+  61. Kill Cliff FC (miami-gyms.csv:26)
+     website: "killcliff.com" → "https://killcliff.com"
+
+  62. Kill Cliff FC (miami-gyms.csv:26)
+     matFee: "Contact" → "?"
+
+  63. Kill Cliff FC (miami-gyms.csv:26)
+     dropInFee: "Contact" → "?"
+
+  64. Combat Sports Academy (miami-gyms.csv:27)
+     website: "combatsportsacademy.com" → "https://combatsportsacademy.com"
+
+  65. Combat Sports Academy (miami-gyms.csv:27)
+     matFee: "Contact" → "?"
+
+  66. Combat Sports Academy (miami-gyms.csv:27)
+     dropInFee: "Contact" → "?"
+
+  67. Alliance Jiu Jitsu Miami (miami-gyms.csv:28)
+     website: "alliancejiujitsu.com" → "https://alliancejiujitsu.com"
+
+  68. Alliance Jiu Jitsu Miami (miami-gyms.csv:28)
+     matFee: "Contact" → "?"
+
+  69. Alliance Jiu Jitsu Miami (miami-gyms.csv:28)
+     dropInFee: "Contact" → "?"
+
+  70. South Florida Jiu Jitsu (miami-gyms.csv:29)
+     website: "southfloridajiujitsu.com" → "https://southfloridajiujitsu.com"
+
+  71. South Florida Jiu Jitsu (miami-gyms.csv:29)
+     matFee: "Contact" → "?"
+
+  72. South Florida Jiu Jitsu (miami-gyms.csv:29)
+     dropInFee: "Contact" → "?"
+
+  73. BJJ Center Miami (miami-gyms.csv:30)
+     website: "bjjcentermiami.com" → "https://bjjcentermiami.com"
+
+  74. BJJ Center Miami (miami-gyms.csv:30)
+     matFee: "Contact" → "?"
+
+  75. BJJ Center Miami (miami-gyms.csv:30)
+     dropInFee: "Contact" → "?"
+
+  76. Legacy Martial Arts (miami-gyms.csv:31)
+     website: "legacymartialarts.com" → "https://legacymartialarts.com"
+
+  77. Legacy Martial Arts (miami-gyms.csv:31)
+     matFee: "Contact" → "?"
+
+  78. Legacy Martial Arts (miami-gyms.csv:31)
+     dropInFee: "Contact" → "?"
+
+  79. Elite Martial Arts (miami-gyms.csv:32)
+     website: "elitemartialarts.com" → "https://elitemartialarts.com"
+
+  80. Elite Martial Arts (miami-gyms.csv:32)
+     matFee: "Contact" → "?"
+
+  81. Elite Martial Arts (miami-gyms.csv:32)
+     dropInFee: "Contact" → "?"
+
+  82. Miami Grappling Academy (miami-gyms.csv:33)
+     website: "miamigrapplingacademy.com" → "https://miamigrapplingacademy.com"
+
+  83. Miami Grappling Academy (miami-gyms.csv:33)
+     matFee: "Contact" → "?"
+
+  84. Miami Grappling Academy (miami-gyms.csv:33)
+     dropInFee: "Contact" → "?"
+
+  85. Wolfpack Jiu Jitsu (miami-gyms.csv:34)
+     website: "wolfpackjiujitsu.com" → "https://wolfpackjiujitsu.com"
+
+  86. Wolfpack Jiu Jitsu (miami-gyms.csv:34)
+     matFee: "Contact" → "?"
+
+  87. Wolfpack Jiu Jitsu (miami-gyms.csv:34)
+     dropInFee: "Contact" → "?"
+
+  88. Iron Lions BJJ (miami-gyms.csv:35)
+     website: "ironlionsbjj.com" → "https://ironlionsbjj.com"
+
+  89. Iron Lions BJJ (miami-gyms.csv:35)
+     matFee: "Contact" → "?"
+
+  90. Iron Lions BJJ (miami-gyms.csv:35)
+     dropInFee: "Contact" → "?"
+
+  91. Cesar Gracie Jiu Jitsu (miami-gyms.csv:36)
+     website: "cesargracie.com" → "https://cesargracie.com"
+
+  92. Cesar Gracie Jiu Jitsu (miami-gyms.csv:36)
+     matFee: "Contact" → "?"
+
+  93. Cesar Gracie Jiu Jitsu (miami-gyms.csv:36)
+     dropInFee: "Contact" → "?"
+
+  94. Miami Combat Academy (miami-gyms.csv:37)
+     website: "miamicombatacademy.com" → "https://miamicombatacademy.com"
+
+  95. Miami Combat Academy (miami-gyms.csv:37)
+     matFee: "Contact" → "?"
+
+  96. Miami Combat Academy (miami-gyms.csv:37)
+     dropInFee: "Contact" → "?"
+
+  97. Renzo Gracie Miami Beach (miami-gyms.csv:38)
+     website: "renzogracie.com" → "https://renzogracie.com"
+
+  98. Renzo Gracie Miami Beach (miami-gyms.csv:38)
+     matFee: "Contact" → "?"
+
+  99. Renzo Gracie Miami Beach (miami-gyms.csv:38)
+     dropInFee: "Contact" → "?"
+
+  100. Vagner Rocha Martial Arts (miami-gyms.csv:39)
+     website: "vagnerrochamartialarts.com" → "https://vagnerrochamartialarts.com"
+
+  101. Vagner Rocha Martial Arts (miami-gyms.csv:39)
+     matFee: "Contact" → "?"
+
+  102. Vagner Rocha Martial Arts (miami-gyms.csv:39)
+     dropInFee: "Contact" → "?"
+
+  103. Black House MMA (miami-gyms.csv:40)
+     website: "blackhousemma.com" → "https://blackhousemma.com"
+
+  104. Black House MMA (miami-gyms.csv:40)
+     matFee: "Contact" → "?"
+
+  105. Black House MMA (miami-gyms.csv:40)
+     dropInFee: "Contact" → "?"
+
+  106. Arashiro Brazilian Jiu-Jitsu (miami-gyms.csv:41)
+     website: "arashirobjj.com" → "https://arashirobjj.com"
+
+  107. Arashiro Brazilian Jiu-Jitsu (miami-gyms.csv:41)
+     dropInFee: "Contact" → "?"
+
+  108. Cardoso Jiu Jitsu (miami-gyms.csv:42)
+     website: "cardosojiujitsu.com" → "https://cardosojiujitsu.com"
+
+  109. Cardoso Jiu Jitsu (miami-gyms.csv:42)
+     dropInFee: "Contact" → "?"
+
+  110. FSC South Beach Jiu Jitsu (miami-gyms.csv:43)
+     website: "fightsportsclubsobe.com" → "https://fightsportsclubsobe.com"
+
+  111. FSC South Beach Jiu Jitsu (miami-gyms.csv:43)
+     dropInFee: "Contact" → "?"
+
+  112. Gracie Barra Hialeah Brazilian Jiu Jitsu (miami-gyms.csv:44)
+     website: "graciebarrahialeah.com" → "https://graciebarrahialeah.com"
+
+  113. Gracie Barra Hialeah Brazilian Jiu Jitsu (miami-gyms.csv:44)
+     dropInFee: "Contact" → "?"
+
+  114. Trillo Jiujitsu Academy (miami-gyms.csv:45)
+     website: "trillobjj.com" → "https://trillobjj.com"
+
+  115. Trillo Jiujitsu Academy (miami-gyms.csv:45)
+     matFee: "Contact" → "?"
+
+  116. Trillo Jiujitsu Academy (miami-gyms.csv:45)
+     dropInFee: "Contact" → "?"
+
+  117. Millennium Martial Arts Academy (miami-gyms.csv:46)
+     matFee: "Contact" → "?"
+
+  118. Millennium Martial Arts Academy (miami-gyms.csv:46)
+     dropInFee: "Contact" → "?"
+
+  119. Everyone Jiu-Jitsu Miami (miami-gyms.csv:47)
+     website: "everyonejiujitsu.com" → "https://everyonejiujitsu.com"
+
+  120. Beach Martial Arts (miami-gyms.csv:48)
+     website: "beachmartialarts.com" → "https://beachmartialarts.com"
+
+  121. Beach Martial Arts (miami-gyms.csv:48)
+     dropInFee: "Contact" → "?"
+
+  122. 1Jiu-Jitsu Academy (miami-gyms.csv:49)
+     website: "1jiujitsu.com" → "https://1jiujitsu.com"
+
+  123. 1Jiu-Jitsu Academy (miami-gyms.csv:49)
+     matFee: "Contact" → "?"
+
+  124. 1Jiu-Jitsu Academy (miami-gyms.csv:49)
+     dropInFee: "Contact" → "?"
+
+  125. Gama Filho Martial Arts (miami-gyms.csv:50)
+     website: "gfmartialarts.com" → "https://gfmartialarts.com"
+
+  126. Gama Filho Martial Arts (miami-gyms.csv:50)
+     matFee: "Contact" → "?"
+
+  127. Gama Filho Martial Arts (miami-gyms.csv:50)
+     dropInFee: "Contact" → "?"
+
+  128. MG Martial Arts & Sport Center (miami-gyms.csv:51)
+     website: "mgmartialarts.com" → "https://mgmartialarts.com"
+
+  129. MG Martial Arts & Sport Center (miami-gyms.csv:51)
+     matFee: "Contact" → "?"
+
+  130. MG Martial Arts & Sport Center (miami-gyms.csv:51)
+     dropInFee: "Contact" → "?"
+
+  131. Marcus Aurelio Jiu-Jitsu Academy (miami-gyms.csv:52)
+     website: "marcusaureliobjj.com" → "https://marcusaureliobjj.com"
+
+  132. Jorge Pereira Jiu Jitsu South Beach Miami (miami-gyms.csv:53)
+     website: "jorgepereirajiujitsu.com" → "https://jorgepereirajiujitsu.com"
+
+  133. Jorge Pereira Jiu Jitsu South Beach Miami (miami-gyms.csv:53)
+     matFee: "Contact" → "?"
+
+  134. Jorge Pereira Jiu Jitsu South Beach Miami (miami-gyms.csv:53)
+     dropInFee: "Contact" → "?"
+
+  135. Rilion Gracie Jiu-Jitsu Academy (HEADQUARTERS) (miami-gyms.csv:54)
+     website: "riliongracie.com" → "https://riliongracie.com"
+
+  136. Art Movement Miami (miami-gyms.csv:55)
+     website: "artmovementmiami.com" → "https://artmovementmiami.com"
+
+  137. Art Movement Miami (miami-gyms.csv:55)
+     matFee: "Contact" → "?"
+
+  138. Art Movement Miami (miami-gyms.csv:55)
+     dropInFee: "Contact" → "?"
+
+  139. American Top Team of West Kendall (miami-gyms.csv:56)
+     website: "americantopteamkendall.com" → "https://americantopteamkendall.com"
+
+  140. American Top Team of West Kendall (miami-gyms.csv:56)
+     matFee: "Contact" → "?"
+
+  141. American Top Team of West Kendall (miami-gyms.csv:56)
+     dropInFee: "Contact" → "?"
+
+  142. Gracie Barra North Miami (miami-gyms.csv:57)
+     website: "gbnorthmiami.com" → "https://gbnorthmiami.com"
+
+  143. Gracie Barra North Miami (miami-gyms.csv:57)
+     matFee: "Contact" → "?"
+
+  144. Gracie Barra North Miami (miami-gyms.csv:57)
+     dropInFee: "Contact" → "?"
+
+  145. Gracie Barra West Kendall (miami-gyms.csv:58)
+     website: "gbwestkendall.com" → "https://gbwestkendall.com"
+
+  146. Gracie Barra West Kendall (miami-gyms.csv:58)
+     matFee: "Contact" → "?"
+
+  147. Gracie Barra West Kendall (miami-gyms.csv:58)
+     dropInFee: "Contact" → "?"
+
+  148. Gracie Barra Coral Gables (miami-gyms.csv:59)
+     website: "gbcoralgables.com" → "https://gbcoralgables.com"
+
+  149. Gracie Barra Coral Gables (miami-gyms.csv:59)
+     matFee: "Contact" → "?"
+
+  150. Gracie Barra Coral Gables (miami-gyms.csv:59)
+     dropInFee: "Contact" → "?"
+
+  151. Valente Brothers Jiu-Jitsu (miami-gyms.csv:60)
+     website: "valentebrothers.com" → "https://valentebrothers.com"
+
+  152. Valente Brothers Jiu-Jitsu (miami-gyms.csv:60)
+     dropInFee: "Contact" → "?"
+
+  153. Zen Jiu Jitsu Miami (miami-gyms.csv:61)
+     website: "zenjiujitsumiami.com" → "https://zenjiujitsumiami.com"
+
+  154. Zen Jiu Jitsu Miami (miami-gyms.csv:61)
+     matFee: "Contact" → "?"
+
+  155. Zen Jiu Jitsu Miami (miami-gyms.csv:61)
+     dropInFee: "Contact" → "?"
+
+  156. Legendary Brazilian Jiu-Jitsu (miami-gyms.csv:62)
+     website: "legendarybjj.com" → "https://legendarybjj.com"
+
+  157. Legendary Brazilian Jiu-Jitsu (miami-gyms.csv:62)
+     matFee: "Contact" → "?"
+
+  158. Legendary Brazilian Jiu-Jitsu (miami-gyms.csv:62)
+     dropInFee: "Contact" → "?"
+
+  159. Nightmare BJJ Kendall (miami-gyms.csv:63)
+     website: "nightmarebjj.com" → "https://nightmarebjj.com"
+
+  160. Nightmare BJJ Kendall (miami-gyms.csv:63)
+     matFee: "Contact" → "?"
+
+  161. Nightmare BJJ Kendall (miami-gyms.csv:63)
+     dropInFee: "Contact" → "?"
+
+  162. Satori Jiu Jitsu (miami-gyms.csv:64)
+     website: "satorijiujitsu.com" → "https://satorijiujitsu.com"
+
+  163. Satori Jiu Jitsu (miami-gyms.csv:64)
+     matFee: "Contact" → "?"
+
+  164. Satori Jiu Jitsu (miami-gyms.csv:64)
+     dropInFee: "Contact" → "?"
+
+  165. Evolution MMA Miami (miami-gyms.csv:65)
+     website: "evolutionmiami.com" → "https://evolutionmiami.com"
+
+  166. SBG Miami (miami-gyms.csv:66)
+     website: "sbgmiami.com" → "https://sbgmiami.com"
+
+  167. SBG Miami (miami-gyms.csv:66)
+     dropInFee: "Contact" → "?"
+
+  168. Fusion X-Cel Performance (miami-gyms.csv:67)
+     website: "fusionx-cel.com" → "https://fusionx-cel.com"
+
+  169. Fusion X-Cel Performance (miami-gyms.csv:67)
+     matFee: "Contact" → "?"
+
+  170. Fusion X-Cel Performance (miami-gyms.csv:67)
+     dropInFee: "Contact" → "?"
+
+  171. Grapplers Gym Miami (miami-gyms.csv:68)
+     website: "grapplersgym.com" → "https://grapplersgym.com"
+
+  172. Grapplers Gym Miami (miami-gyms.csv:68)
+     matFee: "Contact" → "?"
+
+  173. Grapplers Gym Miami (miami-gyms.csv:68)
+     dropInFee: "Contact" → "?"
+
+  174. Bushido Miami Martial Arts (miami-gyms.csv:69)
+     website: "bushidomiamimartialarts.com" → "https://bushidomiamimartialarts.com"
+
+  175. Bushido Miami Martial Arts (miami-gyms.csv:69)
+     matFee: "Contact" → "?"
+
+  176. Bushido Miami Martial Arts (miami-gyms.csv:69)
+     dropInFee: "Contact" → "?"
+
+  177. Valor Martial Arts Miami (miami-gyms.csv:70)
+     website: "valormartialartsmiami.com" → "https://valormartialartsmiami.com"
+
+  178. Valor Martial Arts Miami (miami-gyms.csv:70)
+     matFee: "Contact" → "?"
+
+  179. Valor Martial Arts Miami (miami-gyms.csv:70)
+     dropInFee: "Contact" → "?"
+
+  180. Champions Martial Arts Kendall (miami-gyms.csv:71)
+     website: "championsmartialartskendall.com" → "https://championsmartialartskendall.com"
+
+  181. Champions Martial Arts Kendall (miami-gyms.csv:71)
+     matFee: "Contact" → "?"
+
+  182. Champions Martial Arts Kendall (miami-gyms.csv:71)
+     dropInFee: "Contact" → "?"
+
+  183. Total Martial Arts Academy (miami-gyms.csv:72)
+     website: "totalmartialartsacademy.com" → "https://totalmartialartsacademy.com"
+
+  184. Total Martial Arts Academy (miami-gyms.csv:72)
+     matFee: "Contact" → "?"
+
+  185. Total Martial Arts Academy (miami-gyms.csv:72)
+     dropInFee: "Contact" → "?"
+
+  186. Global Premier Martial Arts (miami-gyms.csv:73)
+     website: "globalpremiermartialarts.com" → "https://globalpremiermartialarts.com"
+
+  187. Global Premier Martial Arts (miami-gyms.csv:73)
+     matFee: "Contact" → "?"
+
+  188. Global Premier Martial Arts (miami-gyms.csv:73)
+     dropInFee: "Contact" → "?"
+
+  189. Brazilian Top Team Miami (miami-gyms.csv:74)
+     website: "bttmiami.com" → "https://bttmiami.com"
+
+  190. Brazilian Top Team Miami (miami-gyms.csv:74)
+     matFee: "Contact" → "?"
+
+  191. Brazilian Top Team Miami (miami-gyms.csv:74)
+     dropInFee: "Contact" → "?"
+
+  192. Blackhouse MMA Miami (miami-gyms.csv:75)
+     website: "blackhousemiami.com" → "https://blackhousemiami.com"
+
+  193. Blackhouse MMA Miami (miami-gyms.csv:75)
+     matFee: "Contact" → "?"
+
+  194. Blackhouse MMA Miami (miami-gyms.csv:75)
+     dropInFee: "Contact" → "?"
+
+  195. Ground Control Miami (miami-gyms.csv:76)
+     website: "groundcontrolmiami.com" → "https://groundcontrolmiami.com"
+
+  196. Ground Control Miami (miami-gyms.csv:76)
+     matFee: "Contact" → "?"
+
+  197. Ground Control Miami (miami-gyms.csv:76)
+     dropInFee: "Contact" → "?"
+
+  198. ATT Kendall (miami-gyms.csv:77)
+     website: "attkendall.com" → "https://attkendall.com"
+
+  199. ATT Kendall (miami-gyms.csv:77)
+     matFee: "Contact" → "?"
+
+  200. ATT Kendall (miami-gyms.csv:77)
+     dropInFee: "Contact" → "?"
+
+  201. The Cage MMA Kendall (miami-gyms.csv:78)
+     website: "thecagemmakendall.com" → "https://thecagemmakendall.com"
+
+  202. The Cage MMA Kendall (miami-gyms.csv:78)
+     matFee: "Contact" → "?"
+
+  203. The Cage MMA Kendall (miami-gyms.csv:78)
+     dropInFee: "Contact" → "?"
+
+  204. St Pete BJJ (stpete-gyms.csv:2)
+     website: "stpetebjj.com" → "https://stpetebjj.com"
+
+  205. Inside Control Academy (stpete-gyms.csv:3)
+     website: "insidecontrolacademy.com" → "https://insidecontrolacademy.com"
+
+  206. Gracie Jiu Jitsu Largo (stpete-gyms.csv:4)
+     website: "graciejiujitsulargo.com" → "https://graciejiujitsulargo.com"
+
+  207. American Top Team Tampa (tampa-gyms.csv:15)
+     website: "americantopteamtampa.com" → "https://americantopteamtampa.com"
+
+  208. American Top Team Tampa (tampa-gyms.csv:15)
+     matFee: "Contact" → "?"
+
+  209. American Top Team Tampa (tampa-gyms.csv:15)
+     dropInFee: "Contact" → "?"
+
+  210. Gracie Tampa (tampa-gyms.csv:16)
+     website: "gracietampa.com" → "https://gracietampa.com"
+
+  211. Gracie Tampa (tampa-gyms.csv:16)
+     matFee: "Contact" → "?"
+
+  212. Gracie Tampa (tampa-gyms.csv:16)
+     dropInFee: "Contact" → "?"
+
+  213. Marcio Cruz BJJ New Tampa (tampa-gyms.csv:17)
+     website: "marciocruzbjj.com" → "https://marciocruzbjj.com"
+
+  214. Marcio Cruz BJJ New Tampa (tampa-gyms.csv:17)
+     matFee: "Contact" → "?"
+
+  215. Marcio Cruz BJJ New Tampa (tampa-gyms.csv:17)
+     dropInFee: "Contact" → "?"
+
+  216. Checkmat BJJ Tampa (tampa-gyms.csv:18)
+     website: "facebook.com/CheckmatBJJTampa" → "https://facebook.com/CheckmatBJJTampa"
+
+  217. Checkmat BJJ Tampa (tampa-gyms.csv:18)
+     matFee: "Contact" → "?"
+
+  218. Checkmat BJJ Tampa (tampa-gyms.csv:18)
+     dropInFee: "Contact" → "?"
+
+  219. Gracie Barra Citrus Park (tampa-gyms.csv:19)
+     website: "gbcitrusparktampa.com" → "https://gbcitrusparktampa.com"
+
+  220. Gracie Barra Citrus Park (tampa-gyms.csv:19)
+     matFee: "Contact" → "?"
+
+  221. Gracie Barra Citrus Park (tampa-gyms.csv:19)
+     dropInFee: "Contact" → "?"
+
+  222. Gracie Martial Arts Tampa (tampa-gyms.csv:20)
+     website: "graciemartialartstampa.com" → "https://graciemartialartstampa.com"
+
+  223. Gracie Martial Arts Tampa (tampa-gyms.csv:20)
+     matFee: "Contact" → "?"
+
+  224. Gracie Martial Arts Tampa (tampa-gyms.csv:20)
+     dropInFee: "Contact" → "?"
+
+  225. Gracie PAC MMA (tampa-gyms.csv:21)
+     website: "graciepac.com" → "https://graciepac.com"
+
+  226. Gracie PAC MMA (tampa-gyms.csv:21)
+     matFee: "Contact" → "?"
+
+  227. Gracie PAC MMA (tampa-gyms.csv:21)
+     dropInFee: "Contact" → "?"
+
+  228. De La Riva BJJ Tampa Bay (tampa-gyms.csv:22)
+     website: "delarivabjjtampabay.com" → "https://delarivabjjtampabay.com"
+
+  229. De La Riva BJJ Tampa Bay (tampa-gyms.csv:22)
+     matFee: "Contact" → "?"
+
+  230. De La Riva BJJ Tampa Bay (tampa-gyms.csv:22)
+     dropInFee: "Contact" → "?"
+
+
+NEXT STEPS:
+  1. Review the fixed CSV files (with "-fixed" suffix)
+  2. Verify the changes look correct
+  3. Replace original files with fixed versions if satisfied
+  4. Run validation again to confirm fixes

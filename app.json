@@ -21,7 +21,9 @@
       "buildNumber": "19",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "JiuJitsu Finder uses your location to show nearby gyms on the map and calculate distances."
+        "NSLocationWhenInUseUsageDescription": "JiuJitsu Finder uses your location to show nearby gyms on the map and calculate distances.",
+        "NSPhotoLibraryUsageDescription": "JiuJitsu Finder needs access to your photo library to save images for sharing to Instagram Stories.",
+        "NSPhotoLibraryAddUsageDescription": "JiuJitsu Finder needs access to save images to your photo library for sharing to Instagram Stories."
       }
     },
     "android": {

@@ -1,0 +1,1913 @@
+{
+  "timestamp": "2025-08-15T04:41:31.995Z",
+  "summary": {
+    "totalFiles": 4,
+    "filesProcessed": 4,
+    "totalFixes": 88,
+    "errors": 0
+  },
+  "fixes": [
+    {
+      "file": "miami-gyms.csv",
+      "row": 2,
+      "gym": "Gracie Barra Kendall",
+      "field": "website",
+      "before": "graciebarra.com",
+      "after": "https://graciebarra.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 2,
+      "gym": "Gracie Barra Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 3,
+      "gym": "Gracie Barra Aventura",
+      "field": "website",
+      "before": "gbayventura.com",
+      "after": "https://gbayventura.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 3,
+      "gym": "Gracie Barra Aventura",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 4,
+      "gym": "Gracie Barra South Miami",
+      "field": "website",
+      "before": "graciebarra.com",
+      "after": "https://graciebarra.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 4,
+      "gym": "Gracie Barra South Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 4,
+      "gym": "Gracie Barra South Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 5,
+      "gym": "Rilion Gracie Jiu-Jitsu Miami Lakes",
+      "field": "website",
+      "before": "riliongraciemiamilakes.com",
+      "after": "https://riliongraciemiamilakes.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 5,
+      "gym": "Rilion Gracie Jiu-Jitsu Miami Lakes",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 6,
+      "gym": "Rilion Gracie Jiu-Jitsu Doral",
+      "field": "website",
+      "before": "riliongracie.com",
+      "after": "https://riliongracie.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 6,
+      "gym": "Rilion Gracie Jiu-Jitsu Doral",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 6,
+      "gym": "Rilion Gracie Jiu-Jitsu Doral",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 7,
+      "gym": "American Top Team Coconut Creek",
+      "field": "website",
+      "before": "americantopteam.com",
+      "after": "https://americantopteam.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 7,
+      "gym": "American Top Team Coconut Creek",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 8,
+      "gym": "American Top Team Aventura/NMB",
+      "field": "website",
+      "before": "attaventuranmb.com",
+      "after": "https://attaventuranmb.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 8,
+      "gym": "American Top Team Aventura/NMB",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 9,
+      "gym": "10th Planet Miami",
+      "field": "website",
+      "before": "10thplanetmiami.com",
+      "after": "https://10thplanetmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 9,
+      "gym": "10th Planet Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 10,
+      "gym": "Valente Brothers Jiu-Jitsu Coral Gables",
+      "field": "website",
+      "before": "goldbjj.com",
+      "after": "https://goldbjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 10,
+      "gym": "Valente Brothers Jiu-Jitsu Coral Gables",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 10,
+      "gym": "Valente Brothers Jiu-Jitsu Coral Gables",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 11,
+      "gym": "Carlson Gracie Miami",
+      "field": "website",
+      "before": "carlsongraciemiami.com",
+      "after": "https://carlsongraciemiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 11,
+      "gym": "Carlson Gracie Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 12,
+      "gym": "Lira Jiu Jitsu",
+      "field": "website",
+      "before": "lirajiujitsu.com",
+      "after": "https://lirajiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 12,
+      "gym": "Lira Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 12,
+      "gym": "Lira Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 13,
+      "gym": "Fight Sports Club Miami",
+      "field": "website",
+      "before": "fightsports.com",
+      "after": "https://fightsports.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 14,
+      "gym": "MMA MASTERS",
+      "field": "website",
+      "before": "mmamasters.com",
+      "after": "https://mmamasters.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 14,
+      "gym": "MMA MASTERS",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 14,
+      "gym": "MMA MASTERS",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 15,
+      "gym": "Mario Sperry Jiu Jitsu",
+      "field": "website",
+      "before": "mariosperry.com",
+      "after": "https://mariosperry.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 15,
+      "gym": "Mario Sperry Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 15,
+      "gym": "Mario Sperry Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 16,
+      "gym": "Atos Miami",
+      "field": "website",
+      "before": "atosmiami.com",
+      "after": "https://atosmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 16,
+      "gym": "Atos Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 17,
+      "gym": "Renzo Gracie Doral",
+      "field": "website",
+      "before": "renzogracie.com",
+      "after": "https://renzogracie.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 17,
+      "gym": "Renzo Gracie Doral",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 17,
+      "gym": "Renzo Gracie Doral",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 18,
+      "gym": "Miami Jiu Jitsu Team",
+      "field": "website",
+      "before": "miamijiujitsuteam.com",
+      "after": "https://miamijiujitsuteam.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 18,
+      "gym": "Miami Jiu Jitsu Team",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 19,
+      "gym": "Ground Game Theory Jiu Jitsu",
+      "field": "website",
+      "before": "groundgametheory.com",
+      "after": "https://groundgametheory.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 19,
+      "gym": "Ground Game Theory Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 20,
+      "gym": "Evolution Mixed Martial Arts",
+      "field": "website",
+      "before": "evolutionmma.com",
+      "after": "https://evolutionmma.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 20,
+      "gym": "Evolution Mixed Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 20,
+      "gym": "Evolution Mixed Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 21,
+      "gym": "Freestyle Fighting Academy",
+      "field": "website",
+      "before": "freestylefightingacademy.com",
+      "after": "https://freestylefightingacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 21,
+      "gym": "Freestyle Fighting Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 21,
+      "gym": "Freestyle Fighting Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 22,
+      "gym": "Arena Combat Sports",
+      "field": "website",
+      "before": "arenacombatsports.com",
+      "after": "https://arenacombatsports.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 22,
+      "gym": "Arena Combat Sports",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 22,
+      "gym": "Arena Combat Sports",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 23,
+      "gym": "Young Tigers Foundation",
+      "field": "website",
+      "before": "youngtigersfoundation.org",
+      "after": "https://youngtigersfoundation.org"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 23,
+      "gym": "Young Tigers Foundation",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 23,
+      "gym": "Young Tigers Foundation",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 24,
+      "gym": "GOAT Shed Academy",
+      "field": "website",
+      "before": "goatshedacademy.com",
+      "after": "https://goatshedacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 24,
+      "gym": "GOAT Shed Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 24,
+      "gym": "GOAT Shed Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 25,
+      "gym": "Rock M.M.A.",
+      "field": "website",
+      "before": "rockmma.com",
+      "after": "https://rockmma.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 25,
+      "gym": "Rock M.M.A.",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 25,
+      "gym": "Rock M.M.A.",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 26,
+      "gym": "Kill Cliff FC",
+      "field": "website",
+      "before": "killcliff.com",
+      "after": "https://killcliff.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 26,
+      "gym": "Kill Cliff FC",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 26,
+      "gym": "Kill Cliff FC",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 27,
+      "gym": "Combat Sports Academy",
+      "field": "website",
+      "before": "combatsportsacademy.com",
+      "after": "https://combatsportsacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 27,
+      "gym": "Combat Sports Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 27,
+      "gym": "Combat Sports Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 28,
+      "gym": "Alliance Jiu Jitsu Miami",
+      "field": "website",
+      "before": "alliancejiujitsu.com",
+      "after": "https://alliancejiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 28,
+      "gym": "Alliance Jiu Jitsu Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 28,
+      "gym": "Alliance Jiu Jitsu Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 29,
+      "gym": "South Florida Jiu Jitsu",
+      "field": "website",
+      "before": "southfloridajiujitsu.com",
+      "after": "https://southfloridajiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 29,
+      "gym": "South Florida Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 29,
+      "gym": "South Florida Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 30,
+      "gym": "BJJ Center Miami",
+      "field": "website",
+      "before": "bjjcentermiami.com",
+      "after": "https://bjjcentermiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 30,
+      "gym": "BJJ Center Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 30,
+      "gym": "BJJ Center Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 31,
+      "gym": "Legacy Martial Arts",
+      "field": "website",
+      "before": "legacymartialarts.com",
+      "after": "https://legacymartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 31,
+      "gym": "Legacy Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 31,
+      "gym": "Legacy Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 32,
+      "gym": "Elite Martial Arts",
+      "field": "website",
+      "before": "elitemartialarts.com",
+      "after": "https://elitemartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 32,
+      "gym": "Elite Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 32,
+      "gym": "Elite Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 33,
+      "gym": "Miami Grappling Academy",
+      "field": "website",
+      "before": "miamigrapplingacademy.com",
+      "after": "https://miamigrapplingacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 33,
+      "gym": "Miami Grappling Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 33,
+      "gym": "Miami Grappling Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 34,
+      "gym": "Wolfpack Jiu Jitsu",
+      "field": "website",
+      "before": "wolfpackjiujitsu.com",
+      "after": "https://wolfpackjiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 34,
+      "gym": "Wolfpack Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 34,
+      "gym": "Wolfpack Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 35,
+      "gym": "Iron Lions BJJ",
+      "field": "website",
+      "before": "ironlionsbjj.com",
+      "after": "https://ironlionsbjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 35,
+      "gym": "Iron Lions BJJ",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 35,
+      "gym": "Iron Lions BJJ",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 36,
+      "gym": "Cesar Gracie Jiu Jitsu",
+      "field": "website",
+      "before": "cesargracie.com",
+      "after": "https://cesargracie.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 36,
+      "gym": "Cesar Gracie Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 36,
+      "gym": "Cesar Gracie Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 37,
+      "gym": "Miami Combat Academy",
+      "field": "website",
+      "before": "miamicombatacademy.com",
+      "after": "https://miamicombatacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 37,
+      "gym": "Miami Combat Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 37,
+      "gym": "Miami Combat Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 38,
+      "gym": "Renzo Gracie Miami Beach",
+      "field": "website",
+      "before": "renzogracie.com",
+      "after": "https://renzogracie.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 38,
+      "gym": "Renzo Gracie Miami Beach",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 38,
+      "gym": "Renzo Gracie Miami Beach",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 39,
+      "gym": "Vagner Rocha Martial Arts",
+      "field": "website",
+      "before": "vagnerrochamartialarts.com",
+      "after": "https://vagnerrochamartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 39,
+      "gym": "Vagner Rocha Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 39,
+      "gym": "Vagner Rocha Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 40,
+      "gym": "Black House MMA",
+      "field": "website",
+      "before": "blackhousemma.com",
+      "after": "https://blackhousemma.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 40,
+      "gym": "Black House MMA",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 40,
+      "gym": "Black House MMA",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 41,
+      "gym": "Arashiro Brazilian Jiu-Jitsu",
+      "field": "website",
+      "before": "arashirobjj.com",
+      "after": "https://arashirobjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 41,
+      "gym": "Arashiro Brazilian Jiu-Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 42,
+      "gym": "Cardoso Jiu Jitsu",
+      "field": "website",
+      "before": "cardosojiujitsu.com",
+      "after": "https://cardosojiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 42,
+      "gym": "Cardoso Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 43,
+      "gym": "FSC South Beach Jiu Jitsu",
+      "field": "website",
+      "before": "fightsportsclubsobe.com",
+      "after": "https://fightsportsclubsobe.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 43,
+      "gym": "FSC South Beach Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 44,
+      "gym": "Gracie Barra Hialeah Brazilian Jiu Jitsu",
+      "field": "website",
+      "before": "graciebarrahialeah.com",
+      "after": "https://graciebarrahialeah.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 44,
+      "gym": "Gracie Barra Hialeah Brazilian Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 45,
+      "gym": "Trillo Jiujitsu Academy",
+      "field": "website",
+      "before": "trillobjj.com",
+      "after": "https://trillobjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 45,
+      "gym": "Trillo Jiujitsu Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 45,
+      "gym": "Trillo Jiujitsu Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 46,
+      "gym": "Millennium Martial Arts Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 46,
+      "gym": "Millennium Martial Arts Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 47,
+      "gym": "Everyone Jiu-Jitsu Miami",
+      "field": "website",
+      "before": "everyonejiujitsu.com",
+      "after": "https://everyonejiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 48,
+      "gym": "Beach Martial Arts",
+      "field": "website",
+      "before": "beachmartialarts.com",
+      "after": "https://beachmartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 48,
+      "gym": "Beach Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 49,
+      "gym": "1Jiu-Jitsu Academy",
+      "field": "website",
+      "before": "1jiujitsu.com",
+      "after": "https://1jiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 49,
+      "gym": "1Jiu-Jitsu Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 49,
+      "gym": "1Jiu-Jitsu Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 50,
+      "gym": "Gama Filho Martial Arts",
+      "field": "website",
+      "before": "gfmartialarts.com",
+      "after": "https://gfmartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 50,
+      "gym": "Gama Filho Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 50,
+      "gym": "Gama Filho Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 51,
+      "gym": "MG Martial Arts & Sport Center",
+      "field": "website",
+      "before": "mgmartialarts.com",
+      "after": "https://mgmartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 51,
+      "gym": "MG Martial Arts & Sport Center",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 51,
+      "gym": "MG Martial Arts & Sport Center",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 52,
+      "gym": "Marcus Aurelio Jiu-Jitsu Academy",
+      "field": "website",
+      "before": "marcusaureliobjj.com",
+      "after": "https://marcusaureliobjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 53,
+      "gym": "Jorge Pereira Jiu Jitsu South Beach Miami",
+      "field": "website",
+      "before": "jorgepereirajiujitsu.com",
+      "after": "https://jorgepereirajiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 53,
+      "gym": "Jorge Pereira Jiu Jitsu South Beach Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 53,
+      "gym": "Jorge Pereira Jiu Jitsu South Beach Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 54,
+      "gym": "Rilion Gracie Jiu-Jitsu Academy (HEADQUARTERS)",
+      "field": "website",
+      "before": "riliongracie.com",
+      "after": "https://riliongracie.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 55,
+      "gym": "Art Movement Miami",
+      "field": "website",
+      "before": "artmovementmiami.com",
+      "after": "https://artmovementmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 55,
+      "gym": "Art Movement Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 55,
+      "gym": "Art Movement Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 56,
+      "gym": "American Top Team of West Kendall",
+      "field": "website",
+      "before": "americantopteamkendall.com",
+      "after": "https://americantopteamkendall.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 56,
+      "gym": "American Top Team of West Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 56,
+      "gym": "American Top Team of West Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 57,
+      "gym": "Gracie Barra North Miami",
+      "field": "website",
+      "before": "gbnorthmiami.com",
+      "after": "https://gbnorthmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 57,
+      "gym": "Gracie Barra North Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 57,
+      "gym": "Gracie Barra North Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 58,
+      "gym": "Gracie Barra West Kendall",
+      "field": "website",
+      "before": "gbwestkendall.com",
+      "after": "https://gbwestkendall.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 58,
+      "gym": "Gracie Barra West Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 58,
+      "gym": "Gracie Barra West Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 59,
+      "gym": "Gracie Barra Coral Gables",
+      "field": "website",
+      "before": "gbcoralgables.com",
+      "after": "https://gbcoralgables.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 59,
+      "gym": "Gracie Barra Coral Gables",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 59,
+      "gym": "Gracie Barra Coral Gables",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 60,
+      "gym": "Valente Brothers Jiu-Jitsu",
+      "field": "website",
+      "before": "valentebrothers.com",
+      "after": "https://valentebrothers.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 60,
+      "gym": "Valente Brothers Jiu-Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 61,
+      "gym": "Zen Jiu Jitsu Miami",
+      "field": "website",
+      "before": "zenjiujitsumiami.com",
+      "after": "https://zenjiujitsumiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 61,
+      "gym": "Zen Jiu Jitsu Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 61,
+      "gym": "Zen Jiu Jitsu Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 62,
+      "gym": "Legendary Brazilian Jiu-Jitsu",
+      "field": "website",
+      "before": "legendarybjj.com",
+      "after": "https://legendarybjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 62,
+      "gym": "Legendary Brazilian Jiu-Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 62,
+      "gym": "Legendary Brazilian Jiu-Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 63,
+      "gym": "Nightmare BJJ Kendall",
+      "field": "website",
+      "before": "nightmarebjj.com",
+      "after": "https://nightmarebjj.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 63,
+      "gym": "Nightmare BJJ Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 63,
+      "gym": "Nightmare BJJ Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 64,
+      "gym": "Satori Jiu Jitsu",
+      "field": "website",
+      "before": "satorijiujitsu.com",
+      "after": "https://satorijiujitsu.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 64,
+      "gym": "Satori Jiu Jitsu",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 64,
+      "gym": "Satori Jiu Jitsu",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 65,
+      "gym": "Evolution MMA Miami",
+      "field": "website",
+      "before": "evolutionmiami.com",
+      "after": "https://evolutionmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 66,
+      "gym": "SBG Miami",
+      "field": "website",
+      "before": "sbgmiami.com",
+      "after": "https://sbgmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 66,
+      "gym": "SBG Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 67,
+      "gym": "Fusion X-Cel Performance",
+      "field": "website",
+      "before": "fusionx-cel.com",
+      "after": "https://fusionx-cel.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 67,
+      "gym": "Fusion X-Cel Performance",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 67,
+      "gym": "Fusion X-Cel Performance",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 68,
+      "gym": "Grapplers Gym Miami",
+      "field": "website",
+      "before": "grapplersgym.com",
+      "after": "https://grapplersgym.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 68,
+      "gym": "Grapplers Gym Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 68,
+      "gym": "Grapplers Gym Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 69,
+      "gym": "Bushido Miami Martial Arts",
+      "field": "website",
+      "before": "bushidomiamimartialarts.com",
+      "after": "https://bushidomiamimartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 69,
+      "gym": "Bushido Miami Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 69,
+      "gym": "Bushido Miami Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 70,
+      "gym": "Valor Martial Arts Miami",
+      "field": "website",
+      "before": "valormartialartsmiami.com",
+      "after": "https://valormartialartsmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 70,
+      "gym": "Valor Martial Arts Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 70,
+      "gym": "Valor Martial Arts Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 71,
+      "gym": "Champions Martial Arts Kendall",
+      "field": "website",
+      "before": "championsmartialartskendall.com",
+      "after": "https://championsmartialartskendall.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 71,
+      "gym": "Champions Martial Arts Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 71,
+      "gym": "Champions Martial Arts Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 72,
+      "gym": "Total Martial Arts Academy",
+      "field": "website",
+      "before": "totalmartialartsacademy.com",
+      "after": "https://totalmartialartsacademy.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 72,
+      "gym": "Total Martial Arts Academy",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 72,
+      "gym": "Total Martial Arts Academy",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 73,
+      "gym": "Global Premier Martial Arts",
+      "field": "website",
+      "before": "globalpremiermartialarts.com",
+      "after": "https://globalpremiermartialarts.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 73,
+      "gym": "Global Premier Martial Arts",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 73,
+      "gym": "Global Premier Martial Arts",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 74,
+      "gym": "Brazilian Top Team Miami",
+      "field": "website",
+      "before": "bttmiami.com",
+      "after": "https://bttmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 74,
+      "gym": "Brazilian Top Team Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 74,
+      "gym": "Brazilian Top Team Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 75,
+      "gym": "Blackhouse MMA Miami",
+      "field": "website",
+      "before": "blackhousemiami.com",
+      "after": "https://blackhousemiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 75,
+      "gym": "Blackhouse MMA Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 75,
+      "gym": "Blackhouse MMA Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 76,
+      "gym": "Ground Control Miami",
+      "field": "website",
+      "before": "groundcontrolmiami.com",
+      "after": "https://groundcontrolmiami.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 76,
+      "gym": "Ground Control Miami",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 76,
+      "gym": "Ground Control Miami",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 77,
+      "gym": "ATT Kendall",
+      "field": "website",
+      "before": "attkendall.com",
+      "after": "https://attkendall.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 77,
+      "gym": "ATT Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 77,
+      "gym": "ATT Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 78,
+      "gym": "The Cage MMA Kendall",
+      "field": "website",
+      "before": "thecagemmakendall.com",
+      "after": "https://thecagemmakendall.com"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 78,
+      "gym": "The Cage MMA Kendall",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "miami-gyms.csv",
+      "row": 78,
+      "gym": "The Cage MMA Kendall",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "stpete-gyms.csv",
+      "row": 2,
+      "gym": "St Pete BJJ",
+      "field": "website",
+      "before": "stpetebjj.com",
+      "after": "https://stpetebjj.com"
+    },
+    {
+      "file": "stpete-gyms.csv",
+      "row": 3,
+      "gym": "Inside Control Academy",
+      "field": "website",
+      "before": "insidecontrolacademy.com",
+      "after": "https://insidecontrolacademy.com"
+    },
+    {
+      "file": "stpete-gyms.csv",
+      "row": 4,
+      "gym": "Gracie Jiu Jitsu Largo",
+      "field": "website",
+      "before": "graciejiujitsulargo.com",
+      "after": "https://graciejiujitsulargo.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 15,
+      "gym": "American Top Team Tampa",
+      "field": "website",
+      "before": "americantopteamtampa.com",
+      "after": "https://americantopteamtampa.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 15,
+      "gym": "American Top Team Tampa",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 15,
+      "gym": "American Top Team Tampa",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 16,
+      "gym": "Gracie Tampa",
+      "field": "website",
+      "before": "gracietampa.com",
+      "after": "https://gracietampa.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 16,
+      "gym": "Gracie Tampa",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 16,
+      "gym": "Gracie Tampa",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 17,
+      "gym": "Marcio Cruz BJJ New Tampa",
+      "field": "website",
+      "before": "marciocruzbjj.com",
+      "after": "https://marciocruzbjj.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 17,
+      "gym": "Marcio Cruz BJJ New Tampa",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 17,
+      "gym": "Marcio Cruz BJJ New Tampa",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 18,
+      "gym": "Checkmat BJJ Tampa",
+      "field": "website",
+      "before": "facebook.com/CheckmatBJJTampa",
+      "after": "https://facebook.com/CheckmatBJJTampa"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 18,
+      "gym": "Checkmat BJJ Tampa",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 18,
+      "gym": "Checkmat BJJ Tampa",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 19,
+      "gym": "Gracie Barra Citrus Park",
+      "field": "website",
+      "before": "gbcitrusparktampa.com",
+      "after": "https://gbcitrusparktampa.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 19,
+      "gym": "Gracie Barra Citrus Park",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 19,
+      "gym": "Gracie Barra Citrus Park",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 20,
+      "gym": "Gracie Martial Arts Tampa",
+      "field": "website",
+      "before": "graciemartialartstampa.com",
+      "after": "https://graciemartialartstampa.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 20,
+      "gym": "Gracie Martial Arts Tampa",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 20,
+      "gym": "Gracie Martial Arts Tampa",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 21,
+      "gym": "Gracie PAC MMA",
+      "field": "website",
+      "before": "graciepac.com",
+      "after": "https://graciepac.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 21,
+      "gym": "Gracie PAC MMA",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 21,
+      "gym": "Gracie PAC MMA",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 22,
+      "gym": "De La Riva BJJ Tampa Bay",
+      "field": "website",
+      "before": "delarivabjjtampabay.com",
+      "after": "https://delarivabjjtampabay.com"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 22,
+      "gym": "De La Riva BJJ Tampa Bay",
+      "field": "matFee",
+      "before": "Contact",
+      "after": "?"
+    },
+    {
+      "file": "tampa-gyms.csv",
+      "row": 22,
+      "gym": "De La Riva BJJ Tampa Bay",
+      "field": "dropInFee",
+      "before": "Contact",
+      "after": "?"
+    }
+  ],
+  "fixSummary": {
+    "website": {
+      "count": 87,
+      "examples": [
+        {
+          "gym": "Gracie Barra Kendall",
+          "before": "graciebarra.com",
+          "after": "https://graciebarra.com"
+        },
+        {
+          "gym": "Gracie Barra Aventura",
+          "before": "gbayventura.com",
+          "after": "https://gbayventura.com"
+        },
+        {
+          "gym": "Gracie Barra South Miami",
+          "before": "graciebarra.com",
+          "after": "https://graciebarra.com"
+        }
+      ]
+    },
+    "dropInFee": {
+      "count": 80,
+      "examples": [
+        {
+          "gym": "Gracie Barra Kendall",
+          "before": "Contact",
+          "after": "?"
+        },
+        {
+          "gym": "Gracie Barra Aventura",
+          "before": "Contact",
+          "after": "?"
+        },
+        {
+          "gym": "Gracie Barra South Miami",
+          "before": "Contact",
+          "after": "?"
+        }
+      ]
+    },
+    "matFee": {
+      "count": 63,
+      "examples": [
+        {
+          "gym": "Gracie Barra South Miami",
+          "before": "Contact",
+          "after": "?"
+        },
+        {
+          "gym": "Rilion Gracie Jiu-Jitsu Doral",
+          "before": "Contact",
+          "after": "?"
+        },
+        {
+          "gym": "Valente Brothers Jiu-Jitsu Coral Gables",
+          "before": "Contact",
+          "after": "?"
+        }
+      ]
+    }
+  }
+}

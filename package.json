@@ -8,7 +8,9 @@
     "ios": "expo run:ios",
     "ios:pods": "cd ios && pod install && ruby fix-expo-paths.rb",
     "web": "expo start --web",
-    "validate-websites": "node scripts/validate-websites.js"
+    "validate-websites": "node scripts/validate-websites.js",
+    "validate-csv-data": "node scripts/validate-csv-data.js",
+    "fix-csv-data": "node scripts/fix-csv-data.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
