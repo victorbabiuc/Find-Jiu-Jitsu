@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "ios:pods": "cd ios && pod install && ruby fix-expo-paths.rb",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "validate-websites": "node scripts/validate-websites.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
@@ -31,6 +32,7 @@
     "expo-haptics": "~14.1.4",
     "expo-linear-gradient": "~14.1.5",
     "expo-location": "~18.1.5",
+    "expo-media-library": "~17.1.5",
     "expo-status-bar": "~2.2.3",
     "expo-web-browser": "~14.2.0",
     "react": "19.0.0",
