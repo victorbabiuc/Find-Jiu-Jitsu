@@ -16,15 +16,21 @@ class GymLogoService {
   private readonly KNOWN_LOGOS: Record<string, string> = {
     // Tampa gyms
     'tampa-stjj': 'https://southtampajiujitsu.com/wp-content/uploads/2023/01/STJJ-Logo-1.png',
-    'tampa-gracie-south': 'https://gracietampasouth.com/wp-content/uploads/2023/01/gracie-tampa-south-logo.png',
-    'tampa-gracie-brandon': 'https://graciebrandon.com/wp-content/uploads/2023/01/gracie-brandon-logo.png',
-    'tampa-gracie-westchase': 'https://graciewestchase.com/wp-content/uploads/2023/01/gracie-westchase-logo.png',
-    'tampa-st-pete-bjj': 'https://www.stpetebjj.com/wp-content/uploads/2023/01/st-pete-bjj-logo.png',
-    'tampa-inside-control-st-pete': 'https://insidecontrolacademy.com/wp-content/uploads/2023/01/inside-control-logo.png',
-    
+    'tampa-gracie-south':
+      'https://gracietampasouth.com/wp-content/uploads/2023/01/gracie-tampa-south-logo.png',
+    'tampa-gracie-brandon':
+      'https://graciebrandon.com/wp-content/uploads/2023/01/gracie-brandon-logo.png',
+    'tampa-gracie-westchase':
+      'https://graciewestchase.com/wp-content/uploads/2023/01/gracie-westchase-logo.png',
+    'tampa-st-pete-bjj':
+      'https://www.stpetebjj.com/wp-content/uploads/2023/01/st-pete-bjj-logo.png',
+    'tampa-inside-control-st-pete':
+      'https://insidecontrolacademy.com/wp-content/uploads/2023/01/inside-control-logo.png',
+
     // Austin gyms
-    'austin-10th-planet': 'https://10thplanetaustin.com/wp-content/uploads/2023/01/10th-planet-logo.png',
-    
+    'austin-10th-planet':
+      'https://10thplanetaustin.com/wp-content/uploads/2023/01/10th-planet-logo.png',
+
     // Placeholder logos for gyms without specific logos
     'tampa-rmnu': 'https://via.placeholder.com/60x60/374151/FFFFFF?text=RMNU',
     'tampa-gracie-humaita': 'https://via.placeholder.com/60x60/374151/FFFFFF?text=GH',
@@ -35,7 +41,7 @@ class GymLogoService {
     'tampa-tmt': 'https://via.placeholder.com/60x60/374151/FFFFFF?text=TMT',
     'tampa-gracie-trinity': 'https://via.placeholder.com/60x60/374151/FFFFFF?text=GT',
     'tampa-gracie-clermont': 'https://via.placeholder.com/60x60/374151/FFFFFF?text=GC',
-    
+
     // Add more known logos as we discover them
   };
 
@@ -53,7 +59,11 @@ class GymLogoService {
   /**
    * Get logo URL for a gym, with fallback to initials
    */
-  public async getGymLogo(gymId: string, gymName: string, gymWebsite?: string): Promise<string | null> {
+  public async getGymLogo(
+    gymId: string,
+    gymName: string,
+    gymWebsite?: string
+  ): Promise<string | null> {
     // Skip gyms that have hardcoded logos in the app
     if (gymId.includes('10th-planet') || gymId.includes('stjj')) {
       return null;
@@ -73,20 +83,18 @@ class GymLogoService {
     // Generate a placeholder logo with gym initials
     const initials = this.getInitials(gymName);
     const placeholderUrl = `https://via.placeholder.com/60x60/374151/FFFFFF?text=${encodeURIComponent(initials)}`;
-    
+
     // Cache the placeholder
     const logoData: GymLogoData = {
       url: placeholderUrl,
       cached: true,
-      lastFetched: Date.now()
+      lastFetched: Date.now(),
     };
     this.logoCache.set(gymId, logoData);
     await this.saveCacheToStorage();
-    
+
     return placeholderUrl;
   }
-
-
 
   /**
    * Check if cache is still valid
@@ -136,11 +144,11 @@ class GymLogoService {
   public getInitials(name: string): string {
     return name
       .split(' ')
-      .map((n) => n[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 3);
   }
 }
 
-export const gymLogoService = GymLogoService.getInstance(); 
+export const gymLogoService = GymLogoService.getInstance();

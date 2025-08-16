@@ -47,13 +47,17 @@ class GitHubDataService {
   private readonly CACHE_PREFIX = 'github_gym_data_';
   private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
   private readonly CACHE_VERSION = '1.5.2'; // Increment this to force cache refresh
-  
+
   // GitHub raw URLs for CSV files
   private readonly CSV_URLS = {
-    'tampa': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
-    'austin': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
-    'miami': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv',
-    'stpete': 'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms.csv'
+    tampa:
+      'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/tampa-gyms.csv',
+    austin:
+      'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/austin-gyms.csv',
+    miami:
+      'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/miami-gyms.csv',
+    stpete:
+      'https://raw.githubusercontent.com/victorbabiuc/JiuJitsu-Finder/main/data/stpete-gyms.csv',
   };
 
   /**
@@ -65,23 +69,25 @@ class GitHubDataService {
     try {
       const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
       const cachedString = await AsyncStorage.getItem(cacheKey);
-      
+
       if (!cachedString) {
         return true; // No cache, needs fresh data
       }
 
       const cached: CachedData = JSON.parse(cachedString);
-      
+
       // Check if cache version is outdated
       if (cached.version !== this.CACHE_VERSION) {
-        logger.info(`Cache version mismatch for ${location}: cached=${cached.version}, current=${this.CACHE_VERSION}`);
+        logger.info(
+          `Cache version mismatch for ${location}: cached=${cached.version}, current=${this.CACHE_VERSION}`
+        );
         return true; // Version mismatch, needs fresh data
       }
-      
+
       const age = Date.now() - cached.timestamp;
-      
+
       // Cache duration: 1 hour
-      return age > (60 * 60 * 1000); // 1 hour
+      return age > 60 * 60 * 1000; // 1 hour
     } catch (error) {
       logger.error(`Error checking if data is stale for ${location}:`, error);
       return true; // Assume stale if error
@@ -97,22 +103,26 @@ class GitHubDataService {
   async getGymData(location: string, forceRefresh: boolean = false): Promise<OpenMat[]> {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'tampa';
-    
-    console.log(`[DEBUG] getGymData called for location: ${safeLocation}, forceRefresh: ${forceRefresh}`);
-    
+
+    console.log(
+      `[DEBUG] getGymData called for location: ${safeLocation}, forceRefresh: ${forceRefresh}`
+    );
+
     try {
       const normalizedLocation = safeLocation.toLowerCase();
       console.log(`[DEBUG] Normalized location: ${normalizedLocation}`);
-      
+
       // Check if data is stale or force refresh is requested
       const isStale = await this.isDataStale(normalizedLocation);
       console.log(`[DEBUG] Data is stale: ${isStale}`);
-      
+
       // Check cache first (unless force refresh or data is stale)
       if (!forceRefresh && !isStale) {
         const cachedData = await this.getCachedData(normalizedLocation);
         if (cachedData) {
-          console.log(`[DEBUG] Using cached data for ${normalizedLocation}, ${cachedData.length} gyms`);
+          console.log(
+            `[DEBUG] Using cached data for ${normalizedLocation}, ${cachedData.length} gyms`
+          );
           return cachedData;
         }
       }
@@ -123,20 +133,20 @@ class GitHubDataService {
       console.log(`[DEBUG] CSV data length: ${csvData.length} characters`);
       const parsedData = this.parseCSVToOpenMats(csvData, normalizedLocation);
       console.log(`[DEBUG] Parsed ${parsedData.length} gyms for ${normalizedLocation}`);
-      
+
       // Cache the new data
       await this.cacheData(normalizedLocation, parsedData);
-      
+
       return parsedData;
     } catch (error) {
       logger.error(`GitHubDataService: Error fetching data for ${safeLocation}:`, error);
-      
+
       // Fallback to cached data if available
       const cachedData = await this.getCachedData(safeLocation.toLowerCase());
       if (cachedData) {
         return cachedData;
       }
-      
+
       // Return empty array if no cached data available
       logger.warn(`GitHubDataService: No data available for ${safeLocation}`);
       return [];
@@ -150,14 +160,14 @@ class GitHubDataService {
    */
   private async fetchCSVFromGitHub(location: string): Promise<string> {
     const url = this.CSV_URLS[location as keyof typeof this.CSV_URLS];
-    
+
     if (!url) {
       throw new Error(`No CSV URL configured for location: ${location}`);
     }
 
     try {
       const response = await fetch(url);
-      
+
       if (response.status === 429) {
         // Rate limited - try to use cached data
         logger.rateLimit('GitHubDataService: Rate limited, falling back to cache');
@@ -168,11 +178,11 @@ class GitHubDataService {
         }
         throw new Error('Rate limited and no cached data available');
       }
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch CSV data: ${response.status} ${response.statusText}`);
       }
-      
+
       return await response.text();
     } catch (error) {
       // Always try cache on any error
@@ -192,9 +202,22 @@ class GitHubDataService {
    */
   private convertOpenMatsToCSV(openMats: OpenMat[]): string {
     // CSV header
-    const headers = ['id', 'name', 'address', 'website', 'distance', 'matFee', 'dropInFee', 'sessionDay', 'sessionTime', 'sessionType', 'coordinates', 'lastUpdated'];
+    const headers = [
+      'id',
+      'name',
+      'address',
+      'website',
+      'distance',
+      'matFee',
+      'dropInFee',
+      'sessionDay',
+      'sessionTime',
+      'sessionType',
+      'coordinates',
+      'lastUpdated',
+    ];
     const csvRows = [headers.join(',')];
-    
+
     // Convert each gym and its sessions to CSV rows
     openMats.forEach(gym => {
       gym.openMats?.forEach(session => {
@@ -210,9 +233,9 @@ class GitHubDataService {
           session.time,
           session.type,
           gym.coordinates || '',
-          gym.lastUpdated || ''
+          gym.lastUpdated || '',
         ];
-        
+
         // Escape commas in fields and wrap in quotes if needed
         const escapedRow = row.map(field => {
           const str = field.toString();
@@ -221,11 +244,11 @@ class GitHubDataService {
           }
           return str;
         });
-        
+
         csvRows.push(escapedRow.join(','));
       });
     });
-    
+
     return csvRows.join('\n');
   }
 
@@ -236,13 +259,13 @@ class GitHubDataService {
    */
   private sortSessionsByDay(sessions: OpenMatSession[]): OpenMatSession[] {
     const dayOrder = {
-      'Friday': 1,
-      'Saturday': 2, 
-      'Sunday': 3,
-      'Monday': 4,
-      'Tuesday': 5,
-      'Wednesday': 6,
-      'Thursday': 7
+      Friday: 1,
+      Saturday: 2,
+      Sunday: 3,
+      Monday: 4,
+      Tuesday: 5,
+      Wednesday: 6,
+      Thursday: 7,
     };
 
     return sessions.sort((a, b) => {
@@ -259,13 +282,18 @@ class GitHubDataService {
    */
   private parseCSVToOpenMats(csvData: string, location?: string): OpenMat[] {
     console.log(`[DEBUG] parseCSVToOpenMats called for location: ${location}`);
-    
-            // Use new format for St Pete, Austin, Miami, and Tampa, old format for other cities
-        if (location === 'stpete' || location === 'austin' || location === 'miami' || location === 'tampa') {
-          console.log(`[DEBUG] Using new format parser for ${location}`);
-          return this.parseCSVToOpenMatsNewFormat(csvData);
-        }
-    
+
+    // Use new format for St Pete, Austin, Miami, and Tampa, old format for other cities
+    if (
+      location === 'stpete' ||
+      location === 'austin' ||
+      location === 'miami' ||
+      location === 'tampa'
+    ) {
+      console.log(`[DEBUG] Using new format parser for ${location}`);
+      return this.parseCSVToOpenMatsNewFormat(csvData);
+    }
+
     // Use old format for all other cities
     console.log('[DEBUG] Using old format parser for other cities');
     return this.parseCSVToOpenMatsOldFormat(csvData);
@@ -274,13 +302,21 @@ class GitHubDataService {
   private parseCSVToOpenMatsOldFormat(csvData: string): OpenMat[] {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
-    
 
-    
     // Validate headers
-    const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'dropInFee', 'sessionDay', 'sessionTime', 'sessionType'];
+    const requiredHeaders = [
+      'id',
+      'name',
+      'address',
+      'distance',
+      'matFee',
+      'dropInFee',
+      'sessionDay',
+      'sessionTime',
+      'sessionType',
+    ];
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-    
+
     if (missingHeaders.length > 0) {
       throw new Error(`Missing required CSV headers: ${missingHeaders.join(', ')}`);
     }
@@ -300,17 +336,15 @@ class GitHubDataService {
         sessionTime: values[headers.indexOf('sessionTime')] || '',
         sessionType: values[headers.indexOf('sessionType')] || 'both',
         coordinates: values[headers.indexOf('coordinates')] || undefined,
-        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined
+        lastUpdated: values[headers.indexOf('lastUpdated')] || undefined,
       };
-      
 
-      
       return row;
     });
 
     // Group by gym name to consolidate multiple sessions per gym
     const gymMap = new Map<string, OpenMat>();
-    
+
     csvRows.forEach(row => {
       if (!row.id || !row.name) {
         logger.warn('Skipping row with missing id or name:', { row });
@@ -318,7 +352,7 @@ class GitHubDataService {
       }
 
       const gymName = row.name.trim();
-      
+
       if (!gymMap.has(gymName)) {
         // Create new gym entry using the first occurrence's data
         // Clean up the ID to remove any suffixes like -1, -2, -3
@@ -330,12 +364,14 @@ class GitHubDataService {
           website: row.website && row.website.trim() !== '' ? row.website : undefined,
           distance: parseFloat(row.distance) || 0,
           matFee: parseInt(row.matFee) || 0,
-          dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
-          coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
+          dropInFee:
+            row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
+          coordinates:
+            row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
           lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
-          openMats: []
+          openMats: [],
         };
-        
+
         gymMap.set(gymName, gym);
       }
 
@@ -345,7 +381,7 @@ class GitHubDataService {
         const session: OpenMatSession = {
           day: row.sessionDay.trim(),
           time: row.sessionTime.trim(),
-          type: this.validateSessionType(row.sessionType)
+          type: this.validateSessionType(row.sessionType),
         };
         gym.openMats.push(session);
       }
@@ -354,16 +390,16 @@ class GitHubDataService {
     // Sort sessions by day order for each gym
     const sortedGyms = Array.from(gymMap.values()).map(gym => ({
       ...gym,
-      openMats: this.sortSessionsByDay(gym.openMats)
+      openMats: this.sortSessionsByDay(gym.openMats),
     }));
 
     // Debug: Log the parsing results
-    console.log('[DEBUG] Old format CSV parsing completed:', { 
+    console.log('[DEBUG] Old format CSV parsing completed:', {
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
-      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length })),
     });
-    
+
     // Check for duplicate IDs
     const ids = sortedGyms.map(g => g.id);
     const uniqueIds = new Set(ids);
@@ -387,34 +423,34 @@ class GitHubDataService {
     if (!sessionData || sessionData.trim() === '') {
       return null;
     }
-    
+
     // Handle multiple sessions separated by commas
     const sessions = sessionData.split(',').map(s => s.trim());
-    
+
     // For now, just parse the first session
     const firstSession = sessions[0];
-    
+
     // Parse "5:00 PM - Gi/NoGi" format
     const parts = firstSession.split(' - ');
-    
+
     if (parts.length < 2) {
       // Fallback: treat entire string as time, assume "both" type
       return {
         day: day.charAt(0).toUpperCase() + day.slice(1), // "sunday" -> "Sunday"
         time: firstSession.trim(),
-        type: 'both'
+        type: 'both',
       };
     }
-    
+
     // Handle cases like "9:00 AM - 10:30 AM - NoGi" (3 parts)
     // or "5:00 PM - Gi/NoGi" (2 parts)
     const time = parts.slice(0, -1).join(' - ').trim(); // All parts except the last
     const type = parts[parts.length - 1].trim(); // Last part is the type
-    
+
     return {
       day: day.charAt(0).toUpperCase() + day.slice(1),
       time: time,
-      type: this.validateSessionType(type)
+      type: this.validateSessionType(type),
     };
   }
 
@@ -428,11 +464,11 @@ class GitHubDataService {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
     console.log('[DEBUG] CSV headers:', headers);
-    
+
     // Validate headers for new format
     const requiredHeaders = ['id', 'name', 'address', 'distance', 'matFee', 'dropInFee'];
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-    
+
     if (missingHeaders.length > 0) {
       throw new Error(`Missing required CSV headers for new format: ${missingHeaders.join(', ')}`);
     }
@@ -456,74 +492,93 @@ class GitHubDataService {
         thursday: values[headers.indexOf('thursday')] || undefined,
         friday: values[headers.indexOf('friday')] || undefined,
         saturday: values[headers.indexOf('saturday')] || undefined,
-        sunday: values[headers.indexOf('sunday')] || undefined
+        sunday: values[headers.indexOf('sunday')] || undefined,
       };
-      
+
       return row;
     });
 
     // Convert each row to OpenMat object
     console.log('[DEBUG] Processing', csvRows.length, 'CSV rows');
-    const gyms = csvRows.map((row, index) => {
-      console.log(`[DEBUG] Processing row ${index + 1}:`, { id: row.id, name: row.name });
-      
-      if (!row.id || !row.name) {
-        console.log('[DEBUG] Skipping row with missing id or name:', { row });
-        return null;
-      }
+    const gyms = csvRows
+      .map((row, index) => {
+        console.log(`[DEBUG] Processing row ${index + 1}:`, { id: row.id, name: row.name });
 
-      const gym: OpenMat = {
-        id: row.id,
-        name: row.name.trim(),
-        address: row.address,
-        website: row.website && row.website.trim() !== '' ? row.website : undefined,
-        distance: parseFloat(row.distance) || 0,
-        matFee: parseInt(row.matFee) || 0,
-        dropInFee: row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
-        coordinates: row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
-        lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
-        openMats: []
-      };
-      
-      console.log('[DEBUG] Created gym object:', { id: gym.id, name: gym.name, coordinates: gym.coordinates });
-      
-      // Parse sessions from day columns
-      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-      console.log(`[DEBUG] Parsing sessions for gym: ${gym.name}`);
-      days.forEach(day => {
-        const sessionData = row[day as keyof CSVRowNew] as string | undefined;
-        console.log(`[DEBUG] ${day}: "${sessionData}"`);
-        if (sessionData && sessionData.trim() !== '') {
-          const session = this.parseSessionFromDayColumn(sessionData, day);
-          if (session) {
-            gym.openMats.push(session);
-            console.log(`[DEBUG] Added session: ${session.day} ${session.time} ${session.type}`);
-          }
+        if (!row.id || !row.name) {
+          console.log('[DEBUG] Skipping row with missing id or name:', { row });
+          return null;
         }
-      });
-      
-      return gym;
-    }).filter((gym): gym is OpenMat => gym !== null);
-    
+
+        const gym: OpenMat = {
+          id: row.id,
+          name: row.name.trim(),
+          address: row.address,
+          website: row.website && row.website.trim() !== '' ? row.website : undefined,
+          distance: parseFloat(row.distance) || 0,
+          matFee: parseInt(row.matFee) || 0,
+          dropInFee:
+            row.dropInFee && row.dropInFee.trim() !== '' ? parseInt(row.dropInFee) : undefined,
+          coordinates:
+            row.coordinates && row.coordinates.trim() !== '' ? row.coordinates : undefined,
+          lastUpdated: this.parseLastUpdatedDate(row.lastUpdated),
+          openMats: [],
+        };
+
+        console.log('[DEBUG] Created gym object:', {
+          id: gym.id,
+          name: gym.name,
+          coordinates: gym.coordinates,
+        });
+
+        // Parse sessions from day columns
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        console.log(`[DEBUG] Parsing sessions for gym: ${gym.name}`);
+        days.forEach(day => {
+          const sessionData = row[day as keyof CSVRowNew] as string | undefined;
+          console.log(`[DEBUG] ${day}: "${sessionData}"`);
+          if (sessionData && sessionData.trim() !== '') {
+            const session = this.parseSessionFromDayColumn(sessionData, day);
+            if (session) {
+              gym.openMats.push(session);
+              console.log(`[DEBUG] Added session: ${session.day} ${session.time} ${session.type}`);
+            }
+          }
+        });
+
+        return gym;
+      })
+      .filter((gym): gym is OpenMat => gym !== null);
+
     console.log('[DEBUG] After filter:', gyms.length, 'gyms');
     gyms.forEach((gym, index) => {
-      console.log(`[DEBUG] Gym ${index + 1}:`, { id: gym.id, name: gym.name, sessions: gym.openMats.length });
+      console.log(`[DEBUG] Gym ${index + 1}:`, {
+        id: gym.id,
+        name: gym.name,
+        sessions: gym.openMats.length,
+      });
     });
 
     // Sort sessions by day order for each gym
     const sortedGyms = gyms.map(gym => ({
       ...gym,
-      openMats: this.sortSessionsByDay(gym.openMats)
+      openMats: this.sortSessionsByDay(gym.openMats),
     }));
 
     // Debug: Log the parsing results
-    console.log('[DEBUG] New format CSV parsing completed:', { 
+    console.log('[DEBUG] New format CSV parsing completed:', {
       totalRows: csvRows.length,
       uniqueGyms: sortedGyms.length,
-      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length }))
+      sampleGyms: sortedGyms.slice(0, 5).map(g => ({ name: g.name, sessions: g.openMats.length })),
     });
-    
-    console.log('[DEBUG] All St Pete gyms:', sortedGyms.map(g => ({ name: g.name, sessions: g.openMats.length, coordinates: g.coordinates })));
+
+    console.log(
+      '[DEBUG] All St Pete gyms:',
+      sortedGyms.map(g => ({
+        name: g.name,
+        sessions: g.openMats.length,
+        coordinates: g.coordinates,
+      }))
+    );
 
     return sortedGyms;
   }
@@ -537,10 +592,10 @@ class GitHubDataService {
     const values: string[] = [];
     let current = '';
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
@@ -550,10 +605,10 @@ class GitHubDataService {
         current += char;
       }
     }
-    
+
     // Add the last value
     values.push(current.trim());
-    
+
     return values;
   }
 
@@ -564,7 +619,7 @@ class GitHubDataService {
    */
   private validateSessionType(type: string): 'gi' | 'nogi' | 'both' | 'mma' | string {
     const normalized = type.toLowerCase().trim();
-    
+
     switch (normalized) {
       case 'gi':
       case 'g':
@@ -599,7 +654,12 @@ class GitHubDataService {
 
     // Check if the value is "Contact" or any other non-date string
     const trimmedValue = lastUpdated.trim().toLowerCase();
-    if (trimmedValue === 'contact' || trimmedValue === 'n/a' || trimmedValue === 'unknown' || trimmedValue === '') {
+    if (
+      trimmedValue === 'contact' ||
+      trimmedValue === 'n/a' ||
+      trimmedValue === 'unknown' ||
+      trimmedValue === ''
+    ) {
       return undefined;
     }
 
@@ -612,12 +672,12 @@ class GitHubDataService {
 
     try {
       const date = new Date(lastUpdated);
-      
+
       // Check if the parsed date is valid
       if (isNaN(date.getTime())) {
         return undefined;
       }
-      
+
       return date.toISOString();
     } catch (e) {
       logger.warn(`Could not parse lastUpdated date: ${lastUpdated}`, { error: e });
@@ -634,7 +694,7 @@ class GitHubDataService {
     try {
       const cacheKey = this.CACHE_PREFIX + location;
       const cachedData = await AsyncStorage.getItem(cacheKey);
-      
+
       if (!cachedData) {
         return null;
       }
@@ -668,9 +728,9 @@ class GitHubDataService {
         data,
         timestamp: Date.now(),
         location,
-        version: this.CACHE_VERSION
+        version: this.CACHE_VERSION,
       };
-      
+
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cachedData));
       logger.info(`Cached data for ${location} with version ${this.CACHE_VERSION}`);
     } catch (error) {
@@ -687,7 +747,6 @@ class GitHubDataService {
       if (location) {
         const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
         await AsyncStorage.removeItem(cacheKey);
-
       } else {
         // Clear all location caches
         const keys = Object.keys(this.CSV_URLS);
@@ -695,7 +754,6 @@ class GitHubDataService {
           const cacheKey = `${this.CACHE_PREFIX}${key}`;
           await AsyncStorage.removeItem(cacheKey);
         }
-
       }
     } catch (error) {
       logger.error('Error clearing cache:', error);
@@ -756,7 +814,7 @@ class GitHubDataService {
     try {
       const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
       const cachedString = await AsyncStorage.getItem(cacheKey);
-      
+
       if (!cachedString) {
         return null;
       }
@@ -778,14 +836,14 @@ class GitHubDataService {
     try {
       const cacheKey = `${this.CACHE_PREFIX}${location.toLowerCase()}`;
       const cachedString = await AsyncStorage.getItem(cacheKey);
-      
+
       if (!cachedString) {
         return { hasCache: false, age: null };
       }
 
       const cached: CachedData = JSON.parse(cachedString);
       const age = Date.now() - cached.timestamp;
-      
+
       return { hasCache: true, age };
     } catch (error) {
       logger.error(`Error checking cache status for ${location}:`, error);
@@ -809,14 +867,19 @@ class GitHubDataService {
    * Force refresh data for all locations
    * @returns Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[], stpete: OpenMat[] }>
    */
-  async forceRefreshAllData(): Promise<{ tampa: OpenMat[], austin: OpenMat[], miami: OpenMat[], stpete: OpenMat[] }> {
+  async forceRefreshAllData(): Promise<{
+    tampa: OpenMat[];
+    austin: OpenMat[];
+    miami: OpenMat[];
+    stpete: OpenMat[];
+  }> {
     const [tampaData, austinData, miamiData, stpeteData] = await Promise.all([
       this.getGymData('tampa', true),
       this.getGymData('austin', true),
       this.getGymData('miami', true),
-      this.getGymData('stpete', true)
+      this.getGymData('stpete', true),
     ]);
-    
+
     return { tampa: tampaData, austin: austinData, miami: miamiData, stpete: stpeteData };
   }
 

@@ -36,7 +36,7 @@ export const AppProvider = ({ children }: AppContextProviderProps) => {
     radius: '',
     price: '',
     timeOfDay: '',
-    giType: ''
+    giType: '',
   });
 
   // Get authentication context
@@ -94,10 +94,10 @@ export const AppProvider = ({ children }: AppContextProviderProps) => {
       newFavorites.add(id);
     }
     setFavorites(newFavorites);
-    
+
     // Save to local storage for all users
     await storageService.setItem('favorites', Array.from(newFavorites));
-    
+
     // Sync to Firebase for authenticated users
     if (isAuthenticated && user?.uid) {
       try {
@@ -113,20 +113,24 @@ export const AppProvider = ({ children }: AppContextProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{
-      currentView,
-      setCurrentView,
-      userBelt,
-      setUserBelt,
-      selectedLocation,
-      setSelectedLocation,
-      favorites,
-      toggleFavorite,
-      filters,
-      updateFilters,
-      showSideMenu,
-      setShowSideMenu
-    } as AppContextType}>
+    <AppContext.Provider
+      value={
+        {
+          currentView,
+          setCurrentView,
+          userBelt,
+          setUserBelt,
+          selectedLocation,
+          setSelectedLocation,
+          favorites,
+          toggleFavorite,
+          filters,
+          updateFilters,
+          showSideMenu,
+          setShowSideMenu,
+        } as AppContextType
+      }
+    >
       {children}
     </AppContext.Provider>
   );

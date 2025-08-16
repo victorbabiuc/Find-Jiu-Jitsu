@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -33,16 +28,16 @@ const ResultsEmptyState: React.FC<ResultsEmptyStateProps> = ({
 
   const getEmptyStateSubtitle = () => {
     let subtitle = `No open mats in ${location}`;
-    
+
     if (dateSelection) {
       subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
     }
-    
+
     if (activeFilters.price === 'free') {
       subtitle = `No free open mats in ${location}`;
       if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
     }
-    
+
     if (activeFilters.gi && !activeFilters.nogi) {
       subtitle = `No Gi-only sessions found in ${location}`;
       if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
@@ -50,7 +45,7 @@ const ResultsEmptyState: React.FC<ResultsEmptyStateProps> = ({
       subtitle = `No No-Gi sessions found in ${location}`;
       if (dateSelection) subtitle += ` for ${getDateSelectionDisplay(dateSelection).toLowerCase()}`;
     }
-    
+
     return subtitle;
   };
 
@@ -58,40 +53,40 @@ const ResultsEmptyState: React.FC<ResultsEmptyStateProps> = ({
     <View style={styles.emptyStateContainer}>
       {/* Icon */}
       <View style={styles.emptyStateIconContainer}>
-        <Ionicons 
-          name="search-outline" 
-          size={64} 
-          color={theme.text.secondary} 
-        />
+        <Ionicons name="search-outline" size={64} color={theme.text.secondary} />
       </View>
-      
+
       {/* Title */}
       <Text style={[styles.emptyStateTitle, { color: theme.text.primary }]}>
         No open mats found
       </Text>
-      
+
       {/* Dynamic Subtitle based on filters */}
       <Text style={[styles.emptyStateSubtitle, { color: theme.text.secondary }]}>
         {getEmptyStateSubtitle()}
       </Text>
-      
+
       {/* Action Buttons */}
       <View style={styles.emptyStateButtons}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.emptyStateButton, styles.secondaryButton]}
           onPress={onClearFilters}
         >
-          <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Clear Filters</Text>
+          <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>
+            Clear Filters
+          </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.emptyStateButton, styles.secondaryButton]}
           onPress={onChangeDay}
         >
-          <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>Change Day</Text>
+          <Text style={[styles.secondaryButtonText, { color: theme.text.primary }]}>
+            Change Day
+          </Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Suggestion Text */}
       <Text style={[styles.emptyStateSuggestion, { color: theme.text.secondary }]}>
         Try checking different days or clearing your filters
@@ -153,4 +148,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResultsEmptyState; 
+export default ResultsEmptyState;

@@ -1,5 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Alert, Modal, ActivityIndicator, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Share,
+  Alert,
+  Modal,
+  ActivityIndicator,
+  Animated,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import tenthPlanetLogo from '../../assets/logos/10th-planet-austin.png';
@@ -45,7 +56,7 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
@@ -58,34 +69,38 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
 
   // Entrance animation
   useEffect(() => {
-    animations.parallel([
-      animations.fadeIn(fadeAnim, 400),
-      animations.scale(scaleAnim, 1, 400),
-    ]).start();
+    animations
+      .parallel([animations.fadeIn(fadeAnim, 400), animations.scale(scaleAnim, 1, 400)])
+      .start();
   }, []);
 
   const handleShare = async () => {
     try {
       // Use the full address from the gym data
       const displayAddress = gym.address;
-      
+
       // Get session info from the first session in openMats array
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
-      const sessionInfo = firstSession ? `⏰ ${firstSession.day.toUpperCase()} ${firstSession.time} - ${firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi'}` : '';
-      
-      const inviteMessage = includeImGoing ? '🏃 I\'m going, come train with me!' : '🏃 Join me for training!';
-      
-      const shareText = `${gym.name}\n` +
+      const sessionInfo = firstSession
+        ? `⏰ ${firstSession.day.toUpperCase()} ${firstSession.time} - ${firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi'}`
+        : '';
+
+      const inviteMessage = includeImGoing
+        ? "🏃 I'm going, come train with me!"
+        : '🏃 Join me for training!';
+
+      const shareText =
+        `${gym.name}\n` +
         (displayAddress && displayAddress.trim() !== '' ? `📍 ${displayAddress}\n` : '') +
         (gym.website ? `🌐 ${gym.website.replace(/^https?:\/\//, '')}\n` : '') +
         (sessionInfo ? `${sessionInfo}\n` : '') +
         `💵 Open mat: ${gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : 'Contact gym'}\n\n` +
         `${inviteMessage}\n\n` +
         `📱 Get the app:\nhttps://bit.ly/40DjTlM`;
-      
+
       Share.share({
         message: shareText,
-        title: `${gym.name} - Jiu Jitsu Gym`
+        title: `${gym.name} - Jiu Jitsu Gym`,
       });
     } catch (error) {
       // Share error handled silently
@@ -94,13 +109,13 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
 
   const handleScreenshotShare = async () => {
     if (isSharing) return; // Prevent multiple clicks
-    
+
     haptics.light(); // Light haptic for button press
     setIsSharing(true);
     try {
       // Get the first session for the share card
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
-      
+
       if (!firstSession) {
         haptics.warning(); // Warning haptic for no sessions
         Alert.alert('No Sessions', 'No sessions available to share.');
@@ -111,11 +126,9 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
       haptics.success(); // Success haptic for successful share
     } catch (error) {
       haptics.error(); // Error haptic for failed share
-      Alert.alert(
-        '❌ Sharing Error',
-        'Failed to create and share the image. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('❌ Sharing Error', 'Failed to create and share the image. Please try again.', [
+        { text: 'OK' },
+      ]);
     } finally {
       setIsSharing(false);
     }
@@ -127,20 +140,22 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
 
   const handleHeartPress = () => {
     const isFavorited = favorites.has(gym.id);
-    
+
     // Haptic feedback
     if (isFavorited) {
       haptics.light(); // Light haptic for unfavoriting
     } else {
       haptics.success(); // Success haptic for favoriting
     }
-    
+
     // Heart button animation
-    animations.sequence([
-      animations.scale(heartScaleAnim, 1.3, 150),
-      animations.scale(heartScaleAnim, 1, 200),
-    ]).start();
-    
+    animations
+      .sequence([
+        animations.scale(heartScaleAnim, 1.3, 150),
+        animations.scale(heartScaleAnim, 1, 200),
+      ])
+      .start();
+
     // Color transition animation - temporarily disabled
     // const targetColor = isFavorited ? 0 : 1;
     // Animated.timing(heartColorAnim, {
@@ -148,22 +163,24 @@ const OpenMatCard: React.FC<OpenMatCardProps> = ({
     //   duration: 300,
     //   useNativeDriver: false,
     // }).start();
-    
+
     // Call the original handler
     onHeartPress(gym);
   };
 
   const handleCopy = async () => {
     if (isCopying) return; // Prevent multiple clicks
-    
+
     haptics.light(); // Light haptic for button press
     animations.bounce(buttonScaleAnim, 200).start(); // Button press animation
     setIsCopying(true);
     try {
       // Get session info from the first session in openMats array
       const firstSession = gym.openMats && gym.openMats.length > 0 ? gym.openMats[0] : null;
-      const sessionInfo = firstSession ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}` : '';
-      
+      const sessionInfo = firstSession
+        ? `📅 ${firstSession.day.toUpperCase()}, ${firstSession.time}`
+        : '';
+
       const copyText = `🥋 ${gym.name} - Open Mat
 ${sessionInfo}
 👕 ${firstSession ? (firstSession.type === 'gi' ? 'Gi' : firstSession.type === 'nogi' ? 'No-Gi' : 'Gi & No-Gi') : 'Session'}
@@ -173,7 +190,7 @@ ${sessionInfo}
 📱 Get the app: https://bit.ly/40DjTlM`;
 
       await Clipboard.setStringAsync(copyText);
-      
+
       haptics.success(); // Success haptic for successful copy
       // Show success toast
       setToastMessage('Copied to clipboard!');
@@ -191,7 +208,7 @@ ${sessionInfo}
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.container,
         {
@@ -202,20 +219,20 @@ ${sessionInfo}
     >
       {/* Invisible ShareCard rendered off-screen */}
       {gym.openMats && gym.openMats.length > 0 && (
-        <ShareCard 
+        <ShareCard
           ref={cardRef}
           gym={gym}
           session={gym.openMats[0]}
           includeImGoing={includeImGoing}
         />
       )}
-      
-      <View 
+
+      <View
         style={[
           styles.card,
           {
-            transform: [{ scale: cardPressAnim }]
-          }
+            transform: [{ scale: cardPressAnim }],
+          },
         ]}
         onTouchStart={() => {
           if (onPress) {
@@ -242,130 +259,161 @@ ${sessionInfo}
           }
         }}
       >
-      {/* Header: Logo/Avatar + Gym Name + Heart */}
-      <View style={styles.cardHeader}>
-        {gym.id.includes('10th-planet') ? (
-          <Image source={tenthPlanetLogo} style={styles.gymLogo} />
-        ) : gym.id.includes('stjj') ? (
-          <Image source={stjjLogo} style={styles.gymLogo} />
-        ) : (
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{getInitials(gym.name)}</Text>
-          </View>
-        )}
-        <Text style={styles.gymName}>{gym.name}</Text>
-        <View style={styles.logoHeartContainer}>
-          <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
-            <TouchableOpacity 
-              style={styles.heartButton}
-              onPress={handleHeartPress}
-            >
-              <Text style={[
-                styles.heartIcon,
-                { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' }
-              ]}>
-                {favorites.has(gym.id) ? '♥' : '♡'}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
-          <Animated.View style={{ transform: [{ scale: buttonScaleAnim }] }}>
-            <TouchableOpacity 
-              style={[styles.copyButton, isCopying && styles.disabledButton]}
-              onPress={handleCopy}
-              disabled={isCopying}
-            >
-              {isCopying ? (
-                <ActivityIndicator size="small" color="#60798A" />
-              ) : (
-                <Ionicons name="copy-outline" size={20} color="#60798A" />
-              )}
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </View>
-
-      {/* Session Type Subtitle */}
-      <Text style={styles.sessionSubtitle}>Open Mat Sessions</Text>
-
-      {/* Sessions Section */}
-      <View style={styles.sessionsSection}>
-                    {gym.openMats.map((session: OpenMatSession, index: number) => (
-          <View key={index} style={styles.sessionBlock}>
-            <Text style={styles.dayHeader}>
-              {session.day.toUpperCase()}
-            </Text>
-            <Text style={styles.timeRange}>
-              {session.time} • {session.type === 'gi' ? 'Gi 🥋' : 
-                               session.type === 'nogi' ? 'No-Gi 👕' : 
-                               session.type.toLowerCase() === 'mma' || session.type.toLowerCase() === 'mma sparring' ? 'MMA Sparring 🥊' :
-                               session.type === 'both' ? 'Gi & No-Gi 🥋👕' : 
-                               `${session.type} 🥋👕`}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Fees Section */}
-      <View style={styles.feesSection}>
-        <View style={styles.feesHeader}>
-          <Text style={styles.infoIcon}>💵</Text>
-          <Text style={styles.infoText}>Fees</Text>
-        </View>
-        <View style={styles.feeItem}>
-          <Text style={styles.feeLabel}>Open mat - </Text>
-          <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}> {/* Green if free */}
-            {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
-          </Text>
-        </View>
-        <View style={styles.feeItem}>
-          <Text style={styles.feeLabel}>Class Drop in - </Text>
-          <Text style={styles.feeValue}>
-            {typeof gym.dropInFee === 'number' ? (gym.dropInFee === 0 ? 'Free' : `$${gym.dropInFee}`) : '?/unknown'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity 
-          style={[styles.actionButton, (!gym.website || gym.website.trim() === '') && styles.disabledButton]}
-          onPress={() => {
-            if (gym.website && gym.website.trim() !== '') {
-              haptics.light(); // Light haptic for website button
-              openWebsite(gym.website);
-            }
-          }}
-          disabled={!gym.website || gym.website.trim() === ''}
-        >
-          <Text style={[styles.buttonText, (!gym.website || gym.website.trim() === '') && styles.disabledText]}>🌐 Website</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledButton]}
-          onPress={() => {
-            if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
-              haptics.light(); // Light haptic for directions button
-              openDirections(gym.address);
-            }
-          }}
-          disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
-        >
-          <Text style={[styles.buttonText, (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') && styles.disabledText]}>📍 Directions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, isSharing && styles.disabledButton]}
-          onPress={() => {
-            haptics.light(); // Light haptic for share button
-            handleShareOptions();
-          }}
-          disabled={isSharing}
-        >
-          {isSharing ? (
-            <ActivityIndicator size="small" color="#111518" />
+        {/* Header: Logo/Avatar + Gym Name + Heart */}
+        <View style={styles.cardHeader}>
+          {gym.id.includes('10th-planet') ? (
+            <Image source={tenthPlanetLogo} style={styles.gymLogo} />
+          ) : gym.id.includes('stjj') ? (
+            <Image source={stjjLogo} style={styles.gymLogo} />
           ) : (
-            <Text style={styles.buttonText}>↗️ Share</Text>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>{getInitials(gym.name)}</Text>
+            </View>
           )}
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.gymName}>{gym.name}</Text>
+          <View style={styles.logoHeartContainer}>
+            <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
+              <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
+                <Text
+                  style={[
+                    styles.heartIcon,
+                    { color: favorites.has(gym.id) ? '#EF4444' : '#9CA3AF' },
+                  ]}
+                >
+                  {favorites.has(gym.id) ? '♥' : '♡'}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+            <Animated.View style={{ transform: [{ scale: buttonScaleAnim }] }}>
+              <TouchableOpacity
+                style={[styles.copyButton, isCopying && styles.disabledButton]}
+                onPress={handleCopy}
+                disabled={isCopying}
+              >
+                {isCopying ? (
+                  <ActivityIndicator size="small" color="#60798A" />
+                ) : (
+                  <Ionicons name="copy-outline" size={20} color="#60798A" />
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </View>
+
+        {/* Session Type Subtitle */}
+        <Text style={styles.sessionSubtitle}>Open Mat Sessions</Text>
+
+        {/* Sessions Section */}
+        <View style={styles.sessionsSection}>
+          {gym.openMats.map((session: OpenMatSession, index: number) => (
+            <View key={index} style={styles.sessionBlock}>
+              <Text style={styles.dayHeader}>{session.day.toUpperCase()}</Text>
+              <Text style={styles.timeRange}>
+                {session.time} •{' '}
+                {session.type === 'gi'
+                  ? 'Gi 🥋'
+                  : session.type === 'nogi'
+                    ? 'No-Gi 👕'
+                    : session.type.toLowerCase() === 'mma' ||
+                        session.type.toLowerCase() === 'mma sparring'
+                      ? 'MMA Sparring 🥊'
+                      : session.type === 'both'
+                        ? 'Gi & No-Gi 🥋👕'
+                        : `${session.type} 🥋👕`}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Fees Section */}
+        <View style={styles.feesSection}>
+          <View style={styles.feesHeader}>
+            <Text style={styles.infoIcon}>💵</Text>
+            <Text style={styles.infoText}>Fees</Text>
+          </View>
+          <View style={styles.feeItem}>
+            <Text style={styles.feeLabel}>Open mat - </Text>
+            <Text style={[styles.feeValue, gym.matFee === 0 && { color: '#10B981' }]}>
+              {' '}
+              {/* Green if free */}
+              {gym.matFee === 0 ? 'Free' : gym.matFee ? `$${gym.matFee}` : '?/unknown'}
+            </Text>
+          </View>
+          <View style={styles.feeItem}>
+            <Text style={styles.feeLabel}>Class Drop in - </Text>
+            <Text style={styles.feeValue}>
+              {typeof gym.dropInFee === 'number'
+                ? gym.dropInFee === 0
+                  ? 'Free'
+                  : `$${gym.dropInFee}`
+                : '?/unknown'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              (!gym.website || gym.website.trim() === '') && styles.disabledButton,
+            ]}
+            onPress={() => {
+              if (gym.website && gym.website.trim() !== '') {
+                haptics.light(); // Light haptic for website button
+                openWebsite(gym.website);
+              }
+            }}
+            disabled={!gym.website || gym.website.trim() === ''}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                (!gym.website || gym.website.trim() === '') && styles.disabledText,
+              ]}
+            >
+              🌐 Website
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') &&
+                styles.disabledButton,
+            ]}
+            onPress={() => {
+              if (gym.address && gym.address !== 'Tampa, FL' && gym.address !== 'Austin, TX') {
+                haptics.light(); // Light haptic for directions button
+                openDirections(gym.address);
+              }
+            }}
+            disabled={!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX'}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                (!gym.address || gym.address === 'Tampa, FL' || gym.address === 'Austin, TX') &&
+                  styles.disabledText,
+              ]}
+            >
+              📍 Directions
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, isSharing && styles.disabledButton]}
+            onPress={() => {
+              haptics.light(); // Light haptic for share button
+              handleShareOptions();
+            }}
+            disabled={isSharing}
+          >
+            {isSharing ? (
+              <ActivityIndicator size="small" color="#111518" />
+            ) : (
+              <Text style={styles.buttonText}>↗️ Share</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Share Options Modal - Moved outside TouchableOpacity */}
@@ -375,42 +423,50 @@ ${sessionInfo}
         animationType="slide"
         onRequestClose={() => setShowShareOptions(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}
           activeOpacity={1}
           onPress={() => setShowShareOptions(false)}
         >
-          <View style={{
-            backgroundColor: theme.surface,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            paddingHorizontal: 20,
-            paddingTop: 20,
-            paddingBottom: 40,
-          }}>
-            <Text style={{ 
-              fontSize: 20, 
-              fontWeight: 'bold', 
-              marginBottom: 20, 
-              color: theme.text.primary,
-              textAlign: 'center'
-            }}>
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingHorizontal: 20,
+              paddingTop: 20,
+              paddingBottom: 40,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                marginBottom: 20,
+                color: theme.text.primary,
+                textAlign: 'center',
+              }}
+            >
               Share Open Mat
             </Text>
-            
+
             {/* I'm Going Toggle */}
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              marginBottom: 20,
-              paddingHorizontal: 10
-            }}>
-              <Text style={{ 
-                fontSize: 16, 
-                color: theme.text.primary,
-                flex: 1
-              }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 20,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: theme.text.primary,
+                  flex: 1,
+                }}
+              >
                 Say "I'm going"?
               </Text>
               <TouchableOpacity
@@ -421,33 +477,35 @@ ${sessionInfo}
                   borderRadius: 15,
                   justifyContent: 'center',
                   alignItems: includeImGoing ? 'flex-end' : 'flex-start',
-                  paddingHorizontal: 2
+                  paddingHorizontal: 2,
                 }}
                 onPress={() => setIncludeImGoing(!includeImGoing)}
               >
-                <View style={{
-                  width: 26,
-                  height: 26,
-                  backgroundColor: 'white',
-                  borderRadius: 13,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 1,
-                  elevation: 2
-                }} />
+                <View
+                  style={{
+                    width: 26,
+                    height: 26,
+                    backgroundColor: 'white',
+                    borderRadius: 13,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 1,
+                    elevation: 2,
+                  }}
+                />
               </TouchableOpacity>
             </View>
-            
+
             <TouchableOpacity
-              style={{ 
-                padding: 16, 
-                backgroundColor: theme.surfaceHover, 
-                borderRadius: 12, 
+              style={{
+                padding: 16,
+                backgroundColor: theme.surfaceHover,
+                borderRadius: 12,
                 marginBottom: 12,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
               onPress={() => {
                 setShowShareOptions(false);
@@ -456,16 +514,16 @@ ${sessionInfo}
             >
               <Text style={{ fontSize: 18, color: theme.text.primary }}>📝 Share as Text</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
-              style={{ 
-                padding: 16, 
-                backgroundColor: theme.surfaceHover, 
-                borderRadius: 12, 
+              style={{
+                padding: 16,
+                backgroundColor: theme.surfaceHover,
+                borderRadius: 12,
                 marginBottom: 12,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
               onPress={() => {
                 setShowShareOptions(false);
@@ -474,23 +532,25 @@ ${sessionInfo}
             >
               <Text style={{ fontSize: 18, color: theme.text.primary }}>📸 Share as Image</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={{ padding: 16, marginTop: 8 }}
               onPress={() => setShowShareOptions(false)}
             >
-              <Text style={{ 
-                fontSize: 16, 
-                color: theme.text.secondary, 
-                textAlign: 'center' 
-              }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: theme.text.secondary,
+                  textAlign: 'center',
+                }}
+              >
                 Cancel
               </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
-      
+
       {/* Toast Notification */}
       <Toast
         visible={showToast}
@@ -675,7 +735,7 @@ const styles = StyleSheet.create({
 export default React.memo(OpenMatCard, (prevProps, nextProps) => {
   // Return true if props are equal (skip re-render)
   // Return false if props changed (re-render)
-  
+
   // Check if gym data changed
   if (prevProps.gym.id !== nextProps.gym.id) return false;
   if (prevProps.gym.name !== nextProps.gym.name) return false;
@@ -685,34 +745,36 @@ export default React.memo(OpenMatCard, (prevProps, nextProps) => {
   if (prevProps.gym.dropInFee !== nextProps.gym.dropInFee) return false;
   if (prevProps.gym.coordinates !== nextProps.gym.coordinates) return false;
   if (prevProps.gym.lastUpdated !== nextProps.gym.lastUpdated) return false;
-  
+
   // Check if openMats sessions changed
   if (prevProps.gym.openMats?.length !== nextProps.gym.openMats?.length) return false;
-  
+
   // Deep compare openMats sessions
   if (prevProps.gym.openMats && nextProps.gym.openMats) {
     for (let i = 0; i < prevProps.gym.openMats.length; i++) {
       const prevSession = prevProps.gym.openMats[i];
       const nextSession = nextProps.gym.openMats[i];
-      if (prevSession.day !== nextSession.day || 
-          prevSession.time !== nextSession.time || 
-          prevSession.type !== nextSession.type) {
+      if (
+        prevSession.day !== nextSession.day ||
+        prevSession.time !== nextSession.time ||
+        prevSession.type !== nextSession.type
+      ) {
         return false;
       }
     }
   }
-  
+
   // Check if favorite status changed
   const prevIsFavorite = prevProps.favorites.has(prevProps.gym.id);
   const nextIsFavorite = nextProps.favorites.has(nextProps.gym.id);
   if (prevIsFavorite !== nextIsFavorite) return false;
-  
+
   // Check if function references changed (these should be stable)
   if (prevProps.onHeartPress !== nextProps.onHeartPress) return false;
   if (prevProps.onPress !== nextProps.onPress) return false;
   if (prevProps.openWebsite !== nextProps.openWebsite) return false;
   if (prevProps.openDirections !== nextProps.openDirections) return false;
-  
+
   // All props are equal, skip re-render
   return true;
-}); 
+});

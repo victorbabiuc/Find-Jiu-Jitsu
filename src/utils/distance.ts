@@ -16,19 +16,19 @@ export interface Coordinates {
  */
 export function calculateDistance(coord1: Coordinates, coord2: Coordinates): number {
   const R = 3959; // Earth's radius in miles
-  
+
   const lat1Rad = toRadians(coord1.latitude);
   const lat2Rad = toRadians(coord2.latitude);
   const deltaLatRad = toRadians(coord2.latitude - coord1.latitude);
   const deltaLonRad = toRadians(coord2.longitude - coord1.longitude);
-  
-  const a = Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
-            Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-            Math.sin(deltaLonRad / 2) * Math.sin(deltaLonRad / 2);
-  
+
+  const a =
+    Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
+    Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(deltaLonRad / 2) * Math.sin(deltaLonRad / 2);
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
-  
+
   // Round to 1 decimal place
   return Math.round(distance * 10) / 10;
 }
@@ -61,23 +61,23 @@ export function formatDistance(distance: number): string {
  * @returns Distance in miles, or null if coordinates are invalid
  */
 export function calculateGymDistance(
-  userLocation: Coordinates | null, 
+  userLocation: Coordinates | null,
   gymCoordinates: string | undefined
 ): number | null {
   if (!userLocation || !gymCoordinates) {
     return null;
   }
-  
+
   try {
     const [lat, lng] = gymCoordinates.split(',').map(coord => parseFloat(coord.trim()));
-    
+
     if (isNaN(lat) || isNaN(lng)) {
       return null;
     }
-    
+
     const gymCoord: Coordinates = { latitude: lat, longitude: lng };
     return calculateDistance(userLocation, gymCoord);
   } catch (error) {
     return null;
   }
-} 
+}

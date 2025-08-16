@@ -8,10 +8,7 @@ interface AppleSignInButtonProps {
   onError?: (error: Error) => void;
 }
 
-export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({ 
-  onSuccess, 
-  onError 
-}) => {
+export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({ onSuccess, onError }) => {
   const { signInWithApple, loading } = useAuth();
 
   const handleAppleSignIn = async () => {
@@ -20,7 +17,7 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
       onSuccess?.();
     } catch (error) {
       logger.error('Apple Sign-In failed:', error);
-      
+
       // Handle specific Apple Sign-In errors
       if (error instanceof Error) {
         if (error.message.includes('canceled')) {
@@ -31,7 +28,7 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
           return;
         }
       }
-      
+
       Alert.alert('Sign-In Failed', 'Unable to sign in with Apple. Please try again.');
       onError?.(error as Error);
     }
@@ -49,9 +46,7 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
       disabled={loading}
       activeOpacity={0.8}
     >
-      <Text style={styles.buttonText}>
-        {loading ? 'Signing in...' : 'Sign in with Apple'}
-      </Text>
+      <Text style={styles.buttonText}>{loading ? 'Signing in...' : 'Sign in with Apple'}</Text>
     </TouchableOpacity>
   );
 };
@@ -74,4 +69,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

@@ -40,13 +40,13 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
     allGyms.forEach(gym => {
       gym.openMats.forEach(session => {
         totalCount++;
-        
+
         if (session.type.toLowerCase().includes('gi')) {
           giCount++;
         } else if (session.type.toLowerCase().includes('nogi')) {
           nogiCount++;
         }
-        
+
         if (gym.matFee === 0) {
           freeCount++;
         }
@@ -59,7 +59,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
   // Apply filters to gyms
   const applyFilters = useCallback((gyms: OpenMat[], filters: FilterState): OpenMat[] => {
     logger.filter('Applying filters:', filters);
-    
+
     return gyms.filter(gym => {
       // Check if gym has any sessions that match the filters
       const hasMatchingSessions = gym.openMats.some(session => {
@@ -73,17 +73,17 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
             return false;
           }
         }
-        
+
         // Price filter
         if (filters.price === 'free') {
           if (gym.matFee !== 0) {
             return false;
           }
         }
-        
+
         return true;
       });
-      
+
       return hasMatchingSessions;
     });
   }, []);
@@ -92,12 +92,12 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
   const filteredGyms = useMemo(() => {
     const filtered = applyFilters(allGyms, activeFilters);
     logger.filter('Filtered gyms count:', { total: allGyms.length, filtered: filtered.length });
-    
+
     // Notify parent if callback provided
     if (onFiltersChange) {
       onFiltersChange(filtered);
     }
-    
+
     return filtered;
   }, [allGyms, activeFilters, applyFilters, onFiltersChange]);
 
@@ -105,7 +105,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
   const toggleFilter = useCallback((filterType: 'gi' | 'nogi') => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      
+
       if (filterType === 'gi') {
         newFilters.gi = !prev.gi;
         // If both are selected, deselect the other
@@ -119,7 +119,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
           newFilters.gi = false;
         }
       }
-      
+
       logger.filter(`Toggled ${filterType} filter:`, { newValue: newFilters[filterType] });
       return newFilters;
     });
@@ -129,7 +129,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
   const handleFreeFilter = useCallback(() => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      
+
       if (prev.price === 'free') {
         newFilters.price = null; // Clear free filter
         logger.filter('Cleared free filter');
@@ -137,27 +137,30 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
         newFilters.price = 'free'; // Set free filter
         logger.filter('Set free filter');
       }
-      
+
       return newFilters;
     });
   }, []);
 
   // Handle filter tap (general filter handler)
-  const handleFilterTap = useCallback((filterName: string) => {
-    switch (filterName.toLowerCase()) {
-      case 'gi':
-        toggleFilter('gi');
-        break;
-      case 'nogi':
-        toggleFilter('nogi');
-        break;
-      case 'free':
-        handleFreeFilter();
-        break;
-      default:
-        logger.warn('Unknown filter type:', filterName);
-    }
-  }, [toggleFilter, handleFreeFilter]);
+  const handleFilterTap = useCallback(
+    (filterName: string) => {
+      switch (filterName.toLowerCase()) {
+        case 'gi':
+          toggleFilter('gi');
+          break;
+        case 'nogi':
+          toggleFilter('nogi');
+          break;
+        case 'free':
+          handleFreeFilter();
+          break;
+        default:
+          logger.warn('Unknown filter type:', filterName);
+      }
+    },
+    [toggleFilter, handleFreeFilter]
+  );
 
   // Reset all filters
   const resetFilters = useCallback(() => {
@@ -189,7 +192,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
     if (activeFilters.gi) activeFilterNames.push('Gi');
     if (activeFilters.nogi) activeFilterNames.push('No-Gi');
     if (activeFilters.price === 'free') activeFilterNames.push('Free');
-    
+
     return {
       hasActiveFilters,
       activeFilterNames,
@@ -206,7 +209,7 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
     sessionCounts,
     filteredGyms,
     hasActiveFilters,
-    
+
     // Actions
     toggleFilter,
     handleFreeFilter,
@@ -214,8 +217,8 @@ export const useGymFilters = ({ allGyms, onFiltersChange }: UseGymFiltersProps) 
     resetFilters,
     setFilter,
     applyFilters,
-    
+
     // Utilities
     getFilterSummary,
   };
-}; 
+};

@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+.expo-shared/
+ios/
+android/
+dist/
+build/
+*.md
+*.csv
+package-lock.json

@@ -9,12 +9,12 @@ const theme: Theme = {
   text: {
     primary: '#111827',
     secondary: '#6b7280',
-    tertiary: '#9ca3af'
+    tertiary: '#9ca3af',
   },
   card: {
     background: '#ffffff',
-    hover: '#f9fafb'
-  }
+    hover: '#f9fafb',
+  },
 };
 
 interface ThemeContextType {
@@ -24,11 +24,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  return (
-    <ThemeContext.Provider value={{ theme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {

@@ -9,12 +9,12 @@ interface ToastProps {
   onHide: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ 
-  visible, 
-  message, 
-  type = 'success', 
-  duration = 2000, 
-  onHide 
+const Toast: React.FC<ToastProps> = ({
+  visible,
+  message,
+  type = 'success',
+  duration = 2000,
+  onHide,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-50)).current;
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Toast; 
+export default Toast;

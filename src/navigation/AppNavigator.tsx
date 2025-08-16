@@ -7,11 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform, Easing } from 'react-native';
 import { useApp, useLoading, useTheme, useAuth } from '../context';
 import { beltColors, selectionColor } from '../utils';
-import {
-  RootStackParamList,
-  MainTabParamList,
-  FindStackParamList,
-} from './types';
+import { RootStackParamList, MainTabParamList, FindStackParamList } from './types';
 import { FEATURES } from '../config/featureFlags';
 
 // Import screens
@@ -34,7 +30,7 @@ const FindStack = createStackNavigator<FindStackParamList>();
 const FindStackNavigator = () => {
   const { theme } = useTheme();
   const { showTransitionalLoading, hideLoading } = useLoading();
-  
+
   return (
     <FindStack.Navigator
       initialRouteName="TimeSelection"
@@ -89,31 +85,31 @@ const FindStackNavigator = () => {
         },
       }}
     >
-      <FindStack.Screen 
-        name="Location" 
+      <FindStack.Screen
+        name="Location"
         component={LocationScreen}
-        options={{ 
+        options={{
           headerShown: false,
         }}
       />
-      <FindStack.Screen 
-        name="TimeSelection" 
+      <FindStack.Screen
+        name="TimeSelection"
         component={TimeSelectionScreen}
-        options={{ 
+        options={{
           headerShown: false,
         }}
       />
-      <FindStack.Screen 
-        name="Results" 
+      <FindStack.Screen
+        name="Results"
         component={ResultsScreen}
-        options={{ 
+        options={{
           headerShown: false,
         }}
       />
-      <FindStack.Screen 
-        name="MapView" 
+      <FindStack.Screen
+        name="MapView"
         component={MapViewScreen}
-        options={{ 
+        options={{
           headerShown: false,
         }}
       />
@@ -204,13 +200,9 @@ const MainTabNavigator = () => {
         },
       }}
     >
-      <MainTabs.Screen 
-        name="Home" 
-        component={DashboardScreen}
-        options={{ tabBarLabel: 'Home' }}
-      />
-      <MainTabs.Screen 
-        name="Find" 
+      <MainTabs.Screen name="Home" component={DashboardScreen} options={{ tabBarLabel: 'Home' }} />
+      <MainTabs.Screen
+        name="Find"
         component={FindStackNavigator}
         options={{ tabBarLabel: 'Find' }}
         listeners={({ navigation }) => ({
@@ -224,14 +216,14 @@ const MainTabNavigator = () => {
           },
         })}
       />
-      <MainTabs.Screen 
-        name="Favorites" 
+      <MainTabs.Screen
+        name="Favorites"
         component={SavedScreen}
         options={{ tabBarLabel: 'Favorites' }}
       />
       {FEATURES.PROFILE_TAB && (
-        <MainTabs.Screen 
-          name="Profile" 
+        <MainTabs.Screen
+          name="Profile"
           component={ProfileScreen}
           options={{ tabBarLabel: 'Profile' }}
         />
@@ -250,94 +242,107 @@ const AppNavigator = () => {
   // Get appropriate loading message based on navigation
   const getLoadingMessage = useCallback((fromRoute: string, toRoute: string): string => {
     const now = Date.now();
-    
+
     // Prevent rapid navigation spam
     if (now - lastNavigationTime.current < 300) {
-      return "Loading...";
+      return 'Loading...';
     }
     lastNavigationTime.current = now;
 
     // Tab navigation messages
-    if (fromRoute === 'Home' && toRoute === 'Find') return "Finding open mats...";
-    if (fromRoute === 'Home' && toRoute === 'Favorites') return "Loading favorites...";
-    if (fromRoute === 'Home' && toRoute === 'Profile') return "Loading profile...";
-    if (fromRoute === 'Find' && toRoute === 'Home') return "Going home...";
-    if (fromRoute === 'Find' && toRoute === 'Favorites') return "Loading favorites...";
-    if (fromRoute === 'Find' && toRoute === 'Profile') return "Loading profile...";
-    if (fromRoute === 'Favorites' && toRoute === 'Home') return "Going home...";
-    if (fromRoute === 'Favorites' && toRoute === 'Find') return "Finding open mats...";
-    if (fromRoute === 'Favorites' && toRoute === 'Profile') return "Loading profile...";
-    if (fromRoute === 'Profile' && toRoute === 'Home') return "Going home...";
-    if (fromRoute === 'Profile' && toRoute === 'Find') return "Finding open mats...";
-    if (fromRoute === 'Profile' && toRoute === 'Favorites') return "Loading favorites...";
+    if (fromRoute === 'Home' && toRoute === 'Find') return 'Finding open mats...';
+    if (fromRoute === 'Home' && toRoute === 'Favorites') return 'Loading favorites...';
+    if (fromRoute === 'Home' && toRoute === 'Profile') return 'Loading profile...';
+    if (fromRoute === 'Find' && toRoute === 'Home') return 'Going home...';
+    if (fromRoute === 'Find' && toRoute === 'Favorites') return 'Loading favorites...';
+    if (fromRoute === 'Find' && toRoute === 'Profile') return 'Loading profile...';
+    if (fromRoute === 'Favorites' && toRoute === 'Home') return 'Going home...';
+    if (fromRoute === 'Favorites' && toRoute === 'Find') return 'Finding open mats...';
+    if (fromRoute === 'Favorites' && toRoute === 'Profile') return 'Loading profile...';
+    if (fromRoute === 'Profile' && toRoute === 'Home') return 'Going home...';
+    if (fromRoute === 'Profile' && toRoute === 'Find') return 'Finding open mats...';
+    if (fromRoute === 'Profile' && toRoute === 'Favorites') return 'Loading favorites...';
 
     // Find stack navigation messages
-    if (toRoute === 'Location') return "Selecting location...";
-    if (toRoute === 'TimeSelection') return "Choosing time...";
-    if (toRoute === 'Results') return "Loading results...";
-    if (toRoute === 'MapView') return "Loading map...";
+    if (toRoute === 'Location') return 'Selecting location...';
+    if (toRoute === 'TimeSelection') return 'Choosing time...';
+    if (toRoute === 'Results') return 'Loading results...';
+    if (toRoute === 'MapView') return 'Loading map...';
 
     // Root stack navigation
-    if (toRoute === 'Login') return "Signing in...";
-    if (toRoute === 'ProfileDetails') return "Loading details...";
+    if (toRoute === 'Login') return 'Signing in...';
+    if (toRoute === 'ProfileDetails') return 'Loading details...';
 
-    return "Loading...";
+    return 'Loading...';
   }, []);
 
   // Define navigation transitions that should NOT show loading
   const shouldSkipLoading = (fromRoute: string, toRoute: string): boolean => {
     // Skip loading for city selection (Dashboard → TimeSelection)
     if (fromRoute === 'Home' && toRoute === 'TimeSelection') return true;
-    
+
     // Skip loading for tab navigation within the same stack
-    if (['Home', 'Find', 'Favorites', 'Profile'].includes(fromRoute) && 
-        ['Home', 'Find', 'Favorites', 'Profile'].includes(toRoute)) return true;
-    
+    if (
+      ['Home', 'Find', 'Favorites', 'Profile'].includes(fromRoute) &&
+      ['Home', 'Find', 'Favorites', 'Profile'].includes(toRoute)
+    )
+      return true;
+
     // Skip loading for navigation within the Find stack (except to Results)
-    if (['Location', 'TimeSelection', 'MapView'].includes(fromRoute) && 
-        ['Location', 'TimeSelection', 'MapView'].includes(toRoute)) return true;
-    
+    if (
+      ['Location', 'TimeSelection', 'MapView'].includes(fromRoute) &&
+      ['Location', 'TimeSelection', 'MapView'].includes(toRoute)
+    )
+      return true;
+
     // Skip loading for initial route navigation
     if (fromRoute === 'Home' && toRoute === 'Find') return true;
-    
+
     return false;
   };
 
   // Handle navigation state changes
-  const handleNavigationStateChange = useCallback((state: NavigationState | undefined) => {
-    if (!state || !state.routes || state.routes.length === 0) return;
+  const handleNavigationStateChange = useCallback(
+    (state: NavigationState | undefined) => {
+      if (!state || !state.routes || state.routes.length === 0) return;
 
-    const currentRoute = state.routes[state.index];
-    const currentRouteName = currentRoute?.name;
-    
-    // Get the previous route name from navigation state
-    const previousRouteName = state.routes[state.index - 1]?.name || 'Home';
-    
-    // Clear any existing timeout
-    if (navigationTimeout.current) {
-      clearTimeout(navigationTimeout.current);
-    }
+      const currentRoute = state.routes[state.index];
+      const currentRouteName = currentRoute?.name;
 
-    // Only show loading for navigation transitions that need it
-    if (currentRouteName && currentRouteName !== previousRouteName) {
-      // Check if we should skip loading for this transition
-      if (shouldSkipLoading(previousRouteName, currentRouteName)) {
-        console.log(`🚀 Skipping loading for navigation: ${previousRouteName} → ${currentRouteName}`);
-        return;
+      // Get the previous route name from navigation state
+      const previousRouteName = state.routes[state.index - 1]?.name || 'Home';
+
+      // Clear any existing timeout
+      if (navigationTimeout.current) {
+        clearTimeout(navigationTimeout.current);
       }
-      
-      const message = getLoadingMessage(previousRouteName, currentRouteName);
-      console.log(`⏳ Showing loading for navigation: ${previousRouteName} → ${currentRouteName}`);
-      
-      // Show navigation loading for 600ms (short and snappy)
-      showNavigationLoading(message, 600);
-      
-      // Auto-hide after 600ms to prevent stuck loading states
-      navigationTimeout.current = setTimeout(() => {
-        hideNavigationLoading();
-      }, 600);
-    }
-  }, [showNavigationLoading, hideNavigationLoading, getLoadingMessage]);
+
+      // Only show loading for navigation transitions that need it
+      if (currentRouteName && currentRouteName !== previousRouteName) {
+        // Check if we should skip loading for this transition
+        if (shouldSkipLoading(previousRouteName, currentRouteName)) {
+          console.log(
+            `🚀 Skipping loading for navigation: ${previousRouteName} → ${currentRouteName}`
+          );
+          return;
+        }
+
+        const message = getLoadingMessage(previousRouteName, currentRouteName);
+        console.log(
+          `⏳ Showing loading for navigation: ${previousRouteName} → ${currentRouteName}`
+        );
+
+        // Show navigation loading for 600ms (short and snappy)
+        showNavigationLoading(message, 600);
+
+        // Auto-hide after 600ms to prevent stuck loading states
+        navigationTimeout.current = setTimeout(() => {
+          hideNavigationLoading();
+        }, 600);
+      }
+    },
+    [showNavigationLoading, hideNavigationLoading, getLoadingMessage]
+  );
 
   const navigationTheme = {
     dark: false,
@@ -352,10 +357,7 @@ const AppNavigator = () => {
   };
 
   return (
-    <NavigationContainer
-      theme={navigationTheme}
-      onStateChange={handleNavigationStateChange}
-    >
+    <NavigationContainer theme={navigationTheme} onStateChange={handleNavigationStateChange}>
       <RootStack.Navigator
         initialRouteName="Main"
         screenOptions={{
@@ -363,8 +365,8 @@ const AppNavigator = () => {
           headerBackTitleVisible: false,
           headerLeft: () => null,
           gestureEnabled: true,
-                  // Smooth stack transitions
-        cardStyleInterpolator: ({ current, layouts }: AnimationValue) => {
+          // Smooth stack transitions
+          cardStyleInterpolator: ({ current, layouts }: AnimationValue) => {
             return {
               cardStyle: {
                 transform: [
@@ -406,28 +408,28 @@ const AppNavigator = () => {
           },
         }}
       >
-        <RootStack.Screen 
-          name="Login" 
+        <RootStack.Screen
+          name="Login"
           component={LoginScreen}
           options={{
             headerShown: false,
-            gestureEnabled: false
+            gestureEnabled: false,
           }}
         />
-        <RootStack.Screen 
-          name="Main" 
+        <RootStack.Screen
+          name="Main"
           component={MainTabNavigator}
           options={{
             headerShown: false,
-            gestureEnabled: false
+            gestureEnabled: false,
           }}
         />
-        <RootStack.Screen 
-          name="ProfileDetails" 
+        <RootStack.Screen
+          name="ProfileDetails"
           component={ProfileDetailsScreen}
           options={{
             headerShown: false,
-            gestureEnabled: true
+            gestureEnabled: true,
           }}
         />
       </RootStack.Navigator>
@@ -435,4 +437,4 @@ const AppNavigator = () => {
   );
 };
 
-export default AppNavigator; 
+export default AppNavigator;

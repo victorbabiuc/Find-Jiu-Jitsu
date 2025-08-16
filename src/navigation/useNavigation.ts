@@ -1,9 +1,5 @@
 import { useNavigation as useRNNavigation } from '@react-navigation/native';
-import {
-  RootStackNavigationProp,
-  MainTabNavigationProp,
-  FindStackNavigationProp,
-} from './types';
+import { RootStackNavigationProp, MainTabNavigationProp, FindStackNavigationProp } from './types';
 
 // Typed navigation hooks for different navigators
 export const useRootNavigation = () => useRNNavigation<RootStackNavigationProp>();
@@ -22,4 +18,4 @@ export const useNavigation = () => {
     mainTab: mainTabNavigation,
     find: findNavigation,
   };
-}; 
+};

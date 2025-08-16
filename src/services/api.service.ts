@@ -14,8 +14,8 @@ const mockTampaGyms: OpenMat[] = [
     openMats: [
       { day: 'Friday', time: '5:00 PM', type: 'nogi' },
       { day: 'Sunday', time: '9:00 AM', type: 'gi' },
-      { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ]
+      { day: 'Saturday', time: '11:00 AM', type: 'both' },
+    ],
   },
   {
     id: 'tampa-rmnu',
@@ -24,9 +24,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://www.rmnu.com',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Friday', time: '6:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Friday', time: '6:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-gracie-humaita',
@@ -35,9 +33,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://www.graciehumaita.com',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Friday', time: '6:30 PM - 7:30 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Friday', time: '6:30 PM - 7:30 PM', type: 'both' }],
   },
   {
     id: 'tampa-kaizen',
@@ -45,9 +41,7 @@ const mockTampaGyms: OpenMat[] = [
     address: 'Tampa, FL',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '11:00 AM - 1:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '11:00 AM - 1:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-ybor-city-jj',
@@ -56,9 +50,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://www.facebook.com/ycjjc/',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '12:00 PM - 2:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '12:00 PM - 2:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-gracie-brandon',
@@ -67,9 +59,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://graciebrandon.com',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '1:30 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '1:30 PM', type: 'both' }],
   },
   {
     id: 'tampa-gracie-westchase',
@@ -80,8 +70,8 @@ const mockTampaGyms: OpenMat[] = [
     matFee: 0,
     openMats: [
       { day: 'Saturday', time: '10:00 AM - 12:00 PM', type: 'both' },
-      { day: 'Sunday', time: '9:00 AM - 12:00 PM', type: 'both' }
-    ]
+      { day: 'Sunday', time: '9:00 AM - 12:00 PM', type: 'both' },
+    ],
   },
   {
     id: 'tampa-tactics-jj',
@@ -89,9 +79,7 @@ const mockTampaGyms: OpenMat[] = [
     address: 'Tampa, FL',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Saturday', time: '10:30 AM', type: 'both' }
-    ]
+    openMats: [{ day: 'Saturday', time: '10:30 AM', type: 'both' }],
   },
   {
     id: 'tampa-northriver',
@@ -99,9 +87,7 @@ const mockTampaGyms: OpenMat[] = [
     address: 'Tampa, FL',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ]
+    openMats: [{ day: 'Saturday', time: '11:00 AM', type: 'both' }],
   },
   {
     id: 'tampa-tmt',
@@ -109,9 +95,7 @@ const mockTampaGyms: OpenMat[] = [
     address: 'Tampa, FL',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Saturday', time: '11:30 AM', type: 'both' }
-    ]
+    openMats: [{ day: 'Saturday', time: '11:30 AM', type: 'both' }],
   },
   {
     id: 'tampa-gracie-trinity',
@@ -120,9 +104,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://gracietrinity.com/',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Saturday', time: '11:00 AM', type: 'both' }
-    ]
+    openMats: [{ day: 'Saturday', time: '11:00 AM', type: 'both' }],
   },
   {
     id: 'tampa-gracie-clermont',
@@ -130,9 +112,7 @@ const mockTampaGyms: OpenMat[] = [
     address: 'Clermont, FL',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Saturday', time: '12:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Saturday', time: '12:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-st-pete-bjj',
@@ -141,9 +121,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://www.stpetebjj.com/',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '5:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '5:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-inside-control-st-pete',
@@ -152,9 +130,7 @@ const mockTampaGyms: OpenMat[] = [
     website: 'https://insidecontrolacademy.com/',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '11:00 AM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '11:00 AM', type: 'both' }],
   },
   {
     id: 'tampa-jiu-jitsu',
@@ -167,8 +143,8 @@ const mockTampaGyms: OpenMat[] = [
       { day: 'Tuesday', time: '9:00 PM - 10:00 PM', type: 'both' },
       { day: 'Wednesday', time: '9:15 PM - 10:00 PM', type: 'both' },
       { day: 'Thursday', time: '9:00 PM - 10:00 PM', type: 'both' },
-      { day: 'Saturday', time: '1:00 PM - 2:00 PM', type: 'both' }
-    ]
+      { day: 'Saturday', time: '1:00 PM - 2:00 PM', type: 'both' },
+    ],
   },
   {
     id: 'tampa-gracie-tampa-south',
@@ -176,7 +152,7 @@ const mockTampaGyms: OpenMat[] = [
     address: '1345 W Gray St, Tampa, FL 33606',
     distance: 0,
     matFee: 0,
-    openMats: []
+    openMats: [],
   },
   {
     id: 'tampa-collective-jj',
@@ -184,9 +160,7 @@ const mockTampaGyms: OpenMat[] = [
     address: '4316 S Manhattan Ave, Tampa, FL 33611',
     distance: 0,
     matFee: 0,
-    openMats: [
-      { day: 'Sunday', time: '1:00 PM - 3:00 PM', type: 'both' }
-    ]
+    openMats: [{ day: 'Sunday', time: '1:00 PM - 3:00 PM', type: 'both' }],
   },
   {
     id: 'tampa-underdog-mma',
@@ -196,9 +170,9 @@ const mockTampaGyms: OpenMat[] = [
     matFee: 0,
     openMats: [
       { day: 'Friday', time: '7:00 PM - 8:00 PM', type: 'nogi' },
-      { day: 'Saturday', time: '11:00 AM - 12:00 PM', type: 'gi' }
-    ]
-  }
+      { day: 'Saturday', time: '11:00 AM - 12:00 PM', type: 'gi' },
+    ],
+  },
 ];
 
 // Mock data for Austin gyms
@@ -210,50 +184,42 @@ const mockAustinGyms: OpenMat[] = [
     distance: 5.2,
     openMats: [
       { day: 'Wednesday', time: '10:00 AM', type: 'nogi' },
-      { day: 'Saturday', time: '12:00 PM', type: 'nogi' }
+      { day: 'Saturday', time: '12:00 PM', type: 'nogi' },
     ],
-    matFee: 25
+    matFee: 25,
   },
   {
     id: 'austin-2',
     name: '10th Planet Round Rock',
     address: '3810 Gattis School Rd Suite 109 & 110, Round Rock, TX 78664',
     distance: 12.5,
-    openMats: [
-      { day: 'Sunday', time: '12:00 PM', type: 'nogi' }
-    ],
-    matFee: 0
+    openMats: [{ day: 'Sunday', time: '12:00 PM', type: 'nogi' }],
+    matFee: 0,
   },
   {
     id: 'austin-3',
     name: 'Aces',
     address: '2200 E 7th St #B, Austin, TX 78702',
     distance: 3.8,
-    openMats: [
-      { day: 'Friday', time: '7:00 PM', type: 'both' }
-    ],
-    matFee: 0
+    openMats: [{ day: 'Friday', time: '7:00 PM', type: 'both' }],
+    matFee: 0,
   },
   {
     id: 'austin-4',
     name: 'Atos',
     address: '11701 Bee Caves Rd Suite 110, Austin, TX 78738',
     distance: 15.3,
-    openMats: [
-      { day: 'Saturday', time: '11:30 AM', type: 'both' }
-    ],
-    matFee: 0
+    openMats: [{ day: 'Saturday', time: '11:30 AM', type: 'both' }],
+    matFee: 0,
   },
   {
     id: 'austin-5',
     name: 'Austin Submission Fighting',
     address: '11940 Menchaca Rd #104, Austin, TX 78748',
     distance: 11.7,
-    openMats: [
-      { day: 'Saturday', time: '10:00 AM', type: 'both' }
-    ],
-    matFee: 0
-  }
+    openMats: [{ day: 'Saturday', time: '10:00 AM', type: 'both' }],
+    matFee: 0,
+  },
 ];
 
 class ApiService {
@@ -261,7 +227,7 @@ class ApiService {
 
   async login(email: string, password: string): Promise<{ user: User; token: string }> {
     await this.delay(1000); // Simulate API delay
-    
+
     // Mock successful login
     return {
       user: {
@@ -272,16 +238,16 @@ class ApiService {
         profile: {
           trainingStyle: 'Both',
           competitionLevel: 'Local',
-          availability: 'Evening'
-        }
+          availability: 'Evening',
+        },
       },
-      token: 'mock-jwt-token'
+      token: 'mock-jwt-token',
     };
   }
 
   async register(userData: Partial<User>): Promise<{ user: User; token: string }> {
     await this.delay(1000);
-    
+
     return {
       user: {
         id: Date.now().toString(),
@@ -292,55 +258,72 @@ class ApiService {
         profile: {
           trainingStyle: 'Both',
           competitionLevel: 'None',
-          availability: 'Evening'
-        }
+          availability: 'Evening',
+        },
       },
-      token: 'mock-jwt-token'
+      token: 'mock-jwt-token',
     };
   }
 
-  async getOpenMats(location: string, filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] }, forceRefresh?: boolean, showAllGyms?: boolean): Promise<OpenMat[]> {
+  async getOpenMats(
+    location: string,
+    filters?: Partial<Filters> & { dateSelection?: string; dates?: Date[] },
+    forceRefresh?: boolean,
+    showAllGyms?: boolean
+  ): Promise<OpenMat[]> {
     // Ensure location is never undefined or empty
     const safeLocation = location || 'Tampa';
-    
-    console.log('🔍 ApiService: getOpenMats called with location:', safeLocation, 'forceRefresh:', forceRefresh);
-    
+
+    console.log(
+      '🔍 ApiService: getOpenMats called with location:',
+      safeLocation,
+      'forceRefresh:',
+      forceRefresh
+    );
+
     // Determine city from location string
-    const city = safeLocation.toLowerCase().includes('austin') ? 'austin' : 
-                 safeLocation.toLowerCase().includes('miami') ? 'miami' : 
-                 safeLocation.toLowerCase().includes('stpete') ? 'stpete' : 
-                 safeLocation.toLowerCase().includes('st. petersburg') ? 'stpete' : 
-                 safeLocation.toLowerCase().includes('tampa') ? 'tampa' : 'tampa';
-    
+    const city = safeLocation.toLowerCase().includes('austin')
+      ? 'austin'
+      : safeLocation.toLowerCase().includes('miami')
+        ? 'miami'
+        : safeLocation.toLowerCase().includes('stpete')
+          ? 'stpete'
+          : safeLocation.toLowerCase().includes('st. petersburg')
+            ? 'stpete'
+            : safeLocation.toLowerCase().includes('tampa')
+              ? 'tampa'
+              : 'tampa';
+
     console.log('🔍 ApiService: Determined city:', city);
-    
+
     try {
-      
       // Try GitHub service first with force refresh if requested
       let githubData = await githubDataService.getGymData(city, forceRefresh || false);
       console.log('🔍 ApiService: GitHub data received:', githubData.length, 'gyms for', city);
-      
 
-      
       // Apply date filtering if specified (skip if showAllGyms is true)
       if ((filters?.dateSelection || filters?.dates) && !showAllGyms) {
         githubData = this.filterGymsByDate(githubData, filters);
       }
-      
+
       return githubData;
-      
     } catch (error) {
       // GitHub service failed, using mock data
-      console.log('🔍 ApiService: GitHub service failed, using mock data for', city, 'Error:', error);
-      
+      console.log(
+        '🔍 ApiService: GitHub service failed, using mock data for',
+        city,
+        'Error:',
+        error
+      );
+
       // Fallback to mock data
       let mockData = safeLocation.toLowerCase().includes('austin') ? mockAustinGyms : mockTampaGyms;
-      
+
       // Apply date filtering to mock data as well (skip if showAllGyms is true)
       if ((filters?.dateSelection || filters?.dates) && !showAllGyms) {
         mockData = this.filterGymsByDate(mockData, filters);
       }
-      
+
       return mockData;
     }
   }
@@ -351,46 +334,49 @@ class ApiService {
    * @param filters - Filter criteria including dateSelection and dates
    * @returns Filtered array of gyms
    */
-  private filterGymsByDate(gyms: OpenMat[], filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): OpenMat[] {
+  private filterGymsByDate(
+    gyms: OpenMat[],
+    filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }
+  ): OpenMat[] {
     if (!filters.dateSelection && !filters.dates) {
       return gyms;
     }
 
     const targetDays = this.getTargetDays(filters);
-    
-    const filteredGyms = gyms.filter(gym => {
-      // Skip gyms with no sessions
-      if (!gym.openMats || gym.openMats.length === 0) {
-        return false;
-      }
-      
-      // Check if any of the gym's sessions match the target days
-      const hasMatchingSession = gym.openMats.some(session => {
-        // Skip sessions with empty or invalid day
-        if (!session.day || session.day.trim() === '') {
+
+    const filteredGyms = gyms
+      .filter(gym => {
+        // Skip gyms with no sessions
+        if (!gym.openMats || gym.openMats.length === 0) {
           return false;
         }
-        
-        const matches = targetDays.some(targetDay => 
-          this.daysMatch(session.day, targetDay)
-        );
-        
-        return matches;
-      });
-      
-      return hasMatchingSession;
-    }).map(gym => ({
-      ...gym,
-      // Filter sessions to only show matching ones
-      openMats: gym.openMats.filter(session => {
-        // Skip sessions with empty or invalid day
-        if (!session.day || session.day.trim() === '') {
-          return false;
-        }
-        
-        return targetDays.some(targetDay => this.daysMatch(session.day, targetDay));
+
+        // Check if any of the gym's sessions match the target days
+        const hasMatchingSession = gym.openMats.some(session => {
+          // Skip sessions with empty or invalid day
+          if (!session.day || session.day.trim() === '') {
+            return false;
+          }
+
+          const matches = targetDays.some(targetDay => this.daysMatch(session.day, targetDay));
+
+          return matches;
+        });
+
+        return hasMatchingSession;
       })
-    }));
+      .map(gym => ({
+        ...gym,
+        // Filter sessions to only show matching ones
+        openMats: gym.openMats.filter(session => {
+          // Skip sessions with empty or invalid day
+          if (!session.day || session.day.trim() === '') {
+            return false;
+          }
+
+          return targetDays.some(targetDay => this.daysMatch(session.day, targetDay));
+        }),
+      }));
 
     return filteredGyms;
   }
@@ -400,7 +386,9 @@ class ApiService {
    * @param filters - Filter criteria
    * @returns Array of day names to match against
    */
-  private getTargetDays(filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }): string[] {
+  private getTargetDays(
+    filters: Partial<Filters> & { dateSelection?: string; dates?: Date[] }
+  ): string[] {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -453,11 +441,11 @@ class ApiService {
 
   async updateProfile(userId: string, profile: Partial<User>): Promise<User> {
     await this.delay(500);
-    
+
     // Mock profile update
     return {
       id: userId,
-      ...profile
+      ...profile,
     } as User;
   }
 }

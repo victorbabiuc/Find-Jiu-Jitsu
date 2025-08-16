@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated } from 'react-native';
 
 interface ResultsFilterBarProps {
   activeFilters: {
@@ -33,9 +26,11 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
   filterAnim,
 }) => {
   return (
-    <Animated.View style={[styles.filterSection, { alignItems: 'center' }, { opacity: filterAnim }]}>
-      <ScrollView 
-        horizontal={true} 
+    <Animated.View
+      style={[styles.filterSection, { alignItems: 'center' }, { opacity: filterAnim }]}
+    >
+      <ScrollView
+        horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.filterContainer,
@@ -45,13 +40,13 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
             paddingVertical: 8,
             marginTop: 3,
             marginBottom: 3,
-            paddingRight: 24
-          }
+            paddingRight: 24,
+          },
         ]}
         style={{ flexGrow: 0 }}
       >
         {/* Free Toggle Filter - FIRST BUTTON */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.filterPill,
             {
@@ -64,18 +59,18 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
               shadowOpacity: activeFilters.price === 'free' ? 0.3 : 0,
               shadowRadius: 4,
               elevation: activeFilters.price === 'free' ? 3 : 0,
-            }
+            },
           ]}
           onPress={() => handleFilterTap('Free')}
           activeOpacity={0.7}
         >
-          <Text 
+          <Text
             style={[
               styles.filterPillText,
-              { 
+              {
                 color: activeFilters.price === 'free' ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.price === 'free' ? '700' : '500'
-              }
+                fontWeight: activeFilters.price === 'free' ? '700' : '500',
+              },
             ]}
             numberOfLines={1}
           >
@@ -84,7 +79,7 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
         </TouchableOpacity>
 
         {/* Gi Toggle Filter */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.filterPill,
             {
@@ -97,18 +92,18 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
               shadowOpacity: activeFilters.gi ? 0.3 : 0,
               shadowRadius: 4,
               elevation: activeFilters.gi ? 3 : 0,
-            }
+            },
           ]}
           onPress={() => toggleFilter('gi')}
           activeOpacity={0.7}
         >
-          <Text 
+          <Text
             style={[
               styles.filterPillText,
-              { 
+              {
                 color: activeFilters.gi ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.gi ? '700' : '500'
-              }
+                fontWeight: activeFilters.gi ? '700' : '500',
+              },
             ]}
             numberOfLines={1}
           >
@@ -117,7 +112,7 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
         </TouchableOpacity>
 
         {/* No-Gi Toggle Filter */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.filterPill,
             {
@@ -130,18 +125,18 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
               shadowOpacity: activeFilters.nogi ? 0.3 : 0,
               shadowRadius: 4,
               elevation: activeFilters.nogi ? 3 : 0,
-            }
+            },
           ]}
           onPress={() => toggleFilter('nogi')}
           activeOpacity={0.7}
         >
-          <Text 
+          <Text
             style={[
               styles.filterPillText,
-              { 
+              {
                 color: activeFilters.nogi ? '#FFFFFF' : '#60798A',
-                fontWeight: activeFilters.nogi ? '700' : '500'
-              }
+                fontWeight: activeFilters.nogi ? '700' : '500',
+              },
             ]}
             numberOfLines={1}
           >
@@ -150,7 +145,7 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
         </TouchableOpacity>
 
         {/* Map Toggle Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.filterPill,
             {
@@ -163,7 +158,7 @@ const ResultsFilterBar: React.FC<ResultsFilterBarProps> = ({
               shadowOpacity: 0,
               shadowRadius: 4,
               elevation: 0,
-            }
+            },
           ]}
           onPress={toggleViewMode}
           activeOpacity={0.7}
@@ -212,4 +207,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResultsFilterBar; 
+export default ResultsFilterBar;

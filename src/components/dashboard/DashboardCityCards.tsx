@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { haptics } from '../../utils';
@@ -34,62 +29,70 @@ const DashboardCityCards: React.FC<DashboardCityCardsProps> = ({
         style={[
           styles.cityCard,
           { backgroundColor: theme.surface },
-          selectedLocation === 'Tampa' && { backgroundColor: '#374151' }
+          selectedLocation === 'Tampa' && { backgroundColor: '#374151' },
         ]}
         onPress={onTampaPress}
       >
         <View style={styles.cityCardContent}>
           <Text style={styles.cityEmoji}>🌴</Text>
           <View style={styles.cityCardText}>
-            <Text style={[
-              styles.cityCardTitle,
-              { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.primary }
-            ]}>
+            <Text
+              style={[
+                styles.cityCardTitle,
+                { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.primary },
+              ]}
+            >
               Tampa, FL
             </Text>
-            <Text style={[
-              styles.cityCardSubtitle,
-              { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary }
-            ]}>
+            <Text
+              style={[
+                styles.cityCardSubtitle,
+                { color: selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary },
+              ]}
+            >
               {isLoadingCounts ? 'Loading...' : `${tampaGymCount} gyms available`}
             </Text>
           </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={20} 
-            color={selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary} 
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={selectedLocation === 'Tampa' ? '#FFFFFF' : theme.text.secondary}
           />
         </View>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={[
           styles.cityCard,
           { backgroundColor: theme.surface },
-          selectedLocation === 'Austin' && { backgroundColor: '#374151' }
+          selectedLocation === 'Austin' && { backgroundColor: '#374151' },
         ]}
         onPress={onAustinPress}
       >
         <View style={styles.cityCardContent}>
           <Text style={styles.cityEmoji}>🤠</Text>
           <View style={styles.cityCardText}>
-            <Text style={[
-              styles.cityCardTitle,
-              { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.primary }
-            ]}>
+            <Text
+              style={[
+                styles.cityCardTitle,
+                { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.primary },
+              ]}
+            >
               Austin, TX
             </Text>
-            <Text style={[
-              styles.cityCardSubtitle,
-              { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary }
-            ]}>
+            <Text
+              style={[
+                styles.cityCardSubtitle,
+                { color: selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary },
+              ]}
+            >
               {isLoadingCounts ? 'Loading...' : `${austinGymCount} gyms available`}
             </Text>
           </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={20} 
-            color={selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary} 
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={selectedLocation === 'Austin' ? '#FFFFFF' : theme.text.secondary}
           />
         </View>
       </TouchableOpacity>
@@ -141,4 +144,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DashboardCityCards; 
+export default DashboardCityCards;

@@ -91,4 +91,4 @@ export const haptics = {
   },
 };
 
-export default haptics; 
+export default haptics;

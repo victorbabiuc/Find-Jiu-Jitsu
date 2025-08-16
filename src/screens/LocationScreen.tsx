@@ -31,7 +31,7 @@ const LocationScreen: React.FC = () => {
   const [allGyms, setAllGyms] = useState<OpenMat[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const { showLoading, hideLoading } = useLoading();
-  
+
   const beltColor = beltColors[userBelt];
 
   // Load gym data on component mount
@@ -40,14 +40,14 @@ const LocationScreen: React.FC = () => {
       try {
         const [tampaGyms, austinGyms] = await Promise.all([
           githubDataService.getGymData('tampa'),
-          githubDataService.getGymData('austin')
+          githubDataService.getGymData('austin'),
         ]);
         setAllGyms([...tampaGyms, ...austinGyms]);
       } catch (error) {
         console.error('Error loading gym data:', error);
       }
     };
-    
+
     loadGymData();
   }, []);
 
@@ -74,7 +74,7 @@ const LocationScreen: React.FC = () => {
         latitude,
         longitude,
       });
-      
+
       if (results.length > 0) {
         const result = results[0];
         const city = result.city || result.subregion || result.region || 'Unknown City';
@@ -94,14 +94,14 @@ const LocationScreen: React.FC = () => {
     showLoading();
     try {
       const hasPermission = await requestLocationPermission();
-      
+
       if (!hasPermission) {
         Alert.alert(
           'Location Permission Required',
           'To find open mats near you, we need access to your location. Please enable location permissions in your device settings.',
           [
             { text: 'OK', style: 'default' },
-            { text: 'Settings', onPress: () => Location.requestForegroundPermissionsAsync() }
+            { text: 'Settings', onPress: () => Location.requestForegroundPermissionsAsync() },
           ]
         );
         setIsLoadingLocation(false);
@@ -110,7 +110,7 @@ const LocationScreen: React.FC = () => {
       }
 
       const location = await getCurrentLocation();
-      
+
       if (!location) {
         Alert.alert(
           'Location Error',
@@ -122,11 +122,13 @@ const LocationScreen: React.FC = () => {
         return;
       }
 
-      const locationName = await reverseGeocode(location.coords.latitude, location.coords.longitude);
+      const locationName = await reverseGeocode(
+        location.coords.latitude,
+        location.coords.longitude
+      );
       setSelectedLocation(locationName);
       // Navigate immediately - loading will be hidden by navigation state listener
       navigation.navigate('TimeSelection');
-      
     } catch (error) {
       console.error('Location error:', error);
       Alert.alert(
@@ -154,12 +156,8 @@ const LocationScreen: React.FC = () => {
       onPress={() => handleLocationSelect(city.name)}
     >
       <View style={styles.cityButtonContent}>
-        <Text style={[styles.cityName, { color: theme.text.primary }]}>
-          {city.name}
-        </Text>
-        <Text style={[styles.cityCount, { color: theme.text.secondary }]}>
-          {city.count} gyms
-        </Text>
+        <Text style={[styles.cityName, { color: theme.text.primary }]}>{city.name}</Text>
+        <Text style={[styles.cityCount, { color: theme.text.secondary }]}>{city.count} gyms</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color={theme.text.secondary} />
     </TouchableOpacity>
@@ -177,12 +175,8 @@ const LocationScreen: React.FC = () => {
       }}
     >
       <View style={styles.gymCardContent}>
-        <Text style={[styles.gymName, { color: theme.text.primary }]}>
-          {gym.name}
-        </Text>
-        <Text style={[styles.gymAddress, { color: theme.text.secondary }]}>
-          {gym.address}
-        </Text>
+        <Text style={[styles.gymName, { color: theme.text.primary }]}>{gym.name}</Text>
+        <Text style={[styles.gymAddress, { color: theme.text.secondary }]}>{gym.address}</Text>
         <Text style={[styles.gymSessions, { color: theme.text.secondary }]}>
           {gym.openMats.length} session{gym.openMats.length !== 1 ? 's' : ''}
         </Text>
@@ -193,19 +187,23 @@ const LocationScreen: React.FC = () => {
 
   const handleSearch = async (text: string) => {
     setSearchQuery(text);
-    
+
     if (text.trim().length === 0) {
       setSearchResults({ cities: [], gyms: [] });
       return;
     }
-    
+
     setIsSearching(true);
     try {
       const lowerText = text.toLowerCase();
-      
+
       // Search for cities
       const cities: Array<{ name: string; count: number }> = [];
-      if (lowerText.includes('tampa') || lowerText.includes('fl') || lowerText.includes('florida')) {
+      if (
+        lowerText.includes('tampa') ||
+        lowerText.includes('fl') ||
+        lowerText.includes('florida')
+      ) {
         const tampaGyms = allGyms.filter(gym => gym.address.toLowerCase().includes('tampa'));
         cities.push({ name: 'Tampa, FL', count: tampaGyms.length });
       }
@@ -213,10 +211,10 @@ const LocationScreen: React.FC = () => {
         const austinGyms = allGyms.filter(gym => gym.address.toLowerCase().includes('austin'));
         cities.push({ name: 'Austin, TX', count: austinGyms.length });
       }
-      
+
       // Search for gyms
       const gyms = SearchService.searchGyms(text, allGyms);
-      
+
       setSearchResults({ cities, gyms });
       console.log('Search results:', { cities, gyms });
     } catch (error) {
@@ -244,7 +242,16 @@ const LocationScreen: React.FC = () => {
       />
 
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingTop: 24,
+          paddingBottom: 12,
+        }}
+      >
         <Text style={{ fontSize: 22, fontWeight: '700', color: theme.text.primary }}>Location</Text>
         <TouchableOpacity
           onPress={() => {
@@ -271,25 +278,30 @@ const LocationScreen: React.FC = () => {
         {/* Search Input */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
-            <Ionicons name="search-outline" size={20} color={theme.text.secondary} style={styles.searchIcon} />
+            <Ionicons
+              name="search-outline"
+              size={20}
+              color={theme.text.secondary}
+              style={styles.searchIcon}
+            />
             <TextInput
               placeholder="Search for a city or gym"
               value={searchQuery}
               onChangeText={handleSearch}
               onSubmitEditing={() => handleAddCityPress()}
               returnKeyType="search"
-              style={[styles.searchInput, { 
-                backgroundColor: theme.surface,
-                color: theme.text.primary,
-                borderColor: theme.text.secondary 
-              }]}
+              style={[
+                styles.searchInput,
+                {
+                  backgroundColor: theme.surface,
+                  color: theme.text.primary,
+                  borderColor: theme.text.secondary,
+                },
+              ]}
               placeholderTextColor={theme.text.secondary}
             />
             {searchQuery.trim() && (
-              <TouchableOpacity 
-                style={styles.searchButton}
-                onPress={handleAddCityPress}
-              >
+              <TouchableOpacity style={styles.searchButton} onPress={handleAddCityPress}>
                 <Ionicons name="search" size={24} color={theme.text.secondary} />
               </TouchableOpacity>
             )}
@@ -307,7 +319,7 @@ const LocationScreen: React.FC = () => {
                 </Text>
               </View>
             )}
-            
+
             {/* City Results */}
             {searchResults.cities.length > 0 && (
               <View style={styles.resultsSection}>
@@ -317,7 +329,7 @@ const LocationScreen: React.FC = () => {
                 ))}
               </View>
             )}
-            
+
             {/* Gym Results */}
             {searchResults.gyms.length > 0 && (
               <View style={styles.resultsSection}>
@@ -346,18 +358,16 @@ const LocationScreen: React.FC = () => {
               {isLoadingLocation ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator color={beltColor.textOnColor} size="small" />
-                  <Text style={[styles.buttonText, { color: beltColor.textOnColor, marginLeft: 8 }]}>
+                  <Text
+                    style={[styles.buttonText, { color: beltColor.textOnColor, marginLeft: 8 }]}
+                  >
                     Getting location...
                   </Text>
                 </View>
               ) : (
                 <>
-                  <Text style={[styles.locationIcon, { color: beltColor.textOnColor }]}>
-                    📍
-                  </Text>
-                  <Text style={[styles.buttonText, { color: beltColor.textOnColor }]}>
-                    Near Me
-                  </Text>
+                  <Text style={[styles.locationIcon, { color: beltColor.textOnColor }]}>📍</Text>
+                  <Text style={[styles.buttonText, { color: beltColor.textOnColor }]}>Near Me</Text>
                 </>
               )}
             </LinearGradient>
@@ -369,12 +379,8 @@ const LocationScreen: React.FC = () => {
             onPress={() => handleLocationSelect('Tampa, FL')}
           >
             <View style={styles.buttonContent}>
-              <Text style={[styles.locationIcon, { color: theme.text.primary }]}>
-                🏢
-              </Text>
-              <Text style={[styles.buttonText, { color: theme.text.primary }]}>
-                Tampa, FL
-              </Text>
+              <Text style={[styles.locationIcon, { color: theme.text.primary }]}>🏢</Text>
+              <Text style={[styles.buttonText, { color: theme.text.primary }]}>Tampa, FL</Text>
             </View>
           </TouchableOpacity>
 
@@ -384,12 +390,8 @@ const LocationScreen: React.FC = () => {
             onPress={() => handleLocationSelect('Austin, TX')}
           >
             <View style={styles.buttonContent}>
-              <Text style={[styles.locationIcon, { color: theme.text.primary }]}>
-                🏢
-              </Text>
-              <Text style={[styles.buttonText, { color: theme.text.primary }]}>
-                Austin, TX
-              </Text>
+              <Text style={[styles.locationIcon, { color: theme.text.primary }]}>🏢</Text>
+              <Text style={[styles.buttonText, { color: theme.text.primary }]}>Austin, TX</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -571,4 +573,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationScreen; 
+export default LocationScreen;

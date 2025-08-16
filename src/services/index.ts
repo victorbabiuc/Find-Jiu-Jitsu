@@ -9,4 +9,4 @@ export { syncFavorites, getFavorites } from './favorites.service';
 export { gymLogoService } from './gym-logo.service';
 export { SearchService } from './search.service';
 export { shareToInstagramStories, isInstagramInstalled } from './instagramShare';
-export { default as instagramShareService } from './instagramShare'; 
+export { default as instagramShareService } from './instagramShare';

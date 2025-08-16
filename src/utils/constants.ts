@@ -3,15 +3,18 @@ import { BeltType } from '../types';
 // Selection color for UI elements (buttons, tabs, etc.) - matches active filter buttons
 export const selectionColor = '#374151'; // Subtle gray for selections
 
-export const beltColors: Record<BeltType, {
-  primary: string;
-  secondary: string;
-  accent: string;
-  surface: string;
-  gradient: string;
-  cardGradient: string;
-  textOnColor: string;
-}> = {
+export const beltColors: Record<
+  BeltType,
+  {
+    primary: string;
+    secondary: string;
+    accent: string;
+    surface: string;
+    gradient: string;
+    cardGradient: string;
+    textOnColor: string;
+  }
+> = {
   white: {
     primary: '#F8F9FA',
     secondary: '#E9ECEF',
@@ -19,7 +22,7 @@ export const beltColors: Record<BeltType, {
     surface: '#F8F9FA15',
     gradient: 'linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%)',
     cardGradient: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)',
-    textOnColor: '#000000'
+    textOnColor: '#000000',
   },
   blue: {
     primary: '#60A5FA', // Brighter blue
@@ -28,7 +31,7 @@ export const beltColors: Record<BeltType, {
     surface: '#2563EB15',
     gradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
     cardGradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
-    textOnColor: '#FFFFFF'
+    textOnColor: '#FFFFFF',
   },
   purple: {
     primary: '#A78BFA', // Brighter purple
@@ -37,7 +40,7 @@ export const beltColors: Record<BeltType, {
     surface: '#7C3AED15',
     gradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
     cardGradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
-    textOnColor: '#FFFFFF'
+    textOnColor: '#FFFFFF',
   },
   brown: {
     primary: '#F59E0B', // Brighter brown/orange
@@ -46,7 +49,7 @@ export const beltColors: Record<BeltType, {
     surface: '#D9770615',
     gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)',
     cardGradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)',
-    textOnColor: '#FFFFFF'
+    textOnColor: '#FFFFFF',
   },
   black: {
     primary: '#374151', // Brighter black/gray
@@ -55,29 +58,29 @@ export const beltColors: Record<BeltType, {
     surface: '#11182715',
     gradient: 'linear-gradient(135deg, #374151 0%, #6B7280 100%)',
     cardGradient: 'linear-gradient(135deg, #374151 0%, #6B7280 100%)',
-    textOnColor: '#FFFFFF'
-  }
+    textOnColor: '#FFFFFF',
+  },
 };
 
 export const loadingMessages = [
-  "Rolling into action!",
-  "Finding your training partners...",
-  "Scanning the mats...",
-  "Preparing for battle...",
-  "Getting your gi ready...",
-  "Warming up the mats..."
+  'Rolling into action!',
+  'Finding your training partners...',
+  'Scanning the mats...',
+  'Preparing for battle...',
+  'Getting your gi ready...',
+  'Warming up the mats...',
 ];
 
 export const quickDateOptions = [
   { label: 'Today', value: 0 },
   { label: 'Tomorrow', value: 1 },
   { label: 'This Week', value: 7 },
-  { label: 'This Weekend', value: 'weekend' }
+  { label: 'This Weekend', value: 'weekend' },
 ];
 
 export const timeOfDayOptions = [
   { label: 'Morning', value: 'morning', time: '6am - 12pm' },
   { label: 'Afternoon', value: 'afternoon', time: '12pm - 5pm' },
   { label: 'Evening', value: 'evening', time: '5pm - 10pm' },
-  { label: 'Any Time', value: 'any', time: 'All day' }
+  { label: 'Any Time', value: 'any', time: 'All day' },
 ];

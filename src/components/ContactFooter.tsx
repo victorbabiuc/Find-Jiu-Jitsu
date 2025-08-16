@@ -10,10 +10,7 @@ interface ContactFooterProps {
   style?: any; // Keep as any for StyleSheet compatibility
 }
 
-const ContactFooter: React.FC<ContactFooterProps> = ({ 
-  email = 'glootieapp@gmail.com',
-  style 
-}) => {
+const ContactFooter: React.FC<ContactFooterProps> = ({ email = 'glootieapp@gmail.com', style }) => {
   const { theme } = useTheme();
   const [emailCopied, setEmailCopied] = useState(false);
 
@@ -21,7 +18,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
     try {
       await Clipboard.setStringAsync(email);
       setEmailCopied(true);
-      
+
       // Reset copy state after 2 seconds
       setTimeout(() => {
         setEmailCopied(false);
@@ -40,13 +37,11 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
     >
       <View style={styles.content}>
         <View style={styles.emailRow}>
-          <Text style={[styles.emailText, { color: "#6C757D" }]}>
-            Suggestions? Email {email}
-          </Text>
-          <Ionicons 
-            name={emailCopied ? "checkmark" : "copy-outline"} 
-            size={18} 
-            color={emailCopied ? "#10B981" : "#6C757D"} 
+          <Text style={[styles.emailText, { color: '#6C757D' }]}>Suggestions? Email {email}</Text>
+          <Ionicons
+            name={emailCopied ? 'checkmark' : 'copy-outline'}
+            size={18}
+            color={emailCopied ? '#10B981' : '#6C757D'}
           />
         </View>
       </View>
@@ -77,4 +72,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ContactFooter; 
+export default ContactFooter;

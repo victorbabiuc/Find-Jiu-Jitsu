@@ -1,5 +1,13 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -30,7 +38,7 @@ const ProfileScreen = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         />
-        
+
         <UserProfile />
       </SafeAreaView>
     );
@@ -46,15 +54,12 @@ const ProfileScreen = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       />
-      
+
       {/* Welcome Content */}
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <View style={styles.welcomeSection}>
           <View style={styles.welcomeHeader}>
-            <Image
-              source={require('../../assets/icon.png')}
-              style={styles.appIcon}
-            />
+            <Image source={require('../../assets/icon.png')} style={styles.appIcon} />
             <Text style={[styles.welcomeTitle, { color: theme.text.primary }]}>
               Welcome to JiuJitsu Finder
             </Text>
@@ -67,28 +72,28 @@ const ProfileScreen = () => {
             <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
               What you can do:
             </Text>
-            
+
             <View style={styles.featureItem}>
               <Ionicons name="location" size={24} color={beltColor.primary} />
               <Text style={[styles.featureText, { color: theme.text.secondary }]}>
                 Find gyms near you with detailed information
               </Text>
             </View>
-            
+
             <View style={styles.featureItem}>
               <Ionicons name="heart" size={24} color={beltColor.primary} />
               <Text style={[styles.featureText, { color: theme.text.secondary }]}>
                 Save your favorite gyms for quick access
               </Text>
             </View>
-            
+
             <View style={styles.featureItem}>
               <Ionicons name="time" size={24} color={beltColor.primary} />
               <Text style={[styles.featureText, { color: theme.text.secondary }]}>
                 Filter by class times and availability
               </Text>
             </View>
-            
+
             <View style={styles.featureItem}>
               <Ionicons name="settings" size={24} color={beltColor.primary} />
               <Text style={[styles.featureText, { color: theme.text.secondary }]}>
@@ -101,8 +106,8 @@ const ProfileScreen = () => {
             <Text style={[styles.sectionTitle, { color: theme.text.primary }]}>
               Sign in to unlock more features:
             </Text>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.signInButton, { backgroundColor: beltColor.primary }]}
               onPress={() => {
                 haptics.medium(); // Medium haptic for sign in action
@@ -112,7 +117,7 @@ const ProfileScreen = () => {
               <Ionicons name="log-in" size={20} color="white" />
               <Text style={styles.signInButtonText}>Sign in with Google or Apple</Text>
             </TouchableOpacity>
-            
+
             <Text style={[styles.skipText, { color: theme.text.secondary }]}>
               You can continue using the app without signing in
             </Text>
@@ -216,4 +221,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen; 
+export default ProfileScreen;

@@ -34,10 +34,10 @@ export class GeocodingService {
       if (this.GOOGLE_GEOCODING_API_KEY) {
         const googleResult = await this.geocodeWithGoogle(address, city);
         if (googleResult && googleResult.confidence > 0.8) {
-          logger.info('Google geocoding successful:', { 
-            address, 
+          logger.info('Google geocoding successful:', {
+            address,
             coordinates: `${googleResult.latitude},${googleResult.longitude}`,
-            confidence: googleResult.confidence 
+            confidence: googleResult.confidence,
           });
           return googleResult;
         }
@@ -46,19 +46,21 @@ export class GeocodingService {
       // Fallback to OpenStreetMap Nominatim
       const nominatimResult = await this.geocodeWithNominatim(address, city);
       if (nominatimResult) {
-        logger.info('Nominatim geocoding successful:', { 
-          address, 
+        logger.info('Nominatim geocoding successful:', {
+          address,
           coordinates: `${nominatimResult.latitude},${nominatimResult.longitude}`,
-          confidence: nominatimResult.confidence 
+          confidence: nominatimResult.confidence,
         });
         return nominatimResult;
       }
 
       logger.warn('Geocoding failed for address:', { address });
       return null;
-
     } catch (error) {
-      logger.error('Geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Geocoding error:', {
+        address,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -66,7 +68,10 @@ export class GeocodingService {
   /**
    * Geocode using Google Maps Geocoding API (highest accuracy)
    */
-  private static async geocodeWithGoogle(address: string, city?: string): Promise<GeocodingResult | null> {
+  private static async geocodeWithGoogle(
+    address: string,
+    city?: string
+  ): Promise<GeocodingResult | null> {
     try {
       const fullAddress = city ? `${address}, ${city}` : address;
       const encodedAddress = encodeURIComponent(fullAddress);
@@ -78,22 +83,25 @@ export class GeocodingService {
       if (data.status === 'OK' && data.results.length > 0) {
         const result = data.results[0];
         const location = result.geometry.location;
-        
+
         // Calculate confidence based on result quality
         const confidence = this.calculateGoogleConfidence(result);
-        
+
         return {
           latitude: location.lat,
           longitude: location.lng,
           accuracy: confidence > 0.9 ? 'high' : confidence > 0.7 ? 'medium' : 'low',
           formattedAddress: result.formatted_address,
-          confidence
+          confidence,
         };
       }
 
       return null;
     } catch (error) {
-      logger.error('Google geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Google geocoding error:', {
+        address,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -101,35 +109,41 @@ export class GeocodingService {
   /**
    * Geocode using OpenStreetMap Nominatim (fallback)
    */
-  private static async geocodeWithNominatim(address: string, city?: string): Promise<GeocodingResult | null> {
+  private static async geocodeWithNominatim(
+    address: string,
+    city?: string
+  ): Promise<GeocodingResult | null> {
     try {
       const fullAddress = city ? `${address}, ${city}` : address;
       const encodedAddress = encodeURIComponent(fullAddress);
       const url = `/search?format=json&q=${encodedAddress}&limit=1&addressdetails=1`;
 
       const response = await this.makeNominatimRequest(url);
-      
+
       if (response && response.length > 0) {
         const result = response[0];
         const latitude = parseFloat(result.lat);
         const longitude = parseFloat(result.lon);
-        
+
         if (!isNaN(latitude) && !isNaN(longitude)) {
           const confidence = this.calculateNominatimConfidence(result);
-          
+
           return {
             latitude,
             longitude,
             accuracy: confidence > 0.8 ? 'high' : confidence > 0.6 ? 'medium' : 'low',
             formattedAddress: result.display_name,
-            confidence
+            confidence,
           };
         }
       }
 
       return null;
     } catch (error) {
-      logger.error('Nominatim geocoding error:', { address, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Nominatim geocoding error:', {
+        address,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -140,13 +154,13 @@ export class GeocodingService {
   private static async makeNominatimRequest(url: string): Promise<any> {
     try {
       const fullUrl = `https://${this.NOMINATIM_BASE_URL}${url}`;
-      
+
       const response = await fetch(fullUrl, {
         method: 'GET',
         headers: {
           'User-Agent': this.USER_AGENT,
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -156,7 +170,10 @@ export class GeocodingService {
       const data = await response.json();
       return data;
     } catch (error) {
-      logger.error('Nominatim request failed:', { url, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Nominatim request failed:', {
+        url,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -181,9 +198,11 @@ export class GeocodingService {
 
     // Boost confidence based on address components
     const addressComponents = result.address_components || [];
-    const hasStreetNumber = addressComponents.some((comp: any) => comp.types.includes('street_number'));
+    const hasStreetNumber = addressComponents.some((comp: any) =>
+      comp.types.includes('street_number')
+    );
     const hasRoute = addressComponents.some((comp: any) => comp.types.includes('route'));
-    
+
     if (hasStreetNumber && hasRoute) confidence += 0.1;
 
     return Math.min(confidence, 1.0);
@@ -217,24 +236,28 @@ export class GeocodingService {
   /**
    * Validate coordinates for a specific city/region
    */
-  static validateCoordinates(latitude: number, longitude: number, city: string): CoordinateValidation {
+  static validateCoordinates(
+    latitude: number,
+    longitude: number,
+    city: string
+  ): CoordinateValidation {
     const issues: string[] = [];
     const suggestions: string[] = [];
 
     // Define expected coordinate ranges for cities
     const cityRanges = {
-      'tampa': {
+      tampa: {
         lat: { min: 27.5, max: 28.5 },
-        lng: { min: -82.8, max: -82.0 }
+        lng: { min: -82.8, max: -82.0 },
       },
-      'austin': {
+      austin: {
         lat: { min: 30.0, max: 30.8 },
-        lng: { min: -98.0, max: -97.4 }
+        lng: { min: -98.0, max: -97.4 },
       },
-      'miami': {
+      miami: {
         lat: { min: 25.5, max: 26.5 },
-        lng: { min: -81.0, max: -80.0 }
-      }
+        lng: { min: -81.0, max: -80.0 },
+      },
     };
 
     const cityKey = city.toLowerCase();
@@ -243,12 +266,16 @@ export class GeocodingService {
     if (ranges) {
       // Check if coordinates are within expected range
       if (latitude < ranges.lat.min || latitude > ranges.lat.max) {
-        issues.push(`Latitude ${latitude} is outside expected range for ${city} (${ranges.lat.min}-${ranges.lat.max})`);
+        issues.push(
+          `Latitude ${latitude} is outside expected range for ${city} (${ranges.lat.min}-${ranges.lat.max})`
+        );
         suggestions.push('Verify the address and re-geocode');
       }
 
       if (longitude < ranges.lng.min || longitude > ranges.lng.max) {
-        issues.push(`Longitude ${longitude} is outside expected range for ${city} (${ranges.lng.min}-${ranges.lng.max})`);
+        issues.push(
+          `Longitude ${longitude} is outside expected range for ${city} (${ranges.lng.min}-${ranges.lng.max})`
+        );
         suggestions.push('Verify the address and re-geocode');
       }
     }
@@ -262,7 +289,7 @@ export class GeocodingService {
     // Check coordinate precision
     const latPrecision = this.getCoordinatePrecision(latitude);
     const lngPrecision = this.getCoordinatePrecision(longitude);
-    
+
     if (latPrecision < 6 || lngPrecision < 6) {
       issues.push('Low coordinate precision detected');
       suggestions.push('Use higher precision geocoding service');
@@ -271,7 +298,7 @@ export class GeocodingService {
     return {
       isValid: issues.length === 0,
       issues,
-      suggestions
+      suggestions,
     };
   }
 
@@ -330,7 +357,10 @@ export class GeocodingService {
 
       return { latitude, longitude };
     } catch (error) {
-      logger.error('Error parsing coordinates:', { coordString, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Error parsing coordinates:', {
+        coordString,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -347,4 +377,4 @@ export class GeocodingService {
       .replace(/\s+(suite|apt|ste|#)\s*\d+[a-z]?/gi, '') // Remove suite/apt numbers
       .trim();
   }
-} 
+}

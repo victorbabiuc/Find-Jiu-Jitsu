@@ -25,13 +25,15 @@ export class SearchService {
   static async saveRecentSearch(query: string): Promise<void> {
     try {
       const recentSearches = await this.getRecentSearches();
-      
+
       // Remove the query if it already exists
-      const filteredSearches = recentSearches.filter(search => search.toLowerCase() !== query.toLowerCase());
-      
+      const filteredSearches = recentSearches.filter(
+        search => search.toLowerCase() !== query.toLowerCase()
+      );
+
       // Add the new query to the beginning
       const updatedSearches = [query, ...filteredSearches].slice(0, MAX_RECENT_SEARCHES);
-      
+
       await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updatedSearches));
     } catch (error) {
       logger.error('Error saving recent search:', error);
@@ -106,10 +108,13 @@ export class SearchService {
       }
 
       // Check session types
-      if (gym.openMats.some(session => 
-        session.type.toLowerCase().includes(lowerQuery) ||
-        session.day.toLowerCase().includes(lowerQuery)
-      )) {
+      if (
+        gym.openMats.some(
+          session =>
+            session.type.toLowerCase().includes(lowerQuery) ||
+            session.day.toLowerCase().includes(lowerQuery)
+        )
+      ) {
         results.push(gym);
         return;
       }
@@ -150,15 +155,15 @@ export class SearchService {
       'Gracie Tampa South',
       'Collective MMA Tampa',
       'Wesley Chapel Gym',
-      'Gracie Jiu Jitsu Largo'
+      'Gracie Jiu Jitsu Largo',
     ];
 
     // Filter to only include gyms that exist in the data
     const existingGymNames = gyms.map(gym => gym.name);
-    return popularGyms.filter(name => 
-      existingGymNames.some(gymName => 
-        gymName.toLowerCase().includes(name.toLowerCase())
+    return popularGyms
+      .filter(name =>
+        existingGymNames.some(gymName => gymName.toLowerCase().includes(name.toLowerCase()))
       )
-    ).slice(0, 6);
+      .slice(0, 6);
   }
-} 
+}

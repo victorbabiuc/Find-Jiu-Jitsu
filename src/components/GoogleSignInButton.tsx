@@ -8,10 +8,7 @@ interface GoogleSignInButtonProps {
   onError?: (error: Error) => void;
 }
 
-export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ 
-  onSuccess, 
-  onError 
-}) => {
+export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onError }) => {
   const { signInWithGoogle, loading } = useAuth();
 
   const handleGoogleSignIn = async () => {
@@ -32,9 +29,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       disabled={loading}
       activeOpacity={0.8}
     >
-      <Text style={styles.buttonText}>
-        {loading ? 'Signing in...' : 'Sign in with Google'}
-      </Text>
+      <Text style={styles.buttonText}>{loading ? 'Signing in...' : 'Sign in with Google'}</Text>
     </TouchableOpacity>
   );
 };
@@ -57,4 +52,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

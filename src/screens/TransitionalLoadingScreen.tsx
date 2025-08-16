@@ -6,7 +6,7 @@ import { useTheme } from '../context';
 const { width, height } = Dimensions.get('window');
 
 const beltTypes = ['white', 'blue', 'purple', 'brown', 'black'] as const;
-type BeltType = typeof beltTypes[number];
+type BeltType = (typeof beltTypes)[number];
 
 interface TransitionalLoadingScreenProps {
   message?: string;
@@ -15,12 +15,12 @@ interface TransitionalLoadingScreenProps {
 }
 
 const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
-  message = "Discovering open mat sessions...",
+  message = 'Discovering open mat sessions...',
   onComplete,
-  duration = 2000
+  duration = 2000,
 }) => {
   const { theme } = useTheme();
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const textAnim = useRef(new Animated.Value(0)).current;
@@ -89,44 +89,46 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
   }, [currentBeltIndex]);
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.container,
         {
           backgroundColor: theme.background,
           opacity: fadeAnim,
-        }
+        },
       ]}
     >
-      <Animated.Text 
+      <Animated.Text
         style={[
           styles.message,
           {
             color: theme.text.primary,
             opacity: textAnim,
-          }
+          },
         ]}
       >
         {message}
       </Animated.Text>
-      
+
       <View style={styles.beltBarsContainer}>
         {beltTypes.map((beltType, index) => {
           const beltColor = beltColors[beltType];
           const isActive = index <= currentBeltIndex;
           const isCurrent = index === currentBeltIndex;
-          
+
           return (
             <View
               key={beltType}
               style={[
                 styles.belt,
-                { 
+                {
                   backgroundColor: beltColor.primary,
                   opacity: isActive ? 1 : 0.3,
-                  transform: [{
-                    scale: isActive && isCurrent ? 1.1 : 1
-                  }],
+                  transform: [
+                    {
+                      scale: isActive && isCurrent ? 1.1 : 1,
+                    },
+                  ],
                   borderWidth: 1,
                   borderColor: isActive ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.1)',
                   shadowColor: isActive ? '#000' : 'transparent',
@@ -134,7 +136,7 @@ const TransitionalLoadingScreen: React.FC<TransitionalLoadingScreenProps> = ({
                   shadowOpacity: isActive ? 0.1 : 0,
                   shadowRadius: 4,
                   elevation: isActive ? 2 : 0,
-                }
+                },
               ]}
             />
           );
@@ -175,4 +177,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TransitionalLoadingScreen; 
+export default TransitionalLoadingScreen;
