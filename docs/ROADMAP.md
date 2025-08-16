@@ -228,4 +228,4 @@ Features are prioritized based on:
 
 ---
 
-[← Back to README](../README.md) | [Technical Details →](TECHNICAL.md) 
+[← Back to README](../README.md) | [API Reference →](API.md) 
